@@ -122,6 +122,39 @@
   .intro-item .sprite{width:160px;height:160px}
   .intro-item .intro-name{color:var(--gold);font-weight:800;margin-top:10px;font-size:22px;text-shadow:0 0 16px rgba(255,207,86,.6);letter-spacing:1px}
 
+  /* NEW FX: reveal flash, beam, shine, breathe, twinkle, confetti */
+  .reveal-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5}
+  #reveal.show .reveal-flash.go{animation:revflash .5s ease}
+  @keyframes revflash{0%{opacity:.85}100%{opacity:0}}
+  .beam{position:absolute;top:-10%;left:50%;transform:translateX(-50%);width:130px;height:130%;background:linear-gradient(to bottom,transparent,rgba(255,207,86,.5),rgba(255,255,255,.9),rgba(255,207,86,.5),transparent);filter:blur(7px);opacity:0;animation:beamIn 1.8s ease forwards;z-index:2}
+  @keyframes beamIn{0%{opacity:0;transform:translateX(-50%) scaleY(.15)}35%{opacity:1}100%{opacity:.7;transform:translateX(-50%) scaleY(1)}}
+  .act-flash{position:absolute;inset:0;background:#fff;opacity:0;animation:actflash .5s ease;z-index:3}
+  @keyframes actflash{0%{opacity:.9}100%{opacity:0}}
+  .intro-frame{position:relative;overflow:hidden;border-radius:14px;width:170px;height:170px;display:flex;align-items:center;justify-content:center}
+  .intro-frame .shine{position:absolute;top:0;left:-70%;width:55%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.95),transparent);transform:skewX(-20deg);animation:shineSweep 1.5s .35s ease;z-index:4}
+  @keyframes shineSweep{0%{left:-70%}100%{left:130%}}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+  .rcell.in .spritewrap{animation:breathe 3.4s ease-in-out infinite}
+  .card .spritewrap{animation:breathe 3.8s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.78)}}
+  .rcell .rstars{animation:twinkle 1.8s ease-in-out infinite}
+  .card .star{animation:twinkle 1.6s ease-in-out infinite}
+  .confetti{position:fixed;top:-24px;width:10px;height:14px;border-radius:2px;z-index:80;pointer-events:none;animation:fall 2.1s linear forwards}
+  @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(106vh) translateX(var(--dx)) rotate(var(--rot));opacity:.85}}
+
+  /* PULL TRANSITION: falling star with light */
+  #pull-fx{--fx:var(--gold);position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#0a0c18,#02030a);display:none;align-items:center;justify-content:center;z-index:58;overflow:hidden}
+  #pull-fx.show{display:flex}
+  .fx-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,var(--fx),transparent 60%);opacity:0;animation:fxflash 1.15s ease}
+  @keyframes fxflash{0%{opacity:0}40%{opacity:1}100%{opacity:0}}
+  .comet{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 18px 6px #fff,0 0 44px 14px var(--fx);transform:translate(80vw,-20vh) rotate(35deg);animation:cometfly 1s ease-in forwards}
+  .comet::after{content:"";position:absolute;top:50%;right:100%;transform:translateY(-50%);width:280px;height:4px;background:linear-gradient(to left,transparent,var(--fx),#fff);filter:blur(1px);opacity:.9}
+  @keyframes cometfly{0%{transform:translate(82vw,-20vh) rotate(35deg);opacity:0}12%{opacity:1}82%{opacity:1}100%{transform:translate(8vw,112vh) rotate(35deg);opacity:0}}
+  .fx-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px #fff;opacity:0;animation:fxspark 1s ease infinite}
+  @keyframes fxspark{0%,100%{opacity:0;transform:scale(.5)}50%{opacity:.9;transform:scale(1.3)}}
+  .fx-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);font-size:64px;color:var(--fx);text-shadow:0 0 30px var(--fx);animation:fxcenter 1.15s ease forwards}
+  @keyframes fxcenter{0%{transform:translate(-50%,-50%) scale(0);opacity:0}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}100%{transform:translate(-50%,-50%) scale(.9);opacity:.55}}
+
   /* ANALYSIS */
   .ana-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .game{background:var(--panel);border:1px solid #2a2f4a;border-radius:14px;padding:16px}
@@ -320,8 +353,12 @@
 <!-- 5★ SPECIAL INTRO: flying stars + item spotlight -->
 <div id="star-intro"></div>
 
+<!-- PULL TRANSITION: falling star with light (Genshin-style) -->
+<div id="pull-fx"></div>
+
 <!-- REVEAL OVERLAY (Genshin-style) -->
 <div id="reveal">
+  <div class="reveal-flash" id="reveal-flash"></div>
   <div class="reveal-top">
     <div class="reveal-head" id="reveal-head">ПОЛУЧЕНО</div>
     <button class="skip-btn" onclick="skipReveal()">Пропустить ›</button>
@@ -600,7 +637,32 @@ function pull(n){
     results.push({r,item,isNew});
   }
   updateStats();
-  showGachaReveal(results);
+  const tier = results.some(r=>r.r>=5) ? 'gold' : results.some(r=>r.r===4) ? 'purple' : 'blue';
+  playPullTransition(()=>showGachaReveal(results), tier);
+}
+
+/* Falling-star transition (Genshin-style) before the reveal */
+function sfxSweep(){ tone(180,.5,'sawtooth',.10); tone(540,.4,'sine',.10,.06); }
+function playPullTransition(cb, tier){
+  busy=true;
+  const fx=document.getElementById('pull-fx');
+  fx.style.setProperty('--fx', tier==='gold' ? '#ffcf56' : tier==='purple' ? '#c77dff' : '#5cc8ff');
+  fx.innerHTML='';
+  fx.classList.add('show');
+  const fl=document.createElement('div'); fl.className='fx-flash'; fx.appendChild(fl);
+  const c=document.createElement('div'); c.className='comet'; fx.appendChild(c);
+  for(let i=0;i<16;i++){
+    const s=document.createElement('div'); s.className='fx-spark';
+    s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*100)+'%';
+    s.style.animationDelay=(Math.random()*0.6)+'s';
+    fx.appendChild(s);
+  }
+  const st=document.createElement('div'); st.className='fx-center'; st.textContent='✦'; fx.appendChild(st);
+  sfxSweep();
+  setTimeout(()=>{
+    fx.classList.remove('show');
+    setTimeout(()=>{ fx.innerHTML=''; cb(); },250);
+  },1180);
 }
 
 /* ---------- HIDDEN LINKS / EASTER EGGS ---------- */
@@ -646,16 +708,29 @@ function setType(t){
 }
 
 let revealTimer=null, revealDone=null;
-function specialIntro(res){
+function confettiBurst(){
+  const colors=['#ffcf56','#ff4d6d','#c77dff','#5cc8ff','#7dffa1','#ffffff'];
+  for(let i=0;i<46;i++){
+    const p=document.createElement('div'); p.className='confetti';
+    p.style.left=(Math.random()*100)+'vw';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay=(Math.random()*0.3)+'s';
+    p.style.setProperty('--dx',(Math.random()*220-110)+'px');
+    p.style.setProperty('--rot',(Math.random()*720-360)+'deg');
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),2400);
+  }
+}
+/* 5★ GOLDEN ACT: beam + flash + flying stars + slow zoom with shine */
+function goldenAct(res){
   return new Promise(resolve=>{
-    const five = res.r>=5;
     const ov=document.getElementById('star-intro');
     ov.innerHTML='';
     ov.classList.add('show');
-    const n = five?18:12;
-    for(let i=0;i<n;i++){
-      const s=document.createElement('div');
-      s.className='flystar'; s.textContent='✦';
+    const fl=document.createElement('div'); fl.className='act-flash'; ov.appendChild(fl);
+    const beam=document.createElement('div'); beam.className='beam'; ov.appendChild(beam);
+    for(let i=0;i<20;i++){
+      const s=document.createElement('div'); s.className='flystar'; s.textContent='✦';
       const ang=Math.random()*Math.PI*2, dist=320+Math.random()*220;
       s.style.setProperty('--sx',(Math.cos(ang)*dist)+'px');
       s.style.setProperty('--sy',(Math.sin(ang)*dist)+'px');
@@ -664,15 +739,15 @@ function specialIntro(res){
     }
     const item=document.createElement('div');
     item.className='intro-item r'+res.r;
-    item.innerHTML=sprite(res.item.key,res.r)+`<div class="intro-name">${res.item.name}</div>`;
+    item.innerHTML=`<div class="intro-frame">${sprite(res.item.key,res.r)}<div class="shine"></div></div><div class="intro-name">${res.item.name}</div>`;
     ov.appendChild(item);
-    if(five){ sfxLegend(); document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),500); }
-    else sfxRare();
-    const dur = five?2000:1500;
+    sfxLegend();
+    document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),500);
+    confettiBurst();
     setTimeout(()=>{
       ov.classList.remove('show');
       setTimeout(()=>{ ov.innerHTML=''; resolve(); },400);
-    },dur);
+    },2300);
   });
 }
 function showGachaReveal(results){
@@ -683,6 +758,7 @@ function showGachaReveal(results){
   document.getElementById('reveal-head').textContent='×'+results.length+'  ·  ПОЛУЧЕНО';
   document.getElementById('reveal-hint').textContent='Нажмите, чтобы продолжить';
   rev.classList.add('show');
+  const f=document.getElementById('reveal-flash'); if(f){ f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
 
   const cells=results.map(res=>{
     const cell=document.createElement('div');
@@ -695,19 +771,30 @@ function showGachaReveal(results){
     return {cell,res};
   });
 
-  let i=0, finished=false;
-  const revealNext=()=>{
-    if(i>=cells.length){ finished=true; document.getElementById('reveal-hint').textContent='Готово — нажмите, чтобы закрыть'; return; }
-    const {cell,res}=cells[i++];
+  const nonFive=cells.filter(c=>c.res.r<5);
+  const fives=cells.filter(c=>c.res.r>=5);
+  let nf=0, fi=0, finished=false;
+
+  const revealNon=()=>{
+    if(nf>=nonFive.length){ revealFive(); return; }
+    const {cell,res}=nonFive[nf++];
+    cell.classList.add('in');
+    if(res.r>=4){ cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),600); sfxRare(); confettiBurst(); }
+    else sfxClick();
+    revealTimer=setTimeout(revealNon, res.r>=4?520:300);
+  };
+  const revealFive=()=>{
+    if(fi>=fives.length){ finished=true; document.getElementById('reveal-hint').textContent='Готово — нажмите, чтобы закрыть'; return; }
+    const {cell,res}=fives[fi++];
     const after=()=>{
       cell.classList.add('in');
-      if(res.r>=4){ cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),600); }
-      if(res.r<4) sfxClick();
-      revealTimer=setTimeout(revealNext, res.r>=4?520:300);
+      cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),600);
+      revealTimer=setTimeout(revealFive,650);
     };
-    if(res.r>=4) specialIntro(res).then(after); else after();
+    goldenAct(res).then(after);
   };
-  revealTimer=setTimeout(revealNext,250);
+
+  revealTimer=setTimeout(revealNon,500);
 
   revealDone=()=>{
     clearTimeout(revealTimer);
