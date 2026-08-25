@@ -1,0 +1,12 @@
+{
+  "name": "nat-punch-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebRTC NAT punchthrough test: create room, share link, chat P2P",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

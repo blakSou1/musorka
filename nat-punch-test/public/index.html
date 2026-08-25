@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NAT Punchthrough Test</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>NAT Punchthrough Test</h1>
+    <p class="sub">Проверка прямого P2P соединения (WebRTC) между двумя устройствами</p>
+  </header>
+
+  <main>
+    <section class="card" id="setup">
+      <h2>Шаг 1 — создай комнату или войди</h2>
+      <div class="row">
+        <button id="createBtn" class="primary">Создать комнату</button>
+        <input id="joinInput" placeholder="Код комнаты (ABC12)" maxlength="5" autocomplete="off" />
+        <button id="joinBtn">Войти</button>
+      </div>
+      <div id="linkBox" class="hidden">
+        <p class="muted">Скинь эту ссылку другу (скопируй и отправь куда угодно):</p>
+        <div class="row">
+          <input id="linkInput" readonly />
+          <button id="copyBtn">Копировать</button>
+        </div>
+      </div>
+      <p id="status">Подключение к серверу сигнализации...</p>
+    </section>
+
+    <section class="card hidden" id="peer">
+      <h2>Шаг 2 — соединение</h2>
+      <div class="badges">
+        <span>ICE:</span><span id="iceState" class="badge">new</span>
+        <span>Состояние:</span><span id="connState" class="badge">new</span>
+        <span>Тип пары:</span><span id="pairType" class="badge">—</span>
+      </div>
+      <div id="rtt" class="rtt">RTT: —</div>
+
+      <h3>Собранные кандидаты</h3>
+      <table id="candTable">
+        <thead>
+          <tr><th>Тип</th><th>Протокол</th><th>Адрес</th><th>Публичный (NAT)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Обмен сообщениями (идут напрямую P2P)</h3>
+      <div class="row">
+        <input id="chatInput" placeholder="Напиши сообщение другу..." disabled />
+        <button id="chatSend" disabled>Отправить</button>
+      </div>
+      <div id="chatLog"></div>
+    </section>
+
+    <section class="card" id="iceconf">
+      <h2>ICE-конфигурация</h2>
+      <p class="muted">По умолчанию используются публичные STUN-серверы Google — это не сервер для хостинга, а «зеркало»: WebRTC узнаёт через него свой публичный IP для проброса портов. Можно очистить поле (будет чистый LAN-тест) или вставить свой STUN/TURN (формат <code>[{"urls":"stun:host:port"}]</code>).</p>
+      <textarea id="iceInput" rows="4" spellcheck="false"></textarea>
+      <label class="row checkbox">
+        <input type="checkbox" id="turnCheck" />
+        <span>Добавить публичный TURN-релей OpenRelay (если NAT не пробьётся — соединение пойдёт через relay, так видно fallback)</span>
+      </label>
+    </section>
+
+    <section class="card" id="help">
+      <h2>Как проверить</h2>
+      <ol>
+        <li>Запусти сервер (<code>start.bat</code>) и открой его с ПК.</li>
+        <li>Нажми «Создать комнату», скопируй ссылку и отправь себе на телефон (например в Telegram).</li>
+        <li>Открой ссылку на телефоне — он сам войдёт в комнату по коду из ссылки.</li>
+        <li>Если оба в одной Wi-Fi — будет тип пары <b>host</b> (локальная сеть).</li>
+        <li>Чтобы проверить именно NAT punchthrough — пробрось порт 8080 наружу (playit.gg / ngrok) и повтори с телефона в мобильной сети: появится тип <b>srflx</b> или <b>prflx</b> — это и есть пробитый NAT, трафик идёт напрямую.</li>
+        <li>Если не соединилось и с включённым TURN появился <b>relay</b> — NAT не пробился, данные шли через релей.</li>
+      </ol>
+      <p class="hint">Совет: у тебя или у друга включённых одновременно может быть только один клиент в комнате. Комната одноразовая — для нового теста создавай новую.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

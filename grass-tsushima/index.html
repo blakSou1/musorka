@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ветер и трава — дань Ghost of Tsushima</title>
+<link rel="stylesheet" href="css/style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div id="loading">
+  <div class="loading-inner">
+    <div class="loading-title">ВЕТЕР И ТРАВА</div>
+    <div class="loading-sub">дань Ghost of Tsushima</div>
+    <div class="loading-bar"><div class="loading-fill"></div></div>
+    <div id="errorBox" style="display:none; margin-top:28px; max-width:560px; color:#e8b0a0; font-family:Verdana,sans-serif; font-size:13px; line-height:1.6; letter-spacing:0;"></div>
+    <div id="loadFail" style="display:none; margin-top:28px; max-width:560px; color:#e8c880; font-family:Verdana,sans-serif; font-size:13px; line-height:1.6; letter-spacing:0;">
+      Страница не запустилась. Запустите сервер двойным кликом по <b>start-server.bat</b>
+      и откройте <b>http://localhost:8000</b>. Если это уже сделано — нажмите F12
+      и пришлите текст из вкладки Console.
+    </div>
+  </div>
+</div>
+
+<div id="ui" class="hidden">
+  <header class="title">
+    <h1>ВЕТЕР И ТРАВА</h1>
+    <p>дань Ghost of Tsushima</p>
+  </header>
+
+  <div class="hint">
+    <div class="hint-row"><span class="key">ДВИЖЕНИЕ</span><span class="val">двигай мышь — ветер раздвигает траву</span></div>
+    <div class="hint-row"><span class="key">ЛКМ</span><span class="val">держать — бежать сквозь поле</span></div>
+    <div class="hint-row"><span class="key">ПРОБЕЛ</span><span class="val">свистни — дух ветра поведёт тебя</span></div>
+    <div class="hint-row"><span class="key">КОЛЕСО</span><span class="val">приблизить / отдалить</span></div>
+    <div class="hint-row"><span class="key">КЛАВИШИ 1-4</span><span class="val">прогулка / холмы / трава / тип</span></div>
+    <div class="hint-row"><span class="key">ЛКМ·ХОЛМЫ</span><span class="val">поднять холм · ПКМ/Shift — яма</span></div>
+    <div class="hint-row"><span class="key">ЛКМ·ТРАВА</span><span class="val">убрать траву · ПКМ — вернуть</span></div>
+    <div class="hint-row"><span class="key">ЛКМ·ТИП</span><span class="val">сухая высокая трава · ПКМ — зелёная</span></div>
+  </div>
+
+  <div class="presets">
+    <button class="preset active" id="preset-0">ДЕНЬ</button>
+    <button class="preset" id="preset-1">ЗАКАТ</button>
+    <button class="preset" id="preset-2">РАССВЕТ</button>
+    <button class="preset" id="preset-3">НОЧЬ</button>
+    <button class="preset" id="preset-4">ТУМАН</button>
+    <button class="preset" id="preset-5">ГРОЗА</button>
+    <button class="preset" id="preset-6">ДОЖДЬ</button>
+    <button class="preset" id="preset-7">ЛУНА</button>
+  </div>
+
+  <div class="tools">
+    <button class="tool active" data-mode="walk">ПРОГУЛКА <span class="kbd">1</span></button>
+    <button class="tool" data-mode="hills">ХОЛМЫ <span class="kbd">2</span></button>
+    <button class="tool" data-mode="grass">ТРАВА <span class="kbd">3</span></button>
+    <button class="tool" data-mode="type">ТИП <span class="kbd">4</span></button>
+  </div>
+
+  <div class="controls">
+    <button id="hudBtn">HUD: ВКЛ</button>
+    <button id="chunkBtn">ЧАНКИ: ВЫКЛ</button>
+    <button id="whistleBtn">СВИСТ <span class="kbd">пробел</span></button>
+    <button id="soundBtn">ЗВУК: ВКЛ</button>
+  </div>
+
+  <div class="wind-meter"><div id="windFill"></div></div>
+  <div class="fps" id="fps">-- FPS</div>
+
+  <div class="hud" id="hud">
+    <div class="hud-title">ОККЛЮЖЕН КАЛЛИНГ</div>
+    <div class="hud-row"><span>FPS</span><b id="hudFps">–</b></div>
+    <div class="hud-row"><span>ЧАНКИ ВИДИМЫЕ</span><b id="hudChunks">–/–</b></div>
+    <div class="hud-row"><span>LOD1 ДАЛЬНИЕ</span><b id="hudLod1">–</b></div>
+    <div class="hud-row"><span>ТРЕУГОЛЬНИКИ</span><b id="hudTris">–</b></div>
+    <div class="hud-row"><span>DRAW CALLS</span><b id="hudDraws">–</b></div>
+  </div>
+</div>
+
+<script>
+  window.__appReady = false;
+  setTimeout(function () {
+    if (!window.__appReady) {
+      var el = document.getElementById('loadFail');
+      if (el) el.style.display = 'block';
+    }
+  }, 5000);
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

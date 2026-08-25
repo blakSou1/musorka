@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dota 2 — Характеристики героя</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --card: #1c2128;
+    --card2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --red: #e0322c;
+    --teal: #4fc3a1;
+    --yellow: #f5c542;
+    --blue: #6aa9ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, sans-serif;
+    padding: 20px;
+  }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; }
+  header h1 span { color: var(--red); }
+  header .sub { color: var(--muted); font-size: 12px; }
+  header select {
+    margin-left: auto; background: var(--card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 14px;
+  }
+  .layout {
+    display: grid; grid-template-columns: 400px 1fr; gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; margin-bottom: 14px;
+  }
+  .panel h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); margin-bottom: 12px; border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .row { margin-bottom: 10px; }
+  .row label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; margin-bottom: 4px;
+  }
+  .row label b { color: var(--text); font-weight: 600; }
+  .row label output { color: var(--yellow); font-weight: 700; font-size: 13px; }
+  input[type=range] {
+    width: 100%; height: 6px; appearance: none; -webkit-appearance: none;
+    background: var(--card2); border-radius: 3px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--red); border: 2px solid #fff2; cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--red); border: 2px solid #fff2; cursor: pointer;
+  }
+  .seg { display: flex; gap: 6px; }
+  .seg button {
+    flex: 1; background: var(--card); color: var(--muted); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px; font-size: 13px; cursor: pointer;
+  }
+  .seg button.active { background: var(--red); color: #fff; border-color: var(--red); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 14px; cursor: pointer; }
+  .tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+  canvas { width: 100%; max-width: 700px; height: auto; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+  table.attr {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  table.attr td { padding: 7px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.attr td:first-child { width: 120px; font-weight: 700; white-space: nowrap; }
+  table.attr tr:last-child td { border-bottom: none; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px;
+  }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; position: relative; overflow: hidden;
+  }
+  .stat .name { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .stat .value { font-size: 22px; font-weight: 700; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+  .stat .extra { font-size: 12px; color: var(--muted); margin-bottom: 8px; min-height: 15px; line-height: 1.45; }
+  .stat .icon { position: absolute; right: 12px; top: 10px; font-size: 18px; opacity: .35; }
+  .bar { height: 7px; background: var(--card2); border-radius: 4px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; width: 0%; border-radius: 4px; transition: width .25s ease;
+    background: linear-gradient(90deg, var(--red), var(--yellow), var(--teal));
+  }
+  .bar-fill.red { background: linear-gradient(90deg, #7a1512, var(--red)); }
+  .bar-fill.blue { background: linear-gradient(90deg, #1d4ed8, var(--blue)); }
+  .bar-fill.teal { background: linear-gradient(90deg, #0f766e, var(--teal)); }
+  .stat.big { grid-column: span 2; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.6; }
+  .note b { color: var(--text); }
+  .foot { color: var(--muted); font-size: 11px; text-align: center; margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>DOTA <span>2</span> — характеристики героя</h1>
+  <div class="sub">интерактивная визуализация параметров (формулы приближённые, для наглядности)</div>
+  <select id="heroPreset" onchange="applyPreset(this.value)">
+    <option value="custom">Свой герой</option>
+    <option value="invoker">Invoker</option>
+    <option value="sven">Sven</option>
+    <option value="jugg">Juggernaut</option>
+    <option value="windranger">Windranger (универсал)</option>
+    <option value="mirana">Mirana (универсал)</option>
+    <option value="bane">Bane (универсал)</option>
+  </select>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="stats" onclick="switchTab('stats')">Параметры героя</button>
+  <button class="tab" data-tab="xp" onclick="switchTab('xp')">Кривая опыта</button>
+</div>
+
+<div id="tabStats" class="layout">
+
+  <!-- ===== ПАНЕЛЬ НАСТРОЕК ===== -->
+  <div>
+    <div class="panel">
+      <h2>Атрибуты</h2>
+      <div class="row">
+        <label>Основной атрибут</label>
+        <div class="seg" id="primarySeg">
+          <button data-p="str" onclick="setPrimary('str')">Сила</button>
+          <button data-p="agi" class="active" onclick="setPrimary('agi')">Ловкость</button>
+          <button data-p="int" onclick="setPrimary('int')">Интеллект</button>
+          <button data-p="uni" onclick="setPrimary('uni')">Универсал</button>
+        </div>
+      </div>
+      <div class="row">
+        <label>Уровень <output id="levelOut">1</output></label>
+        <input type="range" id="level" min="1" max="30" value="1" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовая сила <output id="strOut">22</output></label>
+        <input type="range" id="str" min="0" max="100" value="22" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Прирост силы/уровень <output id="strGrowOut">2.2</output></label>
+        <input type="range" id="strGrow" min="0" max="5" step="0.1" value="2.2" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовая ловкость <output id="agiOut">21</output></label>
+        <input type="range" id="agi" min="0" max="100" value="21" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Прирост ловкости/уровень <output id="agiGrowOut">2.0</output></label>
+        <input type="range" id="agiGrow" min="0" max="5" step="0.1" value="2.0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовый интеллект <output id="intOut">16</output></label>
+        <input type="range" id="int" min="0" max="100" value="16" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Прирост интеллекта/уровень <output id="intGrowOut">1.8</output></label>
+        <input type="range" id="intGrow" min="0" max="5" step="0.1" value="1.8" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Что даёт 1 единица атрибута</h2>
+      <table class="attr">
+        <tr><td style="color:#ff8a7a">Сила</td>
+            <td>+22 макс. HP &nbsp;·&nbsp; +0.1 HP/с реген</td></tr>
+        <tr><td style="color:#7ae0a0">Ловкость</td>
+            <td>+1 IAS (скорость атаки) &nbsp;·&nbsp; +0.17 брони</td></tr>
+        <tr><td style="color:#8ab8ff">Интеллект</td>
+            <td>+12 маны &nbsp;·&nbsp; +0.05 маны/с &nbsp;·&nbsp; +0.1% маг. резиста</td></tr>
+        <tr><td style="color:#c792ea">Универсал</td>
+            <td>+0.5 урона за каждую единицу суммы всех атрибутов (С+Л+И)</td></tr>
+      </table>
+      <p class="note" style="margin-top:8px">Эффективное значение атрибута = база + прирост × (уровень − 1) + бонусы. Примечание: в самой Dota 2 интеллект маг. резист не даёт (база 25%), добавлено по твоей просьбе.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Базовые параметры</h2>
+      <div class="row">
+        <label>Базовый урон (мин) <output id="dmgMinOut">45</output></label>
+        <input type="range" id="dmgMin" min="20" max="120" value="45" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовый урон (макс) <output id="dmgMaxOut">49</output></label>
+        <input type="range" id="dmgMax" min="25" max="125" value="49" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Base Attack Time (BAT) <output id="batOut">1.40</output></label>
+        <input type="range" id="bat" min="1.3" max="1.9" step="0.05" value="1.4" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовая броня <output id="armorOut">0</output></label>
+        <input type="range" id="armor" min="-5" max="10" step="0.5" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Базовая скорость <output id="msOut">305</output></label>
+        <input type="range" id="ms" min="250" max="400" step="5" value="305" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Turn rate <output id="trOut">0.60</output></label>
+        <input type="range" id="tr" min="0.3" max="1.0" step="0.01" value="0.6" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Attack point (фронтсвинг) <output id="apOut">0.35</output></label>
+        <input type="range" id="ap" min="0.15" max="0.7" step="0.01" value="0.35" oninput="update()">
+      </div>
+      <div class="row">
+        <label>
+          <input type="checkbox" id="melee" onchange="update()"> Ближний бой
+        </label>
+      </div>
+      <div class="row" id="rangeRow">
+        <label>Дальность атаки <output id="rangeOut">600</output></label>
+        <input type="range" id="range" min="300" max="800" step="10" value="600" oninput="update()">
+      </div>
+      <div class="row" id="projRow">
+        <label>Скорость снаряда <output id="projOut">900</output></label>
+        <input type="range" id="proj" min="500" max="2000" step="25" value="900" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Бонусы (предметы/скиллы)</h2>
+      <div class="row">
+        <label>+ Скорость атаки (IAS) <output id="asBOut">0</output></label>
+        <input type="range" id="asB" min="0" max="400" step="5" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ % скорости движения <output id="msBOut">0%</output></label>
+        <input type="range" id="msB" min="0" max="60" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ HP <output id="hpBOut">0</output></label>
+        <input type="range" id="hpB" min="0" max="3000" step="50" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Мана <output id="manaBOut">0</output></label>
+        <input type="range" id="manaB" min="0" max="2000" step="50" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Броня <output id="armorBOut">0</output></label>
+        <input type="range" id="armorB" min="0" max="30" step="0.5" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Урон <output id="dmgBOut">0</output></label>
+        <input type="range" id="dmgB" min="0" max="200" step="5" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Сила (предметы) <output id="strBOut">0</output></label>
+        <input type="range" id="strB" min="0" max="120" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Ловкость (предметы) <output id="agiBOut">0</output></label>
+        <input type="range" id="agiB" min="0" max="120" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Интеллект (предметы) <output id="intBOut">0</output></label>
+        <input type="range" id="intB" min="0" max="120" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Реген HP <output id="hpRegenBOut">0</output></label>
+        <input type="range" id="hpRegenB" min="0" max="30" step="0.1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Реген маны <output id="manaRegenBOut">0</output></label>
+        <input type="range" id="manaRegenB" min="0" max="20" step="0.1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Маг. резист (%) <output id="mrBOut">0%</output></label>
+        <input type="range" id="mrB" min="0" max="80" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Статус резист (%) <output id="statusBOut">0%</output></label>
+        <input type="range" id="statusB" min="0" max="100" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Spell Amp (%) <output id="ampBOut">0%</output></label>
+        <input type="range" id="ampB" min="0" max="100" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Уклонение (%) <output id="evBOut">0%</output></label>
+        <input type="range" id="evB" min="0" max="100" step="1" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Дальность атаки <output id="rangeBOut">0</output></label>
+        <input type="range" id="rangeB" min="0" max="400" step="10" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Обзор <output id="visionBOut">0</output></label>
+        <input type="range" id="visionB" min="0" max="1500" step="50" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Turn rate <output id="trBOut">0.00</output></label>
+        <input type="range" id="trB" min="0" max="0.5" step="0.01" value="0" oninput="update()">
+      </div>
+      <div class="row">
+        <label>+ Скорость движения (плоская) <output id="msFlatBOut">0</output></label>
+        <input type="range" id="msFlatB" min="0" max="200" step="5" value="0" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Прочее</h2>
+      <div class="row">
+        <label>Обзор днём <output id="visionDayOut">1800</output></label>
+        <input type="range" id="visionDay" min="600" max="2500" step="50" value="1800" oninput="update()">
+      </div>
+      <div class="row">
+        <label>Обзор ночью <output id="visionNightOut">800</output></label>
+        <input type="range" id="visionNight" min="300" max="1800" step="50" value="800" oninput="update()">
+      </div>
+    </div>
+
+    <p class="note">
+      <b>Формулы (приближённо):</b> атрибут = база + прирост×(ур−1) + бонусы.<br>
+      HP = 120 + 22×Сила; реген = 0.25 + 0.1×Сила.<br>
+      Мана = 75 + 12×Интеллект; реген = 0.7 + 0.05×Интеллект.<br>
+      Броня = база + 0.17×Ловкость. Скор. атаки = (100 + IAS)/100 ÷ BAT, IAS = Ловкость + бонус, кап 600.<br>
+      Физ. резист: A/(A+16) — убывающая отдача, стремится к 100%, но не достигает. Маг. резист = 25% + 0.1%×Интеллект (кап 90%).<br>
+      Интервал атаки = BAT (базовый, от атрибутов не зависит); реальный интервал между ударами = 1 / (атак/сек).<br>
+      Универсал: белый урон = 0.5 × (Сила+Ловкость+Интеллект) (исторически в Dota 2 — 0.6). У остальных — 1 ед. урона за 1 ед. основного атрибута.<br>
+      Ближний бой: Damage Block 16 ед. с шансом срабатывания 50% (средний блок 8).<br>
+      Бонусы предметов/скиллов складываются с базой по всем параметрам (кроме Damage Block ближников).<br>
+      Скорость движения кап 550. Поворот на 180° = 0.03 / turn rate.
+    </p>
+  </div>
+
+  <!-- ===== СТАТИСТИКА ===== -->
+  <div>
+    <div class="grid" id="statsGrid"></div>
+  </div>
+</div>
+
+<div id="tabXP" style="display:none">
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <h2>Формула кривой опыта</h2>
+        <div class="row">
+          <label>Формула</label>
+          <select id="xpFormula" onchange="xpFormulaChanged()">
+            <option value="linear">Линейный прирост (Dota-стиль)</option>
+            <option value="flat">Константа (плоская)</option>
+            <option value="power">Степенная</option>
+            <option value="exp">Экспоненциальная</option>
+            <option value="capped">Линейная с потолком</option>
+          </select>
+        </div>
+        <div class="row" id="xpKRow">
+          <label>K (база) <output id="xpKOut">100</output></label>
+          <input type="range" id="xpK" min="10" max="1000" step="10" value="100" oninput="updateXP()">
+        </div>
+        <div class="row" id="xpPRow" style="display:none">
+          <label>p (степень) <output id="xpPOut">2.00</output></label>
+          <input type="range" id="xpP" min="0.5" max="4" step="0.05" value="2" oninput="updateXP()">
+        </div>
+        <div class="row" id="xpBRow" style="display:none">
+          <label>B (множитель роста) <output id="xpBOut">1.20</output></label>
+          <input type="range" id="xpB" min="1.01" max="2.5" step="0.01" value="1.2" oninput="updateXP()">
+        </div>
+        <div class="row" id="xpCapRow" style="display:none">
+          <label>Потолок уровня <output id="xpCapOut">10</output></label>
+          <input type="range" id="xpCap" min="5" max="25" step="1" value="10" oninput="updateXP()">
+        </div>
+        <div class="row">
+          <label>Макс. уровень <output id="xpMaxOut">30</output></label>
+          <input type="range" id="xpMax" min="10" max="50" step="1" value="30" oninput="updateXP()">
+        </div>
+        <p class="note" id="xpFormulaDesc"></p>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>Опыт за уровень (n → n+1)</h2>
+        <canvas id="xpPerLevel" width="700" height="260"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Суммарный опыт (достижение уровня)</h2>
+        <canvas id="xpTotal" width="700" height="260"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Таблица значений</h2>
+        <div id="xpTable" style="max-height:320px;overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">Dota 2 и её персонажи — товарный знак Valve Corporation. Страница сделана для наглядного изучения механик.</div>
+<script>
+"use strict";
+
+function $(id) { return document.getElementById(id); }
+
+function setPrimary(p) {
+  document.querySelectorAll("#primarySeg button").forEach(b =>
+    b.classList.toggle("active", b.dataset.p === p));
+  update();
+}
+
+function update() {
+  const v = id => parseFloat($(id).value);
+  const out = (id, txt) => $("" + id + "Out").textContent = txt;
+
+  // вывод значений ползунков
+  out("level", v("level"));
+  out("str", v("str")); out("strGrow", v("strGrow").toFixed(1));
+  out("agi", v("agi")); out("agiGrow", v("agiGrow").toFixed(1));
+  out("int", v("int")); out("intGrow", v("intGrow").toFixed(1));
+  out("dmgMin", v("dmgMin")); out("dmgMax", v("dmgMax"));
+  out("bat", v("bat").toFixed(2));
+  out("armor", v("armor")); out("ms", v("ms"));
+  out("tr", v("tr").toFixed(2));
+  out("ap", v("ap").toFixed(2));
+  out("asB", v("asB")); out("msB", v("msB") + "%");
+  out("hpB", v("hpB")); out("manaB", v("manaB"));
+  out("armorB", v("armorB")); out("dmgB", v("dmgB"));
+  out("strB", v("strB")); out("agiB", v("agiB")); out("intB", v("intB"));
+  out("hpRegenB", v("hpRegenB")); out("manaRegenB", v("manaRegenB"));
+  out("mrB", v("mrB") + "%"); out("statusB", v("statusB") + "%");
+  out("ampB", v("ampB") + "%"); out("evB", v("evB") + "%");
+  out("rangeB", v("rangeB")); out("visionB", v("visionB"));
+  out("trB", v("trB").toFixed(2)); out("msFlatB", v("msFlatB"));
+  out("visionDay", v("visionDay")); out("visionNight", v("visionNight"));
+  if ($("melee").checked) {
+    $("rangeOut").textContent = "150";
+    $("projOut").textContent = "—";
+  } else {
+    out("range", v("range")); out("proj", v("proj"));
+  }
+
+  // --- атрибуты с учётом уровня и роста ---
+  const primary = document.querySelector("#primarySeg button.active").dataset.p;
+  const lvl = v("level");
+  const strEff = v("str") + v("strGrow") * (lvl - 1) + v("strB");
+  const agiEff = v("agi") + v("agiGrow") * (lvl - 1) + v("agiB");
+  const intEff = v("int") + v("intGrow") * (lvl - 1) + v("intB");
+  const melee = $("melee").checked;
+
+  const maxHP = 120 + 22 * strEff + v("hpB");
+  const hpRegen = 0.25 + 0.1 * strEff + v("hpRegenB");
+  const maxMana = 75 + 12 * intEff + v("manaB");
+  const manaRegen = 0.7 + 0.05 * intEff + v("manaRegenB");
+
+  const armor = v("armor") + 0.17 * agiEff + v("armorB");
+  const physRed = (armor >= 0)
+    ? armor / (armor + 16) * 100
+    : armor / (armor - 16) * 100;
+  const physRedMarginal = physRed - ((armor - 1) >= 0
+    ? (armor - 1) / (armor - 1 + 16) * 100
+    : (armor - 1) / (armor - 1 - 16) * 100);
+
+  const ias = agiEff + v("asB");
+  const netAS = Math.min(600, 100 + ias);
+  const bat = v("bat");
+  const atkPerSec = netAS / 100 / bat;
+  const interval = bat * 100 / netAS;
+
+  const attrDmg = primary === "str" ? strEff
+                : primary === "agi" ? agiEff
+                : primary === "int" ? intEff
+                : 0.5 * (strEff + agiEff + intEff);
+  const attrDmgLabel = primary === "uni"
+    ? "0.5×(" + (strEff + agiEff + intEff).toFixed(0) + ")"
+    : (primary === "str" ? "от Силы(" : primary === "agi" ? "от Ловкости(" : "от Интеллекта(") + attrDmg.toFixed(0) + ")";
+  const dmgMin = v("dmgMin") + attrDmg + v("dmgB");
+  const dmgMax = v("dmgMax") + attrDmg + v("dmgB");
+  const avgDmg = (dmgMin + dmgMax) / 2;
+  const dps = avgDmg * atkPerSec;
+
+  const tr = v("tr") + v("trB");
+  const ms = Math.min(550, (v("ms") + v("msFlatB")) * (1 + v("msB") / 100));
+  const turnTime = 0.03 / tr;
+
+  const range = melee ? 150 : v("range") + v("rangeB");
+  const projSpeed = melee ? 0 : v("proj");
+  const visionDay = v("visionDay") + v("visionB");
+  const visionNight = v("visionNight") + v("visionB");
+
+  const magicRes = Math.min(90, 25 + 0.1 * intEff + v("mrB"));
+  const statusRes = v("statusB"); const spellAmp = v("ampB");
+  const evasion = v("evB");
+  const dmgBlock = melee ? 16 : 0;
+  const dmgBlockChance = melee ? 50 : 0;
+
+  const strBase = v("str"), agiBase = v("agi"), intBase = v("int");
+  const strB = v("strB"), agiB = v("agiB"), intB = v("intB");
+
+  // --- отрисовка ---
+  const cards = [
+    { name: "Здоровье", icon: "❤", value: Math.round(maxHP), extra: "Реген: " + hpRegen.toFixed(1) + " HP/с (0.25 + 0.1×С(" + strEff.toFixed(0) + ")" + (v("hpRegenB") ? " + " + v("hpRegenB") : "") + ") · 120 + 22×С(" + strEff.toFixed(0) + ")" + (v("hpB") ? " + " + v("hpB") : ""), bar: Math.min(100, maxHP / 4000 * 100), cls: "red" },
+    { name: "Мана", icon: "✦", value: Math.round(maxMana), extra: "Реген: " + manaRegen.toFixed(1) + " маны/с (0.7 + 0.05×И(" + intEff.toFixed(0) + ")" + (v("manaRegenB") ? " + " + v("manaRegenB") : "") + ") · 75 + 12×И(" + intEff.toFixed(0) + ")" + (v("manaB") ? " + " + v("manaB") : ""), bar: Math.min(100, maxMana / 2000 * 100), cls: "blue" },
+    { name: "Урон атаки", icon: "⚔", value: dmgMin.toFixed(0) + " — " + dmgMax.toFixed(0), extra: "Средний: " + avgDmg.toFixed(0) + " · +" + attrDmg.toFixed(0) + " белого (" + attrDmgLabel + ")", bar: Math.min(100, avgDmg / 400 * 100) },
+    { name: "DPS", icon: "💥", value: dps.toFixed(1), extra: "Урон в секунду", bar: Math.min(100, dps / 500 * 100), cls: "teal" },
+    { name: "Скорость атаки", icon: "⚡", value: netAS.toFixed(0) + " IAS", extra: "Атак/сек: " + atkPerSec.toFixed(2) + " · между ударами: " + interval.toFixed(3) + " с · Ловкость " + agiEff.toFixed(0) + (v("asB") ? " + " + v("asB") : "") + " бонус", bar: Math.min(100, netAS / 600 * 100), cls: "yellow" },
+    { name: "Интервал атаки (BAT)", icon: "⏱", value: bat.toFixed(2) + " с", extra: "Базовый интервал героя · не зависит от атрибутов", bar: Math.min(100, (1.9 - bat) / 0.6 * 100), cls: "teal" },
+    { name: "Броня", icon: "🛡", value: armor.toFixed(1), extra: "Физ. резист: " + physRed.toFixed(1) + "% · прирост последней ед. брони: +" + physRedMarginal.toFixed(2) + "% · A/(A+16), стремится к 100%, не достигая", bar: Math.min(100, Math.max(0, armor) / 60 * 100), cls: "blue" },
+    { name: "Магический резист", icon: "🔮", value: magicRes.toFixed(1) + "%", extra: "25% база + 0.1%×И(" + intEff.toFixed(0) + ")" + (v("mrB") ? " + " + v("mrB") + "% бонус" : "") + " · кап 90%", bar: magicRes / 90 * 100, cls: "blue" },
+    { name: "Скорость движения", icon: "👟", value: Math.round(ms), extra: "Кап: 550 · база " + v("ms").toFixed(0) + (v("msFlatB") ? " + " + v("msFlatB").toFixed(0) : "") + (v("msB") ? " × " + (1 + v("msB") / 100).toFixed(2) : "") + (ms >= 550 ? " (макс)" : ""), bar: Math.min(100, ms / 600 * 100), cls: "yellow" },
+    { name: "Поворот (turn rate)", icon: "🔄", value: tr.toFixed(2), extra: "180° за " + turnTime.toFixed(3) + " с" + (v("trB") ? " · +" + v("trB").toFixed(2) + " бонус" : ""), bar: Math.min(100, tr / 1.5 * 100), cls: "teal" },
+    { name: "Дальность атаки", icon: "🎯", value: range.toFixed(0), extra: melee ? "Ближний бой" : "Снаряд: " + projSpeed.toFixed(0) + (v("rangeB") ? " · +" + v("rangeB").toFixed(0) + " бонус" : ""), bar: Math.min(100, range / 800 * 100), cls: "yellow" },
+    { name: "Обзор", icon: "👁", value: "День " + visionDay.toFixed(0) + " / Ночь " + visionNight.toFixed(0), extra: "Зона видимости" + (v("visionB") ? " · +" + v("visionB").toFixed(0) + " бонус" : ""), bar: Math.min(100, visionDay / 2500 * 100), cls: "blue" },
+    { name: "Статус резист", icon: "🧬", value: statusRes + "%", extra: "Сопротивление контролю · из бонусов", bar: Math.min(100, statusRes), cls: "teal" },
+    { name: "Spell Amplification", icon: "✨", value: spellAmp + "%", extra: "Усиление заклинаний · из бонусов", bar: Math.min(100, spellAmp), cls: "teal" },
+    { name: "Уклонение", icon: "🌫", value: evasion + "%", extra: "Шанс увернуться · из бонусов", bar: Math.min(100, evasion), cls: "teal" },
+    { name: "Damage Block", icon: "🧱", value: dmgBlock + (melee ? " (шанс " + dmgBlockChance + "%)" : ""), extra: melee ? "Средний блок: " + (dmgBlock * dmgBlockChance / 100).toFixed(0) + " · блок 16 при шансе 50%" : "Только у героев ближнего боя", bar: melee ? 50 : 0, cls: "teal" },
+    { name: "Attack point", icon: "🕐", value: v("ap").toFixed(2) + " с", extra: "Задержка до удара", bar: Math.min(100, v("ap") / 0.7 * 100), cls: "red" },
+    { name: "Атрибуты (с учётом уровня)", icon: "📊", big: true,
+      value: "С " + strEff.toFixed(0) + " · Л " + agiEff.toFixed(0) + " · И " + intEff.toFixed(0),
+      extra: "База+рост: С " + strBase.toFixed(0) + "+" + (strEff - strBase - strB).toFixed(1) + "×ур · Л " + agiBase.toFixed(0) + "+" + (agiEff - agiBase - agiB).toFixed(1) + "×ур · И " + intBase.toFixed(0) + "+" + (intEff - intBase - intB).toFixed(1) + "×ур" + ((strB || agiB || intB) ? " · +предметы" : ""),
+      bar: 100 }
+  ];
+
+  const grid = $("statsGrid");
+  grid.innerHTML = cards.map(c => `
+    <div class="stat ${c.big ? "big" : ""}">
+      <span class="icon">${c.icon}</span>
+      <div class="name">${c.name}</div>
+      <div class="value">${c.value}</div>
+      <div class="extra">${c.extra}</div>
+      <div class="bar"><div class="bar-fill ${c.cls || ""}" style="width:${Math.max(0, Math.min(100, c.bar))}%"></div></div>
+    </div>`).join("");
+}
+
+function applyPreset(name) {
+  const presets = {
+    invoker: {
+      str: 17, agi: 14, int: 15, primary: "int",
+      strGrow: 2.4, agiGrow: 1.9, intGrow: 2.9,
+      dmgMin: 29, dmgMax: 33, bat: 1.7, armor: 0, ms: 285, tr: 0.5, ap: 0.35,
+      melee: false, range: 600, proj: 900
+    },
+    sven: {
+      str: 22, agi: 21, int: 16, primary: "str",
+      strGrow: 3.3, agiGrow: 2.2, intGrow: 1.7,
+      dmgMin: 62, dmgMax: 64, bat: 1.7, armor: 2, ms: 325, tr: 0.6, ap: 0.4,
+      melee: true, range: 150, proj: 0
+    },
+    jugg: {
+      str: 20, agi: 34, int: 18, primary: "agi",
+      strGrow: 2.8, agiGrow: 3.4, intGrow: 1.8,
+      dmgMin: 48, dmgMax: 50, bat: 1.4, armor: 3, ms: 305, tr: 0.4, ap: 0.33,
+      melee: true, range: 150, proj: 0
+    },
+    windranger: {
+      str: 16, agi: 18, int: 16, primary: "uni",
+      strGrow: 1.9, agiGrow: 2.6, intGrow: 2.1,
+      dmgMin: 26, dmgMax: 32, bat: 1.4, armor: -1, ms: 290, tr: 0.5, ap: 0.3,
+      melee: false, range: 600, proj: 1250
+    },
+    mirana: {
+      str: 19, agi: 19, int: 17, primary: "uni",
+      strGrow: 2.0, agiGrow: 2.6, intGrow: 1.9,
+      dmgMin: 28, dmgMax: 34, bat: 1.7, armor: 0, ms: 300, tr: 0.7, ap: 0.3,
+      melee: false, range: 630, proj: 900
+    },
+    bane: {
+      str: 20, agi: 18, int: 22, primary: "uni",
+      strGrow: 2.4, agiGrow: 2.4, intGrow: 2.6,
+      dmgMin: 24, dmgMax: 30, bat: 1.7, armor: 1, ms: 300, tr: 0.5, ap: 0.3,
+      melee: false, range: 400, proj: 900
+    }
+  };
+  if (name === "custom") return;
+  const p = presets[name];
+  $("str").value = p.str; $("agi").value = p.agi; $("int").value = p.int;
+  $("strGrow").value = p.strGrow; $("agiGrow").value = p.agiGrow; $("intGrow").value = p.intGrow;
+  $("dmgMin").value = p.dmgMin; $("dmgMax").value = p.dmgMax;
+  $("bat").value = p.bat; $("armor").value = p.armor; $("ms").value = p.ms;
+  $("tr").value = p.tr; $("ap").value = p.ap;
+  $("melee").checked = p.melee;
+  $("range").value = p.range; $("proj").value = p.proj;
+  setPrimary(p.primary);
+  document.querySelector("#heroPreset").value = name;
+}
+
+function val(id) { return parseFloat($(id).value); }
+
+function switchTab(name) {
+  $("tabStats").style.display = name === "stats" ? "" : "none";
+  $("tabXP").style.display = name === "xp" ? "" : "none";
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  if (name === "xp") xpFormulaChanged();
+}
+
+function xpFormulaChanged() {
+  const f = $("xpFormula").value;
+  $("xpKRow").style.display = f === "flat" ? "none" : "";
+  $("xpPRow").style.display = f === "power" ? "" : "none";
+  $("xpBRow").style.display = f === "exp" ? "" : "none";
+  $("xpCapRow").style.display = f === "capped" ? "" : "none";
+  const descs = {
+    linear: "Dota-стиль: XP(n→n+1) = K×(n+1). Прирост за уровень линейный, суммарно — квадратичный рост.",
+    flat: "Константа: XP(n→n+1) = K. Каждый уровень стоит одинаково, суммарно — линейный рост.",
+    power: "Степенная: XP(n→n+1) = K×n^p. Ползунок p задаёт крутизну (обычно 1.5–2.5).",
+    exp: "Экспонента: XP(n→n+1) = K×B^n. Быстро растёт к эндгейму, при высоком B «взрывается».",
+    capped: "Как линейная, но начиная с потолка уровня XP за уровень фиксируется константой."
+  };
+  $("xpFormulaDesc").textContent = descs[f] || "";
+  updateXP();
+}
+
+function xpForLevel(n, f, K, p, B, cap) {
+  switch (f) {
+    case "flat": return K;
+    case "power": return K * Math.pow(n, p);
+    case "exp": return K * Math.pow(B, n);
+    case "capped":
+      return n > cap ? K * (cap + 1) : K * (n + 1);
+    case "linear":
+    default: return K * (n + 1);
+  }
+}
+
+function updateXP() {
+  const f = $("xpFormula").value;
+  const K = val("xpK"), p = val("xpP"), B = val("xpB"), cap = Math.round(val("xpCap"));
+  const max = Math.round(val("xpMax"));
+  $("xpKOut").textContent = K;
+  $("xpPOut").textContent = p.toFixed(2);
+  $("xpBOut").textContent = B.toFixed(2);
+  $("xpCapOut").textContent = cap;
+  $("xpMaxOut").textContent = max;
+
+  const per = [], toReach = [];
+  for (let n = 1; n <= max; n++) per.push(xpForLevel(n, f, K, p, B, cap));
+  let acc = 0;
+  for (let n = 1; n <= max; n++) { toReach.push(acc); acc += per[n - 1]; }
+
+  drawBars($("xpPerLevel"), per, "#e0322c");
+  drawLine($("xpTotal"), toReach, "#4fc3a1");
+
+  let html = "<table class='attr'><tr><td><b>Уровень</b></td><td><b>Опыт за уровень</b></td><td><b>Всего опыта</b></td></tr>";
+  for (let n = 1; n <= max; n++) {
+    html += "<tr><td>" + n + "</td><td>" + Math.round(per[n - 1]) + "</td><td>" + Math.round(toReach[n - 1]) + "</td></tr>";
+  }
+  $("xpTable").innerHTML = html + "</table>";
+}
+
+function drawBars(canvas, values, color) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const padL = 50, padR = 10, padT = 12, padB = 26;
+  const iw = W - padL - padR, ih = H - padT - padB;
+  const maxV = Math.max.apply(null, values.concat([1]));
+  const n = values.length, bw = iw / n;
+  ctx.font = "11px Segoe UI";
+  for (let g = 0; g <= 4; g++) {
+    const y = padT + ih - ih * g / 4;
+    ctx.strokeStyle = "#21262d"; ctx.fillStyle = "#8b949e";
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillText(String(Math.round(maxV * g / 4)), 6, y + 4);
+  }
+  for (let i = 0; i < n; i++) {
+    const h = Math.max(1, values[i] / maxV * ih);
+    ctx.fillStyle = color;
+    ctx.fillRect(padL + i * bw + 1, padT + ih - h, bw - 2, h);
+    if (i % 5 === 0 || i === n - 1) {
+      ctx.fillStyle = "#8b949e";
+      ctx.fillText(String(i + 1), padL + i * bw + bw / 2 - 4, H - 8);
+    }
+  }
+}
+
+function drawLine(canvas, values, color) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const padL = 50, padR = 10, padT = 12, padB = 26;
+  const iw = W - padL - padR, ih = H - padT - padB;
+  const maxV = Math.max.apply(null, values.concat([1]));
+  const n = values.length;
+  ctx.font = "11px Segoe UI";
+  for (let g = 0; g <= 4; g++) {
+    const y = padT + ih - ih * g / 4;
+    ctx.strokeStyle = "#21262d"; ctx.fillStyle = "#8b949e";
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillText(String(Math.round(maxV * g / 4)), 6, y + 4);
+  }
+  const px = i => padL + (n === 1 ? 0 : i * iw / (n - 1));
+  const py = v => padT + ih - v / maxV * ih;
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i < n; i++) { i === 0 ? ctx.moveTo(px(i), py(values[i])) : ctx.lineTo(px(i), py(values[i])); }
+  ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.fillStyle = color;
+  for (let i = 0; i < n; i += 5) {
+    ctx.beginPath(); ctx.arc(px(i), py(values[i]), 3, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = "#8b949e";
+  for (let i = 0; i < n; i += 5) {
+    ctx.fillText(String(i + 1), px(i) - 4, H - 8);
+  }
+}
+
+update();
+xpFormulaChanged();
+</script>
+</body>
+</html>
