@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>мусорка — меню</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+    }
+    .wrap { width: min(640px, 90vw); }
+    h1 { font-size: 2rem; margin-bottom: 0.2em; }
+    p.sub { color: #8b949e; margin-top: 0; }
+    ul { list-style: none; padding: 0; margin: 1.5em 0 0; }
+    li { margin: 0.5em 0; }
+    a {
+      display: block;
+      padding: 0.9em 1.1em;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #e6edf3;
+      background: #161b22;
+      transition: border-color .15s, transform .15s;
+    }
+    a:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    a span { display: block; font-size: 0.8rem; color: #8b949e; margin-top: 0.2em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>мусорка</h1>
+    <p class="sub">Default Project — все страницы</p>
+    <ul>
+      <li><a href="dota2-stats.html">Dota 2 Stats<span>dota2-stats.html</span></a></li>
+      <li><a href="gacha.html">Gacha<span>gacha.html</span></a></li>
+      <li><a href="grass-tsushima/">Grass Tsushima<span>grass-tsushima/index.html</span></a></li>
+      <li><a href="github-stats/">GitHub Stats<span>github-stats/index.html</span></a></li>
+      <li><a href="nat-punch-test/public/">NAT Punch Test<span>nat-punch-test/public/index.html</span></a></li>
+    </ul>
+  </div>
+</body>
+</html>
