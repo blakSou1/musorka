@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open World Optimization — Демонстрация</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --line:#2a313c; --txt:#c9d1d9;
+    --accent:#58a6ff; --good:#3fb950; --bad:#f85149; --warn:#d29922;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font:14px/1.4 -apple-system,Segoe UI,Roboto,sans-serif}
+  h1{font-size:18px;margin:0 0 4px}
+  .wrap{display:grid;grid-template-columns:1fr 320px;gap:12px;padding:12px;min-height:100vh;align-items:start}
+  .stage{display:flex;flex-direction:column;gap:12px;min-width:0}
+  canvas{background:#05070a;border:1px solid var(--line);border-radius:8px;width:100%;display:block}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+  .ctrls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  label.tog{display:flex;align-items:center;gap:6px;background:#0d1117;border:1px solid var(--line);
+    padding:6px 8px;border-radius:6px;cursor:pointer;user-select:none}
+  label.tog input{accent-color:var(--accent)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+  .stat{background:#0d1117;border:1px solid var(--line);border-radius:6px;padding:8px}
+  .stat b{display:block;font-size:20px;color:var(--accent)}
+  .stat span{font-size:11px;opacity:.7}
+  .legend{font-size:12px;line-height:1.7;margin-top:10px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .hint{font-size:12px;opacity:.65;margin-top:8px}
+  .sec{font-size:12px;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin:12px 0 6px}
+  button{background:#21262d;color:var(--txt);border:1px solid var(--line);
+    border-radius:6px;padding:6px 10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .desc{font-size:12px;opacity:.8;margin:4px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+    <div class="panel">
+      <h1>Открытый мир: визуализация конвейера рендера</h1>
+      <div class="hint">Верх — карта мира (вид сверху). Нижний — что видит камера (виртуальный вьюпорт). Включай/выключай техники справа и смотри на статистику.</div>
+    </div>
+    <canvas id="world" height="300"></canvas>
+    <canvas id="view" height="340"></canvas>
+  </div>
+
+  <div class="panel">
+    <div class="sec">Техники оптимизации</div>
+    <div class="ctrls">
+      <label class="tog"><input type="checkbox" id="t_frustum" checked> Frustum Culling</label>
+      <label class="tog"><input type="checkbox" id="t_dist" checked> Distance Culling</label>
+      <label class="tog"><input type="checkbox" id="t_occ" checked> Occlusion Culling</label>
+      <label class="tog"><input type="checkbox" id="t_lod" checked> LOD</label>
+      <label class="tog"><input type="checkbox" id="t_fog" checked> Fog (скрытие pop-in)</label>
+      <label class="tog"><input type="checkbox" id="t_inst" checked> GPU Instancing (трава)</label>
+      <label class="tog"><input type="checkbox" id="t_stream" checked> Streaming (только близкие чанки)</label>
+      <label class="tog"><input type="checkbox" id="t_bake" checked> Baked Light (дешёвый свет)</label>
+      <label class="tog"><input type="checkbox" id="t_chunk" checked> Границы чанков</label>
+      <label class="tog"><input type="checkbox" id="t_bb" checked> Billboards (impostеры)</label>
+    </div>
+
+    <div class="sec">Управление камерой</div>
+    <div class="ctrls">
+      <button id="b_move">⏸ Пауза движения</button>
+      <button id="b_reset">↺ Сброс</button>
+    </div>
+    <div class="hint">Управление: <b>W/S</b> — вперёд/назад, <b>A/D</b> или <b>←/→</b> — поворот. Камера также движется сама (пауза кнопкой), либо тащи мышью по карте.</div>
+
+    <div class="stats">
+      <div class="stat"><b id="s_obj">0</b><span>объектов на проверке</span></div>
+      <div class="stat"><b id="s_vis">0</b><span>реально отрисовано</span></div>
+      <div class="stat"><b id="s_draw">0</b><span>draw calls</span></div>
+      <div class="stat"><b id="s_tri">0</b><span>треугольников</span></div>
+      <div class="stat"><b id="s_fps">0</b><span>FPS (симуляция)</span></div>
+      <div class="stat"><b id="s_mem">0</b><span>загружено чанков</span></div>
+    </div>
+
+    <div class="legend">
+      <div><span class="dot" style="background:#58a6ff"></span>Камера + сектор обзора (FOV)</div>
+      <div><span class="dot" style="background:#3fb950"></span>Видимый объект (пройдёт в рендер)</div>
+      <div><span class="dot" style="background:#f85149"></span>Отсеян (culled — не рисуем)</div>
+      <div><span class="dot" style="background:#d29922"></span>Гора-окклюдер (закрывает всё за собой)</div>
+      <div><span class="dot" style="background:#8b949e"></span>Чанк вне радиуса streaming</div>
+    </div>
+
+      <div class="sec">Доп. статистика</div>
+    <div class="stats">
+      <div class="stat"><b id="s_bb">0</b><span>биллбордов (2 три)</span></div>
+      <div class="stat"><b id="s_sh">0</b><span>теней (динам. свет)</span></div>
+    </div>
+
+    <div class="sec">Что показывает каждая техника</div>
+    <div class="desc">
+      <b>Frustum</b>: не рисуем то, что вне угла камеры.<br>
+      <b>Distance</b>: мелочи исчезают раньше гор.<br>
+      <b>Occlusion</b>: за горой ничего не считаем.<br>
+      <b>LOD</b>: далёкое дерево = 12 треугольников вместо 1200.<br>
+      <b>Fog</b>: туман прячет момент появления объектов.<br>
+      <b>Instancing</b>: тысяча травинок = 1 draw call.<br>
+      <b>Streaming</b>: грузим только чанки рядом с игроком.<br>
+      <b>Baked Light</b>: свет запечён, GPU не считает тени в рантайме.
+    </div>
+  </div>
+</div>
+
+<div class="refs">
+  <style>
+    .refs{max-width:1400px;margin:18px auto 40px;padding:14px 12px 0;border-top:1px solid var(--line);color:var(--txt)}
+    .refs h2{font-size:18px;margin:18px 0 10px}
+    .refgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+    .refcard{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+    .refcard h3{margin:0 0 8px;font-size:14px;color:var(--accent)}
+    .refcard a{display:block;color:#9fb3c8;text-decoration:none;font-size:13px;
+      padding:4px 0;border-bottom:1px solid #1d242d}
+    .refcard a:last-child{border-bottom:none}
+    .refcard a:hover{color:var(--accent)}
+    .refcard a::before{content:"↗ ";opacity:.5}
+  </style>
+  <h2>📚 Материалы по методам оптимизации и открытым мирам</h2>
+  <div class="refgrid">
+
+    <div class="refcard">
+      <h3>Потоковая загрузка (Streaming)</h3>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine" target="_blank" rel="noopener">UE5 — World Partition (документация)</a>
+      <a href="https://docs.unity3d.com/Packages/com.unity.addressables@2.0/manual/index.html" target="_blank" rel="noopener">Unity — Addressables (пакет)</a>
+      <a href="https://en.wikipedia.org/wiki/Open_world#Level_streaming" target="_blank" rel="noopener">Wikipedia — Level streaming в открытых мирах</a>
+    </div>
+
+    <div class="refcard">
+      <h3>LOD / HLOD / Billboards</h3>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/hierarchical-level-of-detail-in-unreal-engine" target="_blank" rel="noopener">UE5 — Hierarchical Level of Detail (HLOD)</a>
+      <a href="https://docs.unity3d.com/Manual/LevelOfDetail.html" target="_blank" rel="noopener">Unity — Level of Detail (руководство)</a>
+      <a href="https://en.wikipedia.org/wiki/Level_of_detail_(computer_graphics)" target="_blank" rel="noopener">Wikipedia — Level of detail (теория, DLOD/CLOD/HLOD)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Culling (Frustum / Occlusion)</h3>
+      <a href="https://docs.unity3d.com/Manual/OcclusionCulling.html" target="_blank" rel="noopener">Unity — Occlusion Culling</a>
+      <a href="https://en.wikipedia.org/wiki/Hidden-surface_determination" target="_blank" rel="noopener">Wikipedia — Hidden-surface determination (PVS, порталы, frustum)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Освещение (Baked / GI)</h3>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine" target="_blank" rel="noopener">UE5 — Lumen (динамический GI)</a>
+      <a href="https://docs.unity3d.com/Manual/Lightmapping.html" target="_blank" rel="noopener">Unity — Baking lightmaps (запечённый свет)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Instancing / Batcher / Nanite</h3>
+      <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine" target="_blank" rel="noopener">UE5 — Nanite (виртуализированная геометрия)</a>
+      <a href="https://docs.unity3d.com/Manual/GPUInstancing.html" target="_blank" rel="noopener">Unity — GPU Instancing</a>
+      <a href="https://docs.unity3d.com/Manual/SRPBatcher.html" target="_blank" rel="noopener">Unity — SRP Batcher (оптимизация draw calls)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Террайн и растительность</h3>
+      <a href="https://docs.unity3d.com/Manual/script-Terrain.html" target="_blank" rel="noopener">Unity — Terrain (плитки, трава, деревья)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Общая оптимизация рендера</h3>
+      <a href="https://docs.unity3d.com/Manual/OptimizingGraphicsPerformance.html" target="_blank" rel="noopener">Unity — Reduce rendering work (CPU/GPU)</a>
+    </div>
+
+    <div class="refcard">
+      <h3>Открытые миры (концепт и история)</h3>
+      <a href="https://en.wikipedia.org/wiki/Open_world" target="_blank" rel="noopener">Wikipedia — Open world (дизайн, streaming, процедурная генерация)</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const world = document.getElementById('world');
+const view  = document.getElementById('view');
+const wctx = world.getContext('2d');
+const vctx = view.getContext('2d');
+
+function fit(c, lh){ const r=c.getBoundingClientRect();
+  c.width=Math.max(1,r.width*devicePixelRatio);
+  c.height=Math.max(1,lh*devicePixelRatio);
+  c.style.height=lh+'px';
+  return {w:c.width,h:c.height}; }
+let W=fit(world,300), V=fit(view,340);
+window.addEventListener('resize',()=>{W=fit(world,300);V=fit(view,340);});
+
+// --- мир ---
+const WORLD_W=2400, WORLD_H=1200;
+const CHUNK=400;
+const objects=[];
+const rng=(a,b)=>a+Math.random()*(b-a);
+function makeWorld(){
+  objects.length=0;
+  // деревья и скалы
+  for(let i=0;i<420;i++){
+    objects.push({t:'tree', x:rng(0,WORLD_W), y:rng(0,WORLD_H),
+      base:rng(0.8,1.4)});
+  }
+  for(let i=0;i<180;i++){
+    objects.push({t:'rock', x:rng(0,WORLD_W), y:rng(0,WORLD_H),
+      base:rng(0.7,1.3)});
+  }
+  // трава — кластеры (instanced)
+  for(let i=0;i<60;i++){
+    objects.push({t:'grass', x:rng(0,WORLD_W), y:rng(0,WORLD_H),
+      count:Math.floor(rng(300,900))});
+  }
+  // горы-окклюдеры
+  for(let i=0;i<5;i++){
+    objects.push({t:'mountain', x:rng(300,WORLD_W-300), y:rng(200,WORLD_H-200),
+      r:rng(90,150)});
+  }
+}
+makeWorld();
+
+// --- камера ---
+const cam={x:WORLD_W/2,y:WORLD_H/2,ang:0,fov:Math.PI/3,maxDist:1000,streamR:700};
+let moving=true, dragging=false;
+
+world.addEventListener('mousedown',e=>{dragging=true;aim(e);});
+world.addEventListener('mousemove',e=>{if(dragging)aim(e);});
+window.addEventListener('mouseup',()=>dragging=false);
+function aim(e){
+  const r=world.getBoundingClientRect();
+  const mx=(e.clientX-r.left)/r.width*WORLD_W;
+  const my=(e.clientY-r.top)/r.height*WORLD_H;
+  cam.x=mx; cam.y=my;
+  moving=false; document.getElementById('b_move').textContent='▶ Движение';
+}
+
+document.getElementById('b_move').onclick=function(){
+  moving=!moving; this.textContent=moving?'⏸ Пауза движения':'▶ Движение';
+};
+document.getElementById('b_reset').onclick=()=>{
+  cam.x=WORLD_W/2;cam.y=WORLD_H/2;cam.ang=0;moving=true;
+  document.getElementById('b_move').textContent='⏸ Пауза движения';
+};
+
+// пересечение отрезка с окружностью (окклюдер)
+function segCircle(x1,y1,x2,y2,cx,cy,r){
+  const dx=x2-x1, dy=y2-y1;
+  const fx=x1-cx, fy=y1-cy;
+  const a=dx*dx+dy*dy;
+  const b=2*(fx*dx+fy*dy);
+  const c=fx*fx+fy*fy-r*r;
+  let disc=b*b-4*a*c;
+  if(disc<0) return false;
+  disc=Math.sqrt(disc);
+  const t1=(-b-disc)/(2*a), t2=(-b+disc)/(2*a);
+  return (t1>=0&&t1<=1)||(t2>=0&&t2<=1);
+}
+function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;}
+
+const T={
+  frustum:()=>document.getElementById('t_frustum').checked,
+  dist:()=>document.getElementById('t_dist').checked,
+  occ:()=>document.getElementById('t_occ').checked,
+  lod:()=>document.getElementById('t_lod').checked,
+  fog:()=>document.getElementById('t_fog').checked,
+  inst:()=>document.getElementById('t_inst').checked,
+  stream:()=>document.getElementById('t_stream').checked,
+  bake:()=>document.getElementById('t_bake').checked,
+  chunk:()=>document.getElementById('t_chunk').checked,
+  bb:()=>document.getElementById('t_bb').checked,
+};
+
+// --- управление с клавиатуры ---
+const keys={};
+let userMoved=false;
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)){
+    keys[k]=true;
+    if(!userMoved){ userMoved=true; moving=false;
+      document.getElementById('b_move').textContent='▶ Движение'; }
+    e.preventDefault();
+  }
+});
+addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+
+// LOD: треугольники по дистанции
+function lodTris(type,d){
+  if(type==='tree'){
+    if(d<250) return 1200; if(d<500) return 240; if(d<800) return 48; return 12;
+  }
+  if(type==='rock'){
+    if(d<250) return 600; if(d<500) return 120; if(d<800) return 24; return 8;
+  }
+  return 0;
+}
+
+let last=performance.now(), fps=60, frame=0;
+function loop(now){
+  const dt=(now-last)/1000; last=now; frame++;
+  if(moving && !dragging){
+    cam.ang+=dt*0.25;
+    cam.x+=Math.cos(cam.ang)*60*dt;
+    cam.y+=Math.sin(cam.ang)*40*dt;
+    if(cam.x<0||cam.x>WORLD_W)cam.ang=Math.PI-cam.ang;
+    if(cam.y<0||cam.y>WORLD_H)cam.ang=-cam.ang;
+  }
+  // ручное управление WASD
+  const sp=320;
+  if(keys['w']||keys['arrowup']){cam.x+=Math.cos(cam.ang)*sp*dt;cam.y+=Math.sin(cam.ang)*sp*dt;}
+  if(keys['s']||keys['arrowdown']){cam.x-=Math.cos(cam.ang)*sp*dt;cam.y-=Math.sin(cam.ang)*sp*dt;}
+  if(keys['a']||keys['arrowleft']){cam.ang-=2.0*dt;}
+  if(keys['d']||keys['arrowright']){cam.ang+=2.0*dt;}
+  // коллизии: персонаж не заходит внутрь деревьев/скал/гор
+  const playerR=9;
+  for(let it=0; it<3; it++){
+    for(const o of objects){
+      const r = o.t==='mountain' ? o.r*0.85
+              : o.t==='tree'    ? 12
+              : o.t==='rock'    ? 12 : 0;
+      if(!r) continue;
+      const dx=cam.x-o.x, dy=cam.y-o.y;
+      const d=Math.hypot(dx,dy);
+      const min=r+playerR;
+      if(d<min){
+        if(d>0.0001){ const p=(min-d)/d; cam.x+=dx*p; cam.y+=dy*p; }
+        else { cam.x+=min; }
+      }
+    }
+  }
+  cam.x=Math.max(20,Math.min(WORLD_W-20,cam.x));
+  cam.y=Math.max(20,Math.min(WORLD_H-20,cam.y));
+
+  // --- анализ видимости ---
+  let tested=0, visible=0, drawCalls=0, tris=0, chunksLoaded=0, bbCount=0, shCount=0;
+  const visList=[];
+  // чанки streaming
+  const seenChunk=new Set();
+  for(const o of objects){
+    const cx=Math.floor(o.x/CHUNK), cy=Math.floor(o.y/CHUNK);
+    const dcam=Math.hypot(o.x-cam.x,o.y-cam.y);
+    if(T.stream()){
+      if(dcam>cam.streamR){ continue; }
+      seenChunk.add(cx+','+cy);
+    }
+    tested++;
+    let culled=false, reason='';
+    if(T.frustum()){
+      const a=Math.atan2(o.y-cam.y,o.x-cam.x);
+      if(Math.abs(angDiff(a,cam.ang))>cam.fov/2){culled=true;reason='frustum';}
+    }
+    if(!culled && T.dist()){
+      const maxD = o.t==='mountain'?cam.maxDist*2.2:cam.maxDist;
+      if(dcam>maxD){culled=true;reason='dist';}
+    }
+    if(!culled && T.occ() && o.t!=='mountain'){
+      for(const m of objects){
+        if(m.t!=='mountain')continue;
+        if(segCircle(cam.x,cam.y,o.x,o.y,m.x,m.y,m.r)){culled=true;reason='occ';break;}
+      }
+    }
+    if(culled){ o._cull=reason; continue; }
+    o._cull=null;
+    visible++;
+    if(o.t==='grass'){
+      if(T.inst()){ drawCalls+=1; tris+=o.count*2; }
+      else { drawCalls+=Math.ceil(o.count/50); tris+=o.count*2; }
+    } else if(o.t==='mountain'){
+      drawCalls+=1; tris+=200;
+    } else {
+      drawCalls+=1;
+      const isBB = T.bb() && dcam>600;
+      if(isBB){ bbCount++; tris+=2; }
+      else tris += T.lod()?lodTris(o.t,dcam):(o.t==='tree'?1200:600);
+    }
+    // динамический свет = тени рисуются в рантайме (дорого)
+    if(!T.bake() && o.t!=='grass' && o.t!=='mountain' && dcam<700) shCount++;
+    visList.push({o,dcam});
+  }
+  chunksLoaded = T.stream()?seenChunk.size : Math.ceil(WORLD_W/CHUNK)*Math.ceil(WORLD_H/CHUNK);
+
+  // симуляция FPS: больше draw calls / tris => ниже fps
+  const load=(drawCalls*1.0+tris*0.02);
+  const target=Math.max(8, 240-load*0.6);
+  fps += (target-fps)*0.1;
+
+  // --- РИСУЕМ КАРТУ МИРА ---
+  wctx.clearRect(0,0,W.w,W.h);
+  wctx.fillStyle='#070b10'; wctx.fillRect(0,0,W.w,W.h);
+  const sx=W.w/WORLD_W, sy=W.h/WORLD_H;
+  // границы чанков
+  if(T.chunk()){
+    const cells = T.stream()? seenChunk : null;
+    wctx.fillStyle='rgba(88,166,255,0.06)';
+    if(cells){
+      for(const c of cells){ const [cx,cy]=c.split(',').map(Number);
+        wctx.fillRect(cx*CHUNK*sx,cy*CHUNK*sy,CHUNK*sx,CHUNK*sy); }
+    } else {
+      for(let cx=0;cx*CHUNK<WORLD_W;cx++) for(let cy=0;cy*CHUNK<WORLD_H;cy++)
+        wctx.fillRect(cx*CHUNK*sx,cy*CHUNK*sy,CHUNK*sx,CHUNK*sy);
+    }
+    wctx.strokeStyle='rgba(88,166,255,0.28)'; wctx.lineWidth=1;
+    for(let x=0;x<=WORLD_W;x+=CHUNK){ wctx.beginPath(); wctx.moveTo(x*sx,0); wctx.lineTo(x*sx,W.h); wctx.stroke(); }
+    for(let y=0;y<=WORLD_H;y+=CHUNK){ wctx.beginPath(); wctx.moveTo(0,y*sy); wctx.lineTo(W.w,y*sy); wctx.stroke(); }
+  }
+  // сектор обзора
+  wctx.fillStyle='rgba(88,166,255,0.10)';
+  wctx.beginPath(); wctx.moveTo(cam.x*sx,cam.y*sy);
+  wctx.arc(cam.x*sx,cam.y*sy, cam.maxDist*sx, cam.ang-cam.fov/2, cam.ang+cam.fov/2);
+  wctx.closePath(); wctx.fill();
+  // объекты
+  for(const o of objects){
+    const px=o.x*sx, py=o.y*sy;
+    if(T.stream() && Math.hypot(o.x-cam.x,o.y-cam.y)>cam.streamR){
+      wctx.fillStyle='rgba(139,148,158,0.25)';
+    } else if(o._cull){
+      wctx.fillStyle='rgba(248,81,73,0.55)';
+    } else if(o.t==='mountain'){
+      wctx.fillStyle='#d29922';
+    } else {
+      wctx.fillStyle='#3fb950';
+    }
+    if(o.t==='mountain'){
+      wctx.beginPath(); wctx.arc(px,py,o.r*sx,0,7); wctx.fill();
+    } else {
+      wctx.fillRect(px-2,py-2,4,4);
+    }
+  }
+  // камера
+  wctx.fillStyle='#58a6ff';
+  wctx.beginPath(); wctx.arc(cam.x*sx,cam.y*sy,5,0,7); wctx.fill();
+  wctx.strokeStyle='rgba(88,166,255,0.5)'; wctx.lineWidth=1;
+  wctx.beginPath(); wctx.arc(cam.x*sx,cam.y*sy,playerR*sx,0,7); wctx.stroke();
+  wctx.strokeStyle='#58a6ff'; wctx.beginPath();
+  wctx.moveTo(cam.x*sx,cam.y*sy);
+  wctx.lineTo((cam.x+Math.cos(cam.ang)*40)*sx,(cam.y+Math.sin(cam.ang)*40)*sy);
+  wctx.stroke();
+
+  // --- РИСУЕМ ВЬЮПОРТ ---
+  const t=now/1000;
+  vctx.clearRect(0,0,V.w,V.h);
+  // небо
+  const sky=vctx.createLinearGradient(0,0,0,V.h*0.75);
+  if(T.bake()){ sky.addColorStop(0,'#0a1422'); sky.addColorStop(1,'#1b2c3a'); }
+  else { sky.addColorStop(0,'#13223a'); sky.addColorStop(1,'#46586e'); }
+  vctx.fillStyle=sky; vctx.fillRect(0,0,V.w,V.h);
+  // солнце + свечение
+  const sunX=V.w*0.8, sunY=V.h*0.18, sr=T.bake()?24:32;
+  const glow=vctx.createRadialGradient(sunX,sunY,0,sunX,sunY,sr*3.2);
+  glow.addColorStop(0,'rgba(255,225,150,0.85)'); glow.addColorStop(1,'rgba(255,225,150,0)');
+  vctx.fillStyle=glow; vctx.beginPath(); vctx.arc(sunX,sunY,sr*3.2,0,7); vctx.fill();
+  vctx.fillStyle=T.bake()?'#ffe7a0':'#fff3c4'; vctx.beginPath(); vctx.arc(sunX,sunY,sr,0,7); vctx.fill();
+  // земля
+  vctx.fillStyle= T.bake()? '#10241a' : '#1d3427';
+  vctx.fillRect(0,V.h*0.7,V.w,V.h*0.3);
+  // туман
+  if(T.fog()){
+    const g=vctx.createLinearGradient(0,0,0,V.h);
+    g.addColorStop(0,'rgba(12,22,34,0)');
+    g.addColorStop(1,'rgba(12,22,34,0.9)');
+    vctx.fillStyle=g; vctx.fillRect(0,0,V.w,V.h);
+  }
+  // --- перспективная камера ---
+  const horizon=V.h*0.7;
+  const focal=(V.w/2)/Math.tan(cam.fov/2);
+  const camH=22;                         // высота камеры над землёй (мировые ед.)
+  // перспективная сетка пола — для ощущения глубины
+  vctx.strokeStyle='rgba(88,166,255,0.10)'; vctx.lineWidth=1;
+  for(const d of [40,90,180,360,720,1400]){
+    const gy=horizon+focal*camH/d;
+    if(gy<=V.h){ vctx.beginPath(); vctx.moveTo(0,gy); vctx.lineTo(V.w,gy); vctx.stroke(); }
+  }
+  // проекция видимых объектов (дальние — сначала, ближние — поверх)
+  visList.sort((a,b)=>b.dcam-a.dcam);
+  const ca=Math.cos(cam.ang), sa=Math.sin(cam.ang);
+  for(const {o,dcam} of visList){
+    const dx=o.x-cam.x, dy=o.y-cam.y;
+    const fwd=dx*ca+dy*sa;               // расстояние вперёд по взгляду
+    if(fwd<1) continue;                  // позади камеры — не рисуем
+    const rgt=-dx*sa+dy*ca;              // смещение вправо
+    const sx=V.w/2 + (rgt/fwd)*focal;    // экранная X
+    const gy=horizon + (focal*camH)/fwd;  // точка касания земли (Y)
+    const sdist=Math.max(fwd,3);
+    const scale=focal/sdist;             // пикселей на мировую единицу
+    const fogA=T.fog()? Math.max(0,1-dcam/(cam.maxDist*0.95)) : 1;
+    vctx.globalAlpha=fogA;
+    // динамический свет: тени рисуются в рантайме (дорого)
+    if(!T.bake() && o.t!=='grass' && o.t!=='mountain' && dcam<700){
+      vctx.fillStyle='rgba(0,0,0,0.22)';
+      const sw=(o.t==='tree'?22:16)*scale;
+      vctx.beginPath(); vctx.ellipse(sx,gy,Math.max(1,sw),Math.max(1,sw*0.22),0,0,7); vctx.fill();
+    }
+    if(o.t==='tree'){
+      const isBB = T.bb() && dcam>600;
+      if(isBB){
+        // биллборд — плоский спрайт вместо 3D-меша
+        const w=22*scale, h=60*scale;
+        vctx.fillStyle='#2e7d32';
+        vctx.beginPath(); vctx.moveTo(sx,gy-h); vctx.lineTo(sx-w,gy); vctx.lineTo(sx+w,gy); vctx.closePath(); vctx.fill();
+      } else {
+        const th=42*scale*(T.lod()&&dcam>500?0.6:1);
+        const tw=10*scale;
+        vctx.fillStyle='#5d4037'; vctx.fillRect(sx-tw*0.4,gy-th*0.25,tw*0.8,th*0.25);
+        vctx.fillStyle='#2e7d32'; vctx.fillRect(sx-tw,gy-th,tw*2,th*0.8);
+      }
+    } else if(o.t==='rock'){
+      const r=15*scale;
+      vctx.fillStyle='#777'; vctx.beginPath();
+      vctx.arc(sx,gy-r*0.5,r,Math.PI,0); vctx.fill();
+    } else if(o.t==='mountain'){
+      const hw=Math.min(o.r*scale, V.w*0.6);
+      const hh=Math.min(o.r*2.2*scale, V.h*1.2);
+      vctx.fillStyle='#d29922'; vctx.beginPath();
+      vctx.moveTo(sx-hw,gy); vctx.lineTo(sx,gy-hh); vctx.lineTo(sx+hw,gy); vctx.closePath(); vctx.fill();
+    } else if(o.t==='grass'){
+      const n = T.inst()? 42 : 10;
+      for(let i=0;i<n;i++){
+        const gx=sx+rng(-50,50)*scale;
+        const hgt=(10+rng(0,16))*scale;
+        const wind=Math.sin(t*2 + gx*0.05 + i)*3*scale;
+        const g2=110+rng(0,70);
+        vctx.fillStyle=`rgb(${40+rng(0,30)|0},${g2+40|0},${60+rng(0,30)|0})`;
+        vctx.beginPath();
+        vctx.moveTo(gx,gy);
+        vctx.lineTo(gx+wind,gy-hgt);
+        vctx.lineTo(gx+2*scale,gy);
+        vctx.closePath(); vctx.fill();
+      }
+    }
+    vctx.globalAlpha=1;
+  }
+
+  // статистика
+  document.getElementById('s_obj').textContent=tested;
+  document.getElementById('s_vis').textContent=visible;
+  document.getElementById('s_draw').textContent=drawCalls;
+  document.getElementById('s_tri').textContent=tris.toLocaleString();
+  document.getElementById('s_fps').textContent=Math.round(fps);
+  document.getElementById('s_mem').textContent=chunksLoaded;
+  document.getElementById('s_bb').textContent=bbCount;
+  document.getElementById('s_sh').textContent=shCount;
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>
