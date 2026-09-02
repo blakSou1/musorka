@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Добавить провал · Реестр геймдев</title>
+  <!-- Защита от ботов: Turnstile от Cloudflare (бесплатно, приватно) -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    :root { color-scheme: dark; --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+    header { border-bottom:1px solid var(--border); background:var(--panel); padding:1.2rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    header .brand { font-weight:700; }
+    .btn { display:inline-block; padding:.55em 1em; border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--text); background:#21262d; cursor:pointer; font-size:.9rem; transition:border-color .15s; }
+    .btn:hover { border-color:var(--accent); }
+    .btn.primary { background:var(--accent); border-color:var(--accent); color:#0d1117; font-weight:600; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    main { max-width:720px; margin:0 auto; padding:1.5rem; }
+    h1 { font-size:1.5rem; }
+    .desc { color:var(--muted); }
+    label { display:block; margin:1rem 0 .35rem; font-weight:600; font-size:.92rem; }
+    input, textarea, select { width:100%; background:#21262d; color:var(--text); border:1px solid var(--border); border-radius:8px; padding:.6em .8em; font-size:.95rem; font-family:inherit; }
+    textarea { min-height:90px; resize:vertical; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+    @media (max-width:560px){ .row,.row-3{grid-template-columns:1fr;} }
+    .hint { color:var(--muted); font-size:.8rem; margin-top:.25rem; font-weight:400; }
+    .error { color:#f85149; background:#2d1514; border:1px solid #f85149; border-radius:8px; padding:.6em .8em; margin-top:.8rem; display:none; }
+    .ok { color:#3fb950; background:#142e1b; border:1px solid #3fb950; border-radius:8px; padding:.8em; margin-top:.8rem; display:none; }
+    button[type=submit] { margin-top:1.4rem; width:100%; padding:.75em; font-size:1rem; }
+    .note { color:var(--muted); font-size:.85rem; border:1px dashed var(--border); border-radius:8px; padding:.8em; margin-top:1.2rem; }
+    footer { border-top:1px solid var(--border); margin-top:2.5rem; padding:1.2rem 1.5rem; color:var(--muted); font-size:.85rem; text-align:center; }
+    /* Скрытое honeypot-поле: невидимо для людей, боты его заполняют */
+    .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; }
+    /* Контейнер Turnstile */
+    .cf-turnstile { margin-top:1rem; }
+    .count { color:var(--muted); font-size:.85rem; margin-top:.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Реестр проваленных геймдев-проектов</div>
+    <nav><a class="btn" href="index.html">← к базе</a></nav>
+  </header>
+
+  <main>
+    <h1>Расскажите о провалившемся проекте</h1>
+    <p class="desc">Ваш опыт поможет другим не наступить на те же грабли. Записи проходят <strong>модерацию</strong> перед публикацией — это защита от спама и скама. Лимит: <strong>5 записей в день</strong>.</p>
+
+    <div class="ok" id="ok"></div>
+    <div class="error" id="err"></div>
+    <div class="count" id="count"></div>
+
+    <form id="form" novalidate>
+      <label>Название проекта <span class="hint">*</span></label>
+      <input id="name" required maxlength="80" autocomplete="off" placeholder="Например: «Космический ураган 3D»">
+
+      <div class="row">
+        <div>
+          <label>Жанр <span class="hint">*</span></label>
+          <select id="genre" required>
+            <option value="">Выберите жанр</option>
+            <option>Метроидвания</option>
+            <option>Платформер</option>
+            <option>Roguelike</option>
+            <option>Soulslike</option>
+            <option>Шутер</option>
+            <option>Хоррор</option>
+            <option>Стратегия</option>
+            <option>Симулятор</option>
+            <option>RPG</option>
+            <option>Гонки</option>
+            <option>Пазл</option>
+            <option>Карточная</option>
+            <option>Казуальная</option>
+            <option>Мобильная</option>
+            <option>Другое</option>
+          </select>
+        </div>
+        <div>
+          <label>Платформа <span class="hint">*</span></label>
+          <select id="platform" required>
+            <option value="">Выберите</option>
+            <option>ПК (Steam)</option>
+            <option>ПК (без Steam)</option>
+            <option>Мобильная (iOS)</option>
+            <option>Мобильная (Android)</option>
+            <option>Web / браузер</option>
+            <option>Консоль</option>
+            <option>VR</option>
+            <option>Другое</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div>
+          <label>Размер команды</label>
+          <input id="team" type="number" min="1" max="1000" placeholder="1">
+        </div>
+        <div>
+          <label>Длительность</label>
+          <input id="duration" maxlength="40" placeholder="Например: 2 года">
+        </div>
+        <div>
+          <label>Статус <span class="hint">*</span></label>
+          <select id="status">
+            <option>провал</option>
+            <option>недостаточно успешен</option>
+            <option>успех (для сравнения)</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Идея / концепция</label>
+      <textarea id="idea" maxlength="600" placeholder="В чём была суть проекта, что отличало его от других?"></textarea>
+
+      <label>Почему провалилось? <span class="hint">*</span></label>
+      <textarea id="reasons" required maxlength="1000" placeholder="Честно опишите причины: нет аудитории, монетизация, scope, конкуренция, команда... Всё анонимно."></textarea>
+
+      <label>Что вы вынесли / совет</label>
+      <textarea id="learned" maxlength="600" placeholder="Что бы сделали иначе?"></textarea>
+
+      <!-- Honeypot: боты заполняют скрытое поле, реальные люди — нет -->
+      <div class="hp" aria-hidden="true">
+        <label>Не заполняйте это поле</label>
+        <input id="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <!-- Turnstile widget: реальный токен подставляется на клиенте -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAEk71yBuDg5rkzzH" data-callback="onTurnstileSuccess"></div>
+
+      <button type="submit" class="btn primary" id="submitBtn" disabled>Отправить на модерацию</button>
+    </form>
+
+    <p class="note">Защита: <strong>Turnstile</strong> (антибот) · лимит <strong>5 записей/день</strong> · скрытое honeypot-поле · всё проходит модерацию перед публикацией. Ваша почта и данные не раскрываются.</p>
+  </main>
+
+  <footer>Реестр проваленных геймдев-проектов · защита от спама включена</footer>
+
+  <script>
+    // ==== НАСТРОЙКИ (заполните перед публикацией) ====
+    const FORM_ACTION = 'https://formspree.io/f/xzebgzeg'; // endpoint Formspree, ваш email при этом скрыт
+    const DAILY_LIMIT = 5; // лимит записей в день на одного пользователя
+    const KEY_DAILY = 'fg_subs_daily';      // ключ для localStorage
+    const KEY_DAILY_DATE = 'fg_subs_date';  // дата отсчёта лимита
+    const MAX_FIELD = { name: 80, duration: 40, idea: 600, reasons: 1000, learned: 600 };
+
+    // ==== ЭЛЕМЕНТЫ ====
+    const okEl = document.getElementById('ok');
+    const errEl = document.getElementById('err');
+    const countEl = document.getElementById('count');
+    const submitBtn = document.getElementById('submitBtn');
+    let turnstileOk = false;
+
+    function show(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+    function hide(el) { el.style.display = 'none'; }
+
+    // ==== ЛИМИТ ЗАПИСЕЙ В ДЕНЬ ====
+    function todayStr() { return new Date().toLocaleDateString('sv'); } // YYYY-MM-DD
+    function getUsedToday() {
+      const date = localStorage.getItem(KEY_DAILY_DATE);
+      if (date !== todayStr()) { localStorage.setItem(KEY_DAILY_DATE, todayStr()); localStorage.setItem(KEY_DAILY, '0'); return 0; }
+      return parseInt(localStorage.getItem(KEY_DAILY) || '0', 10);
+    }
+    function incrementUsed() {
+      const used = getUsedToday() + 1;
+      localStorage.setItem(KEY_DAILY, String(used));
+      updateCount();
+    }
+    function updateCount() {
+      const used = getUsedToday();
+      const left = Math.max(0, DAILY_LIMIT - used);
+      countEl.textContent = used >= DAILY_LIMIT
+        ? 'Достигнут дневной лимит (' + DAILY_LIMIT + '). Попробуйте завтра.'
+        : 'Осталось записей на сегодня: ' + left + ' из ' + DAILY_LIMIT;
+    }
+
+    // ==== САНИТИЗАЦИЯ / ЗАЩИТА ОТ XSS и СКАМ ====
+    function sanitize(str, max) {
+      let s = String(str).trim();
+      if (max) s = s.slice(0, max);
+      return s;
+    }
+    // Нейтрализует опасные символы и превращает URL в безопасную текстовую пометку,
+    // чтобы никто не вставил скрипт или скам-ссылку.
+    function neutralizeContent(str, max) {
+      let s = sanitize(str, max);
+      if (!s) return s;
+      // Убираем управляющие/невидимые символы
+      s = s.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '');
+      // Убиваем попытки внедрить HTML/скрипт
+      s = s.replace(/<[^>]*>/g, '');
+      // Превращаем ссылки в безопасную пометку, чтобы не было скам-кликов
+      s = s.replace(/https?:\/\/\S+/gi, '[ссылка удалена]');
+      s = s.replace(/www\.\S+/gi, '[ссылка удалена]');
+      return s;
+    }
+
+    // Проверка на спам-признаки (простая эвристика)
+    function isSpammy(text) {
+      const t = text.toLowerCase();
+      // Много ссылок / очень длинный / повторяющиеся символы / крик
+      const links = (t.match(/https?:\/\//g) || []).length;
+      const repeated = /(.)\1{20,}/.test(text);
+      const upperRatio = (text.match(/[A-ZА-ЯЁ]/g) || []).length / Math.max(1, text.length);
+      const banned = /(казино|заработай|крипто|инвест|быстрых денег|я разбогател|winners?|buy now|click here|заработок без вложений|номера карт|паспортные данные)/i.test(t);
+      return links >= 2 || repeated || upperRatio > 0.6 || banned;
+    }
+
+    // ==== TURNSTILE ====
+    window.onTurnstileSuccess = function (token) {
+      turnstileOk = true;
+      submitBtn.disabled = false;
+      hide(errEl);
+    };
+
+    // ==== ОТПРАВКА ====
+    document.getElementById('form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      hide(okEl); hide(errEl);
+
+      // Honeypot: если бот заполнил скрытое поле — молча игнорируем (не спаммим ответом)
+      if (document.getElementById('website').value.trim()) {
+        show(okEl, 'Спасибо! Ваша запись принята на рассмотрение.'); // фейковое подтверждение боту
+        this.reset(); updateCount();
+        return;
+      }
+      if (!turnstileOk) { show(errEl, 'Подтвердите, что вы не бот (галочка Turnstile).'); return; }
+      if (getUsedToday() >= DAILY_LIMIT) { show(errEl, 'Достигнут дневной лимит записей (' + DAILY_LIMIT + '). Попробуйте завтра.'); return; }
+
+      // Санитизация всех полей с учётом ограничения длины
+      const record = {
+        name: neutralizeContent(document.getElementById('name').value, MAX_FIELD.name),
+        genre: sanitize(document.getElementById('genre').value, 40),
+        platform: sanitize(document.getElementById('platform').value, 40),
+        teamSize: sanitize(document.getElementById('team').value, 10),
+        duration: neutralizeContent(document.getElementById('duration').value, MAX_FIELD.duration),
+        status: sanitize(document.getElementById('status').value, 40),
+        idea: neutralizeContent(document.getElementById('idea').value, MAX_FIELD.idea),
+        reasons: neutralizeContent(document.getElementById('reasons').value, MAX_FIELD.reasons),
+        whatLearned: neutralizeContent(document.getElementById('learned').value, MAX_FIELD.learned),
+        date: new Date().toISOString()
+      };
+
+      // Проверка спама в текстовых полях
+      const combo = record.idea + ' ' + record.reasons + ' ' + record.whatLearned + ' ' + record.name;
+      if (isSpammy(combo)) {
+        show(errEl, 'Запись содержит признаки спама или недопустимый контент. Ссылки и подозрительный текст блокируются.');
+        return;
+      }
+      if (!record.name || !record.genre || !record.platform || !record.reasons) {
+        show(errEl, 'Заполните обязательные поля.');
+        return;
+      }
+
+      // Блокируем кнопку во время отправки
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Отправка...';
+
+      const body =
+        'НОВАЯ ЗАЯВКА НА РЕЕСТР ПРОВАЛЕННЫХ ПРОЕКТОВ\n' +
+        '--------------------------------------------\n' +
+        'Название: ' + record.name + '\n' +
+        'Жанр: ' + record.genre + '\n' +
+        'Платформа: ' + record.platform + '\n' +
+        'Размер команды: ' + (record.teamSize || '—') + '\n' +
+        'Длительность: ' + (record.duration || '—') + '\n' +
+        'Статус: ' + record.status + '\n' +
+        'Дата подачи: ' + record.date + '\n\n' +
+        'Идея:\n' + record.idea + '\n\n' +
+        'Почему провалилось:\n' + record.reasons + '\n\n' +
+        'Что вынесли / совет:\n' + (record.whatLearned || '—') + '\n\n' +
+        '--- Проверьте и опубликуйте в data/failed-projects.json ---';
+
+      try {
+        const r = await fetch(FORM_ACTION, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            // ВНИМАНИЕ: Formspree по умолчанию ждёт email-поле для уведомления отправителя.
+            // Передаём нейтральный email, чтобы не раскрывать почту посетителя и не требовать её.
+            email: 'anon@example.com',
+            subject: 'Новая заявка: ' + record.name,
+            message: body
+          })
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        incrementUsed(); // учитываем только после успешной отправки
+        show(okEl, 'Спасибо! Запись отправлена на модерацию. После одобрения она появится в общей базе.');
+        this.reset();
+        turnstileOk = false;
+        submitBtn.disabled = true;
+        if (window.turnstile) turnstile.reset();
+      } catch (err) {
+        show(errEl, 'Не удалось отправить. Попробуйте ещё раз позже.');
+      } finally {
+        submitBtn.disabled = !turnstileOk;
+        submitBtn.textContent = 'Отправить на модерацию';
+      }
+    });
+
+    // ==== ИНИЦИАЛИЗАЦИЯ ====
+    updateCount();
+  </script>
+</body>
+</html>
