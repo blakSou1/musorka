@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Афросамурай (Afro Samurai) — полный разбор сюжета, персонажей и медиа</title>
+<style>
+  :root{
+    --bg:#120f14; --panel:#1d1824; --panel2:#241d30; --line:#3a3048; --line2:#4a3e5c;
+    --accent:#ff2e4d; --accent2:#ff9b3d; --gold:#ffcf56; --txt:#ece6f0; --muted:#a49ab0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden;
+  }
+  header{
+    padding:56px 20px 44px;text-align:center;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#1b0e0e 0%,#2a1020 40%,#10182b 100%);
+    border-bottom:1px solid var(--line2);
+  }
+  header::before{
+    content:"";position:absolute;inset:0;opacity:.5;
+    background:
+      radial-gradient(circle at 22% 30%,rgba(255,46,77,.22),transparent 42%),
+      radial-gradient(circle at 82% 70%,rgba(255,207,86,.14),transparent 40%);
+  }
+  header .wrap{position:relative;max-width:880px;margin:0 auto}
+  .kicker{color:var(--gold);letter-spacing:4px;font-size:13px;text-transform:uppercase;font-weight:700}
+  header h1{font-size:clamp(28px,5vw,52px);font-weight:900;margin:12px 0 8px;letter-spacing:1px;
+    text-shadow:0 0 30px rgba(255,46,77,.35)}
+  header .sub{color:var(--muted);font-size:15px;max-width:680px;margin:0 auto}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .badge{background:rgba(255,46,77,.12);border:1px solid var(--line2);color:var(--txt);
+    padding:5px 14px;border-radius:20px;font-size:12.5px;font-weight:600}
+
+  main{max-width:960px;margin:0 auto;padding:30px 18px 44px}
+
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:30px}
+  .toc h2{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  .toc ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 20px;counter-reset:t}
+  .toc a{color:var(--muted);text-decoration:none;font-size:14px;display:flex;gap:8px;padding:5px 8px;border-radius:8px;transition:.15s}
+  .toc a::before{content:counter(t);counter-increment:t;color:var(--accent);font-weight:800}
+  .toc a:hover{background:var(--panel2);color:var(--txt)}
+
+  section{margin:52px 0}
+  h2.sec{font-size:26px;font-weight:800;margin-bottom:6px;padding-left:16px;border-left:4px solid var(--accent)}
+  h2.sec .num{color:var(--gold);margin-right:8px}
+  .secsub{color:var(--muted);font-size:14px;margin:4px 0 16px;padding-left:16px}
+  h3{font-size:19px;margin:22px 0 8px}
+  h4{font-size:15.5px;margin:16px 0 6px;color:var(--gold)}
+  p{margin:10px 0;color:#cfc7d8}
+  strong{color:var(--txt)}
+  em{color:var(--gold);font-style:normal;font-weight:600}
+  ul,ol{ margin:10px 0;padding-left:26px;color:#cfc7d8}
+  li{margin:6px 0}
+
+  .statband{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat b{display:block;font-size:23px;color:var(--gold)}
+  .stat span{color:var(--muted);font-size:12px;line-height:1.35;display:block;margin-top:4px}
+
+  .table-wrap{overflow-x:auto;margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:#cfc7d8}
+  th{background:var(--panel2);color:var(--gold);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  td b{color:var(--txt)}
+
+  .timeline{position:relative;margin:20px 0;padding-left:28px}
+  .timeline::before{content:"";position:absolute;left:8px;top:4px;bottom:4px;width:2px;
+    background:linear-gradient(180deg,var(--accent),var(--accent2),var(--gold))}
+  .tl-item{position:relative;margin:0 0 18px}
+  .tl-item::before{content:"";position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;
+    background:var(--bg);border:3px solid var(--accent)}
+  .tl-item .when{display:inline-block;font-weight:800;color:var(--accent);font-size:12.5px;letter-spacing:1px;
+    text-transform:uppercase;background:rgba(255,46,77,.12);border:1px solid var(--line2);padding:2px 10px;border-radius:14px}
+  .tl-item h4{margin:8px 0 2px;color:var(--txt)}
+  .tl-item p{font-size:14px;color:var(--muted);margin:0}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+  .card.kata{background:linear-gradient(135deg,#1d1018,#24102a);border-color:var(--line2)}
+  .card.gold{background:linear-gradient(135deg,#241d0e,#241010);border-color:#5a4a2a}
+
+  .quote{border-left:4px solid var(--accent2);background:var(--panel);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin:14px 0;color:var(--muted);font-size:14.5px;font-style:italic}
+  .quote b{color:var(--gold);font-style:normal;display:block;margin-top:6px}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .mini{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .mini h4{color:var(--gold);font-size:15px;margin-bottom:6px}
+  .mini p{color:var(--muted);font-size:13.5px;margin:4px 0}
+
+  .srcnote{color:var(--muted);font-size:12.5px;margin-top:12px}
+
+  .sources h2.sec{border-color:var(--gold)}
+  .sources ol{list-style:none;padding-left:0;counter-reset:s;display:flex;flex-direction:column;gap:8px}
+  .sources li{counter-increment:s;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px 11px 54px;position:relative;font-size:14px;color:var(--muted)}
+  .sources li::before{content:counter(s);position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+  .sources a{color:var(--accent2);word-break:break-all;text-decoration:none}
+  .sources a:hover{color:var(--gold)}
+  .sources .t{display:block;color:var(--txt);font-weight:700;margin-bottom:2px}
+
+  footer{text-align:center;color:var(--muted);padding:30px 16px;font-size:12.5px;border-top:1px solid var(--line)}
+  footer a{color:var(--accent2);text-decoration:none}
+
+  @media (max-width:640px){
+    header{padding:40px 16px 32px}
+    h2.sec{font-size:21px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">ΛFΓO SΛMUΓΛI · аниме-гид</div>
+    <h1>Афросамурай</h1>
+    <p class="sub">Полный разбор: сюжет и хронология, события по сериям, фильм-сиквел «Resurrection», персонажи, озвучка, медиа и темы — всё в таблицах и таймлайнах.</p>
+    <div class="badges">
+      <span class="badge">Манга 1998</span>
+      <span class="badge">Аниме 2007 · 5 серий</span>
+      <span class="badge">Фильм 2009</span>
+      <span class="badge">Samuel L. Jackson</span>
+      <span class="badge">Саундтрек RZA</span>
+      <span class="badge">Эмми</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <nav class="toc">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#s1">Что это и из чего сделано</a></li>
+      <li><a href="#s2">Правила мира: легенда о повязках</a></li>
+      <li><a href="#s3">Хронология событий</a></li>
+      <li><a href="#s4">Сюжет аниме по сериям</a></li>
+      <li><a href="#s5">Полный сюжет: шаг за шагом</a></li>
+      <li><a href="#s6">Фильм «Afro Samurai: Resurrection»</a></li>
+      <li><a href="#s7">Персонажи</a></li>
+      <li><a href="#s8">Голоса и команда</a></li>
+      <li><a href="#s9">Манга</a></li>
+      <li><a href="#s10">Игры, саундтреки, медиа</a></li>
+      <li><a href="#s11">Темы, философия, эстетика, вайбы</a></li>
+      <li><a href="#s12">Приём, награды, запреты</a></li>
+      <li><a href="#s13">Интересные факты</a></li>
+      <li><a href="#sources">Источники</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="s1">
+    <h2 class="sec"><span class="num">01</span> Что это и из чего сделано</h2>
+    <p class="secsub">Японская сэйнэн-додзинси-манга Такаси Окадзаки → аниме-минисериал студии Gonzo → телефильм → видеоигры.</p>
+    <p><strong>«Афросамурай»</strong> (アフロサムライ, Afuro Samurai, стилизованно ΛFΓO SΛMUΓΛI) — японская сэйнэн-манга-додзинси Такаси Окадзаки, навеянная любовью автора к хип-хопу и соул-музыке. Впервые публиковалась в авангардном додзинси-журнале <em>Nou Nou Hau</em> с ноября 1998 по сентябрь 2002 года. В 2007 году студия <strong>Gonzo</strong> адаптировала её в аниме-минисериал из 5 серий, в 2009-м — в телефильм-сиквел <strong>«Afro Samurai: Resurrection»</strong>; обе работы озвучены Самюэлем Л. Джексоном, а музыку написал RZA из Wu-Tang Clan.</p>
+    <div class="statband">
+      <div class="stat"><b>5 серий</b><span>минисериал, январь 2007</span></div>
+      <div class="stat"><b>$1 млн</b><span>стоимость одной серии</span></div>
+      <div class="stat"><b>100 мин</b><span>полнометражный сиквел 2009</span></div>
+      <div class="stat"><b>2007/09</b><span>выход аниме и фильма</span></div>
+      <div class="stat"><b>2 Эмми</b><span>номинации и победа сериала</span></div>
+    </div>
+    <h3>Медиа-франшиза одной таблицей</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Формат</th><th>Название</th><th>Дата</th><th>Ключевые фигуры</th></tr></thead>
+        <tbody>
+          <tr><td>Манга (додзинси)</td><td><b>Afro Samurai!</b></td><td>1996–2002 (Nou Nou Hau)</td><td>Такаси Окадзаки (автор и художник)</td></tr>
+          <tr><td>Манга-ремейк</td><td><b>Afro Samurai</b> (2 тома)</td><td>том 1 — сентябрь 2008, том 2 — февраль 2009</td><td>Seven Seas Enterts. / Tor Books в США; Titan Manga — director's cut 2022</td></tr>
+          <tr><td>Аниме-сериал</td><td><b>Afro Samurai</b> (5 серий)</td><td>4 января – 1 февраля 2007</td><td>Gonzo, реж. Фуминори Кизаки, Williams S.L. Jackson, музыка RZA</td></tr>
+          <tr><td>Аниме-фильм</td><td><b>Afro Samurai: The Movie</b> (компиляция)</td><td>2007</td><td>Gonzo</td></tr>
+          <tr><td>Телефильм-сиквел</td><td><b>Afro Samurai: Resurrection</b></td><td>25 января 2009 (Spike TV)</td><td>Gonzo; Lucy Liu, Mark Hamill; бюджет $5 млн</td></tr>
+          <tr><td>Видеоигры</td><td><b>Afro Samurai</b>; <b>Afro Samurai 2: Revenge of Kuma</b></td><td>27.01.2009; 22.09.2015</td><td>Namco Bandai; Redacted Studios / Versus Evil</td></tr>
+          <tr><td>Саундтреки</td><td><b>Afro Samurai OST</b>; <b>Resurrection OST</b></td><td>30.01.2007; 27.01.2009</td><td>RZA, Koch Records</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <h2 class="sec"><span class="num">02</span> Правила мира: легенда о повязках</h2>
+    <p class="secsub">Весь сюжет — следствие одной мифологической системы.</p>
+    <p>Действие происходит в феодальной, но футуристичной Японии. Согласно легенде, владелец <strong>повязки под номером 1</strong> — величайший воин мира и обладает силой богов; кто-то верит, что она дарует бессмертие, кто-то — что сами боги выдали повязки людям.</p>
+    <ul>
+      <li><strong>№1</strong> — титул сильнейшего. Забрать её можно, только победив текущего владельца в бою.</li>
+      <li><strong>№2</strong> — единственная, владелец которой <em>имеет право бросить вызов №1</em>.</li>
+      <li>При этом <strong>вызвать №2 может любой</strong> — она постоянная мишень для всех охотников за головами.</li>
+      <li>Существуют и другие повязки — вплоть до неопределённо высоких номеров (об этом зритель узнаёт от Джастиса).</li>
+    </ul>
+    <div class="quote">«Человек с повязкой №1 — величайший воин в мире. Скажи, малыш, ты готов драться с богом?»<b>— Джастис, после смерти отца Афро</b></div>
+    <p>Именно это правило превращает сюжет в «турнирную лестницу»: Афро носит №2 и должен пробиться сквозь всех, кто хочет её отнять, чтобы дойти до №1 — Джастиса.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <h2 class="sec"><span class="num">03</span> Хронология событий</h2>
+    <p class="secsub">Ключевые вехи истории в порядке возраста.</p>
+    <div class="timeline">
+      <div class="tl-item">
+        <span class="when">Детство</span>
+        <h4>Убийство отца</h4>
+        <p>Джастис обезглавливает Рокутаро, владельца повязки №1, на глазах у маленького сына. Афро даёт клятву отомстить. Джастис надевает №1 и уходит, бросив: «приходи, когда будешь готов драться с богом».</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Детство</span>
+        <h4>Начало пути: храм и школа меча</h4>
+        <p>Оцуру находит Афро у храма и приводит к Мастеру меча, который воспитывает и тренирует сирот: Афро, Джинноске (Кума), Оцуру, Сасукэ. Мастер носит №2 и скрывает её.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Юность</span>
+        <h4>Midnight Battle Under the Bodhi Tree</h4>
+        <p>Ученики и наставник попадают в резню: убийцы, клан Empty Seven и поток наёмников атакуют у Бодхи-дерева. Афро убивает Мастера меча (тот сам просит об этом как владелец №2) и забирает повязку №2. Оцуру выживает и вступает в Empty Seven. Джинно выживает, но винит Афро в смерти мастера.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Взрослый период</span>
+        <h4>Охота за №2</h4>
+        <p>Афро с повязкой №2 убивает армии охотников, наёмников и убийц, которых отправляет клан Empty Seven (включая стрелка Сосуна и волну убийц Дроида). Внутренний голос Афро — плёлкий компаньон Ниндзя Ниндзя.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Взрослый период</span>
+        <h4>Встреча с Окику (Оцуру)</h4>
+        <p>На берегу реки старую подругу находит Афро раненым. Она создала Афро-Дроида из данных его боя. После его гибели Оцуру предаёт клан ради Афро и погибает от рук Братца №2.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Взрослый период</span>
+        <h4>Уничтожение Empty Seven</h4>
+        <p>Афро убивает Братцев 6, 4, 5, 2 и калечит Братца 1. Братец 3, единственный, кто просил повязку словами, а не клинком, остаётся жив.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Взрослый период</span>
+        <h4>Дуэль с Кумой</h4>
+        <p>На горе Афро сталкивается с Джинноске — старым другом, которого Дхарман превратил в киборга с плюшевым медвежьим шлемом. Кума обвиняет Афро в выборе мести вместо семьи.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Финал сериала</span>
+        <h4>Дуэль с Джастисом и №1</h4>
+        <p>Афро добирается до логова Джастиса в горах. Джастис раскрывает план «мира через силу №1» и существование других повязок. Афро разрубает его на куски, забирает №1 и становится новым №1. Джинно, забравший все повязки, возвращается за местью.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Фильм (2009)</span>
+        <h4>«Resurrection»</h4>
+        <p>Джинно и его сестра Сио крадут останки отца Афро и повязку №1, чтобы воскресить Рокутаро. Афро возвращает №2, убивает воскрешённого «отца» и передаёт №2 сыну ронина Котаро. Цикл мести продолжается.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <h2 class="sec"><span class="num">04</span> Сюжет аниме по сериям</h2>
+    <p class="secsub">Официальные названия серий (EN / JA) и даты премьеры на Fuji TV.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Название (EN)</th><th>Название (JA)</th><th>Дата</th><th>События</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>1</b></td><td>Revenge</td><td>Number Two</td><td>04.01.2007</td>
+            <td>Мальчиком Афро видит, как Джастис обезглавливает его отца и забирает №1. Взрослый Афро носит №2 и отправляется в путь мести.</td>
+          </tr>
+          <tr>
+            <td><b>2</b></td><td>The Dream Reader</td><td>OKIKU</td><td>11.01.2007</td>
+            <td>Афро во сне переживает тяжёлое прошлое. На берегу реки его находит старая подруга Оцуру (теперь «Окику») и перевязывает раны. В настоящем она пытается убить Афро, но делит с ним ночь и предаёт клан. Убийцы Empty Seven убивают Окику.</td>
+          </tr>
+          <tr>
+            <td><b>3</b></td><td>The Empty Seven Clan</td><td>THE EMPTY SEVEN CLAN</td><td>18.01.2007</td>
+            <td>Клан Empty Seven давит на Афро с земли и воздуха: армии, Афро-Дроид, Братцы. Афро уничтожает Дроида и пробивается к горе.</td>
+          </tr>
+          <tr>
+            <td><b>4</b></td><td>Duel</td><td>KUMA</td><td>25.01.2007</td>
+            <td>Джинноске («Кума») сражается с Афро: урок о цене мести вместо семьи и о том, почему Афро носит №2. Дуэль на горе Сиюми.</td>
+          </tr>
+          <tr>
+            <td><b>5</b></td><td>Justice</td><td>JUSTICE</td><td>01.02.2007</td>
+            <td>Афро приходит в логово Джастиса и дерётся с ним. Убив Джастиса и забрав №1, примиряется и снова сходится в бою с Джинно.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card kata">
+      <h3>На что обратить внимание в сериале</h3>
+      <ul>
+        <li><strong>Ниндзя Ниндзя</strong> — «воображаемый друг» Афро, голос которого тоже играет Джексон. Он комментирует всё происходящее, раздражает и, как выясняется, в какой-то мере реален.</li>
+        <li><strong>Смена озвучек:</strong> юного Афро озвучивает Crystal Scales, подростка — Phil LaMarr, взрослого — Samuel L. Jackson.</li>
+        <li><strong>Роль Джастиса</strong> исполняет Ron Perlman; важно слушать, как герой «впервые говорит нормально», когда Афро до него доходит.</li>
+        <li>В 5-й серии раскрывается, что Кума «убил» Ниндзя Ниндзя, прикрыв Афро, — и что Джастис видел, как Афро «лишился своего воображаемого друга».</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <h2 class="sec"><span class="num">05</span> Полный сюжет: шаг за шагом</h2>
+    <p class="secsub">Сквозная линия сериала как единая история.</p>
+    <ol>
+      <li>В феодально-футуристической Японии владелец повязки №1 — величайший воин и почти бог. Владелец №2 имеет право его вызвать; его самого может вызвать кто угодно.</li>
+      <li>Вне закона стрелок <strong>Джастис</strong> приходит к Рокутаро, владельцу №1, и убивает его на глазах сына <strong>Афро</strong>. Забрав №1, Джастис приказывает мальчику искать его, когда тот будет готов «драться с богом».</li>
+      <li>Афро подбирает/наследует повязку №2 и годами кипит в ненависти. Воспитанник Мастера меча, он растёт в додзё рядом с Джинноске, Оцуру и Сасукэ.</li>
+      <li>Ночью у Бодхи-дерева война «повязочных» убийств добирается до додзё: гибнут все ученики и наставники. Афро убивает Мастера меча, владевшего №2, и делает повязку своей. Джинно винит его, Оцуру уходит в клан Empty Seven.</li>
+      <li>Клан Empty Seven (шесть монахов) верит, что две повязки дают бессмертие и божественность, и шлёт на Афро волны наёмников: русского Иванова, китайца Фу, стрелка Сосуна и другие наступают на неё волнами у Афро-Дроида.</li>
+      <li>На берегу реки Афро в бреду находит Оцуру («Окику»). Она добыла его боевые данные и собрала андроида-двойника <strong>Афро-Дроида</strong>. После его уничтожения Окику пытается убить Афро, но беседует с ним, проводит ночь и отказывается от мести. Братц №2 убивает её как предательницу.</li>
+      <li>Афро мстит клану: убивает Братцев 6, 5, 4 и 2, калечит Братца 1. Братец 3 выживает — он просил повязку «по-человечески», предложив чай с рисовыми крекерами.</li>
+      <li>Нa горе Афро ждёт <strong>Кума</strong> — Джинноске, чьё тело безумный учёный Дхарман превратил в робота с плюшевым шлемом-мишкой. Дуэль детства против мести: Афро «убивает» друга, тот срывается с обрыва.</li>
+      <li>Афро доходит до тронного зала Джастиса. Джастис признаёт: он перебил всех носителей повязок и украсил логово трупами, чтобы заставить мир жить мирно силой №1. Афро в ответ разрезает его пополам и снова на части; забирает №1.</li>
+      <li>Повязка №1 на голове Афро. Джинно, выживший благодаря Дхарману и заклеенный всеми повязками-«бинтами», снова встаёт напротив бывшего брата. Сериал оставляет их противостояние открытым — продолжение в фильме «Resurrection».</li>
+    </ol>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <h2 class="sec"><span class="num">06</span> Фильм «Afro Samurai: Resurrection»</h2>
+    <p class="secsub">Телефильм 2009 года, 100 минут, режиссёр Фуминори Кизаки, сценарий Yasuyuki Mutō / Josh Fialkov / Eric Calderon.</p>
+    <div class="statband">
+      <div class="stat"><b>$5 млн</b><span>бюджет фильма</span></div>
+      <div class="stat"><b>Lucy Liu</b><span>Леди Сио</span></div>
+      <div class="stat"><b>Mark Hamill</b><span>Бин</span></div>
+      <div class="stat"><b>2009</b><span>эфир 25 января на Spike TV</span></div>
+    </div>
+    <h3>Сюжет</h3>
+    <p>Прошли годы. Утратив цель после мести, <strong>Афро</strong> больше не сражается: он точит деревянные скульптуры исторических личностей, тихие годы без дуэлей. Его находят <strong>Джинно</strong> (приёмный брат, теперь бесчувственный киборг) и его сестра <strong>Леди Сио</strong>: они жестоко избивают Афро, забирают повязку №1 и челюстную кость его покойного отца <strong>Рокутаро</strong>. Сио объявляет: они воскресят отца, чтобы использовать её в мести, — и советует прийти за повязкой №2, если есть воля бороться.</p>
+    <p>Афро перековывает меч и приходит в игорный дом, где выживший <strong>Братец 3</strong> играет с ним в кости за право знать владельца №2. Уличён в жульничестве (пульт подкручивает цифры), Братец 3 раскрывает: №2 у ронина <strong>Сичигоро</strong>. Афро случайно спасает его приёмного сына <strong>Котаро</strong>, затем убивает Сичигоро, забирает №2 — а Котаро клянётся отомстить.</p>
+    <p>Дальше Афро уничтожает трёх киборгов, которые оказываются приёмными братьями и сестрой Сио — <strong>Бин</strong> (бывший шут с маской хётокко), <strong>Майкл</strong> (экс-артист в драконьем костюме) и <strong>Томоэ</strong> (певица с сямисэном). Тем временем Сио с помощью безумного учёного <strong>Дхармана</strong> создаёт бессмертного клона-воина Рокутаро и убивает самого учёного.</p>
+    <div class="quote">«Он шёл за повязкой. А получил отца. И должен сам решить, кто он теперь»<b>— ключевая тема третьего акта фильма</b></div>
+    <p>Ослабленный Афро выходит против Рокутаро и едва не умирает: «отец» душит его до потери сознания. Увидев гибель Афро, <strong>Джинно вспоминает родство братьев</strong> и набрасывается на клона; Рокутаро калечит Джинно и пронзает его тело вместе с Сио. Электричество киборга Джинно проходит через кровь Сио и оживляет Афро. Тот принимает: воскрешённый Рокутаро не его отец — и убивает его.</p>
+    <p>Афро забирает повязку №1 и отдаёт <strong>№2 Котаро</strong>, наказав прийти за ним, когда тот решится мстить за Сичигоро. Сам он уходит на гору Сиюми ждать следующего вызова. Возвращается <strong>Ниндзя Ниндзя</strong> — оказывается, он рождён из повязки №2 и разума владельца — и рассуждает о бесконечном цикле крови и мести.</p>
+    <h3>Различия версий фильма</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Версия</th><th>Концовка</th></tr></thead>
+        <tbody>
+          <tr><td><b>ТВ-премьера</b></td><td>Афро возвращает повязку №1, встречает загадочного человека в маске: на секунду появляется образ Джастиса.</td></tr>
+          <tr><td><b>Director's Cut (DVD)</b></td><td>Афро возвращает №1; после титров Джастис вновь появляется живым.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="srcnote">Загадочный человек в маске — <strong>Такимото</strong> (озвучивает Kevin Michael Richardson): в манге он охраняет «№1» и порядок мира, в аниме лишь зрительски приветствует возрождённого Джастиса в финале — возможный задел на третий фильм.</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="s7">
+    <h2 class="sec"><span class="num">07</span> Персонажи</h2>
+    <p class="secsub">Главные герои, союзники и антагонисты с голосами (EN и JP-версии отсутствуют — в Японии аниме шло только с английской дорожкой).</p>
+
+    <h3>Главные герои</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Персонаж</th><th>Голос</th><th>Роль / суть</th></tr></thead>
+        <tbody>
+          <tr><td><b>Афросамурай</b></td><td>Crystal Scales (ребёнок), Phil LaMarr (подросток), Samuel L. Jackson (взрослый)</td><td>Главный герой. Носит №2, чтобы убить Джастиса и вернуть №1. Тихий, курит самокрутки, пьёт лимонад, почти не разговаривает — говорит его меч.</td></tr>
+          <tr><td><b>Ниндзя Ниндзя</b></td><td>Samuel L. Jackson</td><td>Партнёр и «воображаемый друг» Афро. Беловолосый ниндзя-комментатор, живёт «внутри разума повязки №2». Реален настолько, что взаимодействует с предметами и его видят другие.</td></tr>
+          <tr><td><b>Джинноске / «Кума»</b></td><td>Yuri Lowenthal</td><td>Приёмный брат и друг детства Афро. Винит его в смерти мастера и ревнует к повязке №2. Тело — киборг с плюшевым медвежьим шлемом. Сражается двумя катанами и ходит на метальных гэта.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Поддерживающие персонажи</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Персонаж</th><th>Голос</th><th>Роль / суть</th></tr></thead>
+        <tbody>
+          <tr><td><b>Рокутаро</b></td><td>Greg Eagles</td><td>Отец Афро, прошлый владелец №1. Обезглавлен Джастисом. В «Resurrection» его воскрешают клоном.</td></tr>
+          <tr><td><b>Мастер меча</b></td><td>Terrence C. Carson</td><td>Одноглазый наставник, тренировал сирот. Владел №2 и сам попросил Афро убить его у Бодхи-дерева. Был другом Рокутаро.</td></tr>
+          <tr><td><b>Сичигоро</b></td><td>Liam O'Brien</td><td>Ронин, владелец №2 в «Resurrection», приёмный отец Котаро. Скрывал повязку, но Афро убивает его на празднике парада.</td></tr>
+          <tr><td><b>Котаро</b></td><td>Zachary Gordon</td><td>Приёмный сын Сичигоро. Клянётся отомстить; в финале фильма получает №2.</td></tr>
+          <tr><td><b>Такимото</b></td><td>Kevin Michael Richardson</td><td>Таинственный страж порядка в маске; ждёт возрождённого Джастиса в финале «Resurrection».</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Антагонисты</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Группа / имя</th><th>Члены</th><th>Суть</th></tr></thead>
+        <tbody>
+          <tr><td><b>Джастис</b></td><td>озв. Ron Perlman</td><td>Главный злодей, стрелок, убийца отца Афро. Забрал №1 и «мир через силу». Прячется за маской в тронном зале. Добит Афро в финале 5-й серии.</td></tr>
+          <tr><td><b>Empty Seven (Клан Пустых)</b></td><td>Братец 1–6</td><td>Шесть монахов, верящих в бессмертие через обе повязки. Шлют убийц и роботов. Братец 3 — единственный выживший и «мирный»; Братец 6 — огромный и жестокий, среди них есть женщина-воин по игре.</td></tr>
+          <tr><td><b>Оцуру / «Окику»</b></td><td>Kelly Hu (Окику), Tara Strong (Оцуру)</td><td>Бывшая подруга детства, агент Empty Seven, создательница Афро-Дроида. Предаёт клан ради Афро и погибает.</td></tr>
+          <tr><td><b>Дхарман</b></td><td>Phil LaMarr / S. Scott Bullock</td><td>Безумный учёный-киборг, «оживил» Джинно и киборгов, воскрешал Рокутаро. Хотя Братец 1 зовёт его «братом», официально он не Братец №7.</td></tr>
+          <tr><td><b>Афро-Дроид</b></td><td>—</td><td>Полусвтый андроид-двойник Афро с оружием и лазерами, созданный из данных боя. Уничтожен в 3-й серии.</td></tr>
+          <tr><td><b>Леди Сио</b></td><td>Lucy Liu (взрослая), Ariel Winter (ребёнок)</td><td>Сестра Джинно из «Resurrection», планирует воскресить отца Афро для мести. Погибает от клинка клона.</td></tr>
+          <tr><td><b>Приёмная семья Сио</b></td><td>Бин (Mark Hamill), Майкл (немой), Томоэ (Grey DeLisle)</td><td>Три киборга-убийцы: экс-шут, экс-артист драконьего танца и певица с сямисэном. Обвиняют Афро в «потере человечности».</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Гостевые и второстепенные персонажи</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Имя</th><th>Голос</th><th>Сведения</th></tr></thead>
+        <tbody>
+          <tr><td>Сасукэ</td><td>Jason Marsden</td><td>Ученик Мастера, друг Афро и Джинно, в очках. Погиб в резне у Бодхи-дерева.</td></tr>
+          <tr><td>Дзиро / Матасабуро / Дзюдзо</td><td>Tara Strong / Dave Wittenberg / Fred Tatasciore</td><td>Ученики, погибшие в Midnight Battle.</td></tr>
+          <tr><td>Сосун</td><td>John Kassir</td><td>Стрелок с арбалетом-гранатомётом с «Запада мастеров оружия». Отравленная стрела ранит Афро.</td></tr>
+          <tr><td>Хатиро и Ясичи</td><td>Jeff Bennett / James Arnold Taylor</td><td>Братья, напавшие на юного Афро; Афро допрашивает Ясичи о №2 и убивает его.</td></tr>
+          <tr><td>Иванов, Фу</td><td>John DiMaggio / Jeff Bennett</td><td>Наёмники: русский и китаец, «первый среди людей и машин»; погибают на волне у Дроида (в Director's Cut).</td></tr>
+          <tr><td>DJ</td><td>RZA</td><td>Рэпер-диджей на празднике; случайно убит Сичигоро во время дуэли.</td></tr>
+          <tr><td>Хозяин лавки одэн</td><td>Mark Hamill</td><td>Старый друг Сичигоро и опекун Котаро.</td></tr>
+          <tr><td>О-Сати, Дайго, Горокубэ, Кадзума</td><td>—</td><td>Персонажи только манги: девушка общины, ученик-повар, военачальник с РПГ, болтливый ученик.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="s8">
+    <h2 class="sec"><span class="num">08</span> Голоса и команда</h2>
+    <p class="secsub">Озвучка и ключевые участники проекта.</p>
+    <div class="grid2">
+      <div class="mini"><h4>Производство аниме</h4>
+        <p>Студия Gonzo · режиссёр Фуминори Кизаки · продюсеры Кодзи Кадзита и Тайто Окиура · сценарий Дерека Дрейпера и Криса Йо · история Ясуюки Муто и Томохиро Ямаситы.</p></div>
+      <div class="mini"><h4>Звёздная озвучка</h4>
+        <p>Samuel L. Jackson (Афро + Ниндзя Ниндзя) · Ron Perlman (Джастис) · Lucy Liu (Сио) · Mark Hamill (Бин, Хозяин одэн) · Kelly Hu · Phil LaMarr · Yuri Lowenthal · Grey DeLisle · Greg Eagles · Tara Strong · John DiMaggio.</p></div>
+      <div class="mini"><h4>Музыка</h4>
+        <p>RZA (Wu-Tang Clan) написал саундтреки и сериала, и фильма. Оба релиза — на Koch Records (E1 Music).</p></div>
+      <div class="mini"><h4>Фильм</h4>
+        <p>Режиссёр Фуминори Кизаки · история Окадзаки и Кизаки · сценарий Муто, Джоша Фиалкова, Эрика Кальдерона · исполнительные продюсеры: С.Л. Джексон, Шиничиро Исикава, Лео Чу и др. · арт-директор Сигэми Икэда (эмми-лауреат).</p></div>
+    </div>
+    <p>Особенность сериала: в Японии премьера 3 мая 2007 года прошла <strong>в английской озвучке с японскими субтитрами, без японского дубляжа</strong>. Кастинг и режиссуру голоса вёл Джами Симоне. Сэмюэл Л. Джексон был и исполнительным продюсером.</p>
+  </section>
+
+  <!-- 9 -->
+  <section id="s9">
+    <h2 class="sec"><span class="num">09</span> Манга</h2>
+    <p class="secsub">Додзинси 1998 года и ремейк в двух томах.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Том</th><th>Название</th><th>Дата выхода</th><th>Содержание</th></tr></thead>
+        <tbody>
+          <tr><td><b>1</b></td><td><b>"Nothing personal, kid."</b></td><td>сентябрь 2008 · ISBN 978-0-7653-2123-7</td><td>После убийства отца Джастисом Афро надевает №2 и планирует отомстить. Главы 1–5, примечания переводчика, доп. материалы.</td></tr>
+          <tr><td><b>2</b></td><td><b>"Death isn't the end... it's only the beginning."</b></td><td>февраль 2009 · ISBN 978-0-7653-2239-5</td><td>Убив Джастиса, Афро берёт №1 и бросает вызов Джинно. Главы 6–10, гайд по обращениям, интервью с автором.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>Ремейк сначала вышел в США (Seven Seas Entertainment + Tor Books) и лишь затем — в Японии (один том, декабрь 2009; лимитированное издание включало все выпуски оригинального додзинси).</li>
+      <li>Director's Cut манги издал Titan Manga (Titan Comics): анонсирован на 26 июля 2022, вышел 13 декабря 2022.</li>
+      <li>Первая страница истории Афро появилась уже в «нулевом» выпуске Nou Nou Hau (ноябрь 1998), а сама манга публиковалась с 1999 по 2000 год.</li>
+      <li>В Японии сюжет манги и аниме различается: эксклюзивные персонажи (Daigo "Big Boy", Gorokube, O-Sachi, Kazuma), а также иная роль Такимото — стража «№1», готового устранить очередного «№2».</li>
+      <li>фишка: в конце тома у Окадзаки был рекламный разворот — кошачий корм через Афросамурая.</li>
+    </ul>
+  </section>
+
+  <!-- 10 -->
+  <section id="s10">
+    <h2 class="sec"><span class="num">10</span> Игры, саундтреки, медиа</h2>
+    <p class="secsub">Вся экосистема вокруг франшизы.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Медиа</th><th>Детали</th></tr></thead>
+        <tbody>
+          <tr><td><b>Игра «Afro Samurai»</b></td><td>Xbox 360 / PS3, 27 января 2009, издатель Namco Bandai Games. Озвучка Афро — С.Л. Джексон; сюжет повторяет и расширяет сериал (даймё, братья Ашура, школа Мастера).</td></tr>
+          <tr><td><b>Игра «Afro Samurai 2: Revenge of Kuma»</b></td><td>PC / PS4, 22 сентября 2015, Versus Evil / Redacted Studios. Провальный приём; Xbox One-версия отменена, игра снята с продаж в ноябре 2015 с возвратом средств.</td></tr>
+          <tr><td><b>Саундтрек сериала</b></td><td>«The RZA Presents: Afro Samurai: The Soundtrack» (30 января 2007, Koch Records) — хип-хоп/душевный язык мира.</td></tr>
+          <tr><td><b>Саундтрек фильма</b></td><td>«The RZA Presents: Afro Samurai: Resurrection: The Soundtrack» (27 января 2009).</td></tr>
+          <tr><td><b>Живая экранизация</b></td><td>Анонсирована в 2006 (Comic-Con); права у Indomina Group (2011), продюсеры включая Джексона; проект заморожен после закрытия американского офиса Indomina (2013).</td></tr>
+          <tr><td><b>Anime-фильм-компиляция</b></td><td>«Afro Samurai: The Movie» (2007, Gonzo) — собирает сериал в полный метр.</td></tr>
+          <tr><td><b>Регионы и ТВ</b></td><td>США — Spike TV; Япония — Fuji TV / Wowow; Великобритания — Adult Swim / Bravo; Австралия — MTV, ABC2.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="srcnote">Также был выпущен профильный артбук-профиль во франшизу, а Окадзаки приходил как дизайнер персонажей в Furi (2016), Garo: Vanishing Line (2017), Batman Ninja (2018), «Звёздные войны: Вижнз» (2021–2025) и Ninja Kamui (2024).</p>
+  </section>
+
+  <!-- 11 -->
+  <section id="s11">
+    <h2 class="sec"><span class="num">11</span> Темы, философия, эстетика и вайбы</h2>
+    <p class="secsub">Разбор в четырёх слоях: о чём произведение говорит на самом деле, как оно устроено визуально и какое настроение передаёт.</p>
+
+    <h3>Темы — слой первый: о чём это</h3>
+    <div class="grid2">
+      <div class="mini"><h4>Цикл мести</h4>
+        <p>Каждый убитый порождает следующего мстителя: Котаро получил №2 «по наследству». Ninja Ninja в финале прямо проговаривает бесконечность крови. Месть даёт цель, но не даёт выхода.</p></div>
+      <div class="mini"><h4>Хип-хоп как эстетика и способ говорить</h4>
+        <p>Окадзаки рисовал чернокожих персонажей с юности, слушая R&B и хип-хоп. Рифмы RZA, уличный дух, афро — не косплей, а перенос «белого самурая» в чёрный контекст.</p></div>
+      <div class="mini"><h4>Пустота против «наполненности»</h4>
+        <p>Отец мечтал о «новом порядке»; Джастис хочет мира через страх; Empty Seven боготворят повязки. Каждый красивый лозунг в итоге — просто способ убивать.</p></div>
+      <div class="mini"><h4>Воображаемый друг как душа</h4>
+        <p>Ninja Ninja — единственный, кто с Афро говорит в кадре без меча. Его смерть и возвращение в фильме показывают: спутник рождается там же, где и смысл — внутри самого героя.</p></div>
+      <div class="mini"><h4>Техно-киборги против «живого» тела</h4>
+        <p>Джинно, Дхарман, семья Сио — потерявшие человечность. Метафора: месть и ненависть заменяют живую связь металлом.</p></div>
+      <div class="mini"><h4>Стиль над сюжетом</h4>
+        <p>Критики честно писали: истории здесь немного, но картинка, позы, ритм и звук держат сами по себе. «Afro Samurai» — про крутость как высказывание.</p></div>
+    </div>
+
+    <h3>Философия — слой второй: что в нём зашито по-настоящему</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Философский пласт</th><th>Как он проявлен в сериале</th></tr></thead>
+        <tbody>
+          <tr><td><b>Экзистенциальный абсурд и Сизиф</b></td><td>Смысл Афро не выбирает — его назначает смерть отца. Клятва мести становится «проектом», ради которого он живёт; после её исполнения герой пуст — и «Resurrection» возвращает ему новую цель (или новое рабство). Как у Камю: бунт и ноша — одно и то же.</td></tr>
+          <tr><td><b>Стоицизм и тишина</b></td><td>Афро говорит почти ничего: путь, оплаченный молчанием, — классический стоик. Хладнокровие перед страхом, болью и смертью, автономия разума над телом. Ниндзя Ниндзя — наоборот, его вытесненный голос: всё, что Афро не высказал вслух.</td></tr>
+          <tr><td><b>Буддийская пустота (суньята)</b></td><td>Имя «Empty Seven» не случайно: клан пуст. Маячит и сама идея повязки №1 — «как будто боги», но её суть мирское тщеславие. Носитель высшей повязки в мире почти без повязок — пустой человек на горе. Афро, взяв №1, ничем не стал «больше».</td></tr>
+          <tr><td><b>Религия реликвий и фанатизм</b></td><td>Повязки — не артефакты силы, а фетиши: их богословствуют, вокруг них строят культы (Empty Seven), спекулируют ими (Братец 3, игорный дом). Мир «Afro Samurai» — сатира на любую веру в амулет, который должен даровать абсолют.</td></tr>
+          <tr><td><b>Гири и ниндзё: долг против сердца</b></td><td>Джинно обязан отомстить брату — но помнит братство и в решающий момент «Resurrection» бросается спасать Афро, срывая всё. Классический японский конфликт долга и человеческого чувства, решённый в пользу сердца.</td></tr>
+          <tr><td><b>Отец как миф и убийство отца</b></td><td>Рокутаро существует как идея «идеального №1», а не человек. Финал фильма — психоаналитический жест: Афро убивает не клона, а образ отца, чтобы перестать быть тенью отцовской клятвы. «Я сначала приму: это не мой отец — и убью его».</td></tr>
+          <tr><td><b>Чёрная идентичность и архетип самурая</b></td><td>Афро-самурай — культурный ребрендинг: бусидо, дзен и катаны считываются через афро, рэп и джаз. Это деконструкция «кто имеет право на благородный путь» — и уважение к обоим языкам.</td></tr>
+          <tr><td><b>Насилие как единственный язык</b></td><td>Слова в сериале скупы; диалоги держит звук. Экранное насилие здесь — способ героя сказать «я помню», «я здесь», «иди сюда». Каждая срубленная голова — предложение текста без грамматики.</td></tr>
+          <tr><td><b>Скука после вершины</b></td><td>Став №1, Афро точит скульптуры — отсутствие конфликта оказывается скукой, а не покоем. Метафора достигнутой мечты: цель развенчана, но человек к ней уже не вернётся.</td></tr>
+          <tr><td><b>Вечный возврат</b></td><td>Ниндзя Ниндзя: «всё будет так, как должно быть». Котаро получил №2 — цикл повторится с новым мстителем. Произведение намекает: история не про победу добра, а про механику повтора, пока есть повязки и обиды.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Эстетика — слой третий: как это выглядит</h3>
+    <p>Визуальный язык — главный «экспорт» франшизы: без него вся философия не считывается. Окадзаки признавался: он рисует не лица, а <em>позы</em> — статика, то есть готовность к удару, важнее мимики.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Палитра</th><th>Где живёт</th></tr></thead>
+        <tbody>
+          <tr><td><b style="color:#e63232">Багровый</b></td><td>Кровь, луна, силуэт повязки, чужие плащи — цвет угрозы и жертвенности.</td></tr>
+          <tr><td><b>Чёрный и графит</b></td><td>Тело Афро в тени, силуэты на фоне луны, интерьеры логова Джастиса — пространство одиночества.</td></tr>
+          <tr><td><b style="color:#ffcf56">Золото</b></td><td>Повязка №1, искры клинков, закаты — символ статуса и цены.</td></tr>
+          <tr><td><b style="color:#9fb4ff">Холодный синий</b></td><td>Горы, ночь, кибернетические вспышки Джинно — отчуждение техно-мира.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Визуальный язык</h4>
+    <ul>
+      <li><strong>Контраст силуэтов:</strong> почти весь экшн строится на негативном пространстве — чёрный Афро против белой или красной фигуры противника.</li>
+      <li><strong>Точность клинка:</strong> один вдох кадра, один разрез пополам — без лишних дублей; вырезание из «потока».</li>
+      <li><strong>Киноязык комикса:</strong> позы-«панели», широкие ракушки, дождь гонзарс-движения — наследство студии Gonzo из боевых опенингов 2000-х.</li>
+      <li><strong>Лазер, пламя, сакура:</strong> эффекты существуют, чтобы усилить вакуум тишины вокруг героя.</li>
+      <li><strong>Крупные планы глаз и рук:</strong> нервы Афро читаешь не по лицу — по пальцам, стискивающим меч.</li>
+      <li><strong>Кибер-додзё-футуризм:</strong> телевизоры в горах, пушки у монахов, ростом со склад — мир, где самурай живёт на стыке эпох.</li>
+    </ul>
+    <div class="quote">«Я не хочу, чтобы зритель смотрел на лицо. Лицо врёт. Поза не врёт»<b>— принцип рисунка Такаси Окадзаки</b></div>
+
+    <h3>Вайбы — слой четвёртый: что чувствует зритель</h3>
+    <div class="grid2">
+      <div class="mini"><h4>Почти безмолвная воля</h4>
+        <p>Афро молчит, пьёт лимонад, крутит самокрутку. Мир громкий — он тихий. Это ощущение «взрослого одиночества», которое не извиняется и не объясняется.</p></div>
+      <div class="mini"><h4>Крутость как дзен</h4>
+        <p>Вейбы «просто круто в кадре»: джазовые паузы, грациозные разрезы, ритмичные повторы RZA поверх крови. Вау-моменты без юмора — постоянно прямолинейное удовольствие.</p></div>
+      <div class="mini"><h4>Ночь в конце света</h4>
+        <p>Где-то бродит звук флейты, где-то — уличный бит. Между ними — разрушенные города, луна и обрыв. Почти весь мир стоит накануне чего-то большего, чем простая дуэль.</p></div>
+      <div class="mini"><h4>Ниндзя Ниндзя — вайб, который шепчет</h4>
+        <p>Спутник-болтун — единственная трещина в ледяном покое Афро и одновременно наш «заяц» в его голове. Он задаёт ритм, который прощает всё — вплоть до высмеивания самой серьезности.</p></div>
+      <div class="mini"><h4>Красота без смакования</h4>
+        <p>Жертвы Empty Seven красивы до рези в глазах, но кладбища не показаны сентиментально. Вайб — «это просто мир такой, выбирай, с какой стороны тишины стоять».</p></div>
+      <div class="mini"><h4>После мести — пусто, но красиво</h4>
+        <p>Финал (и начало фильма) — Афро спокоен и почти безрадостен. Сильное, но не радостное завершение: «вот ты и №1. Теперь что?» Оставшаяся ностальгия по прошлым страданиям — фирменный вайб сериала.</p></div>
+    </div>
+    <p class="srcnote">Ни одна из «философских» трактовок в этом блоке не является официальной позицией авторов — это аналитическое прочтение. Визуальные и звуковые детали опираются на рецензии, DVD-материалы и интервью, перечисленные в источниках.</p>
+  </section>
+
+  <!-- 12 -->
+  <section id="s12">
+    <h2 class="sec"><span class="num">12</span> Приём, награды, запреты</h2>
+    <p class="secsub">Как проект приняли и почему о нём до сих пор говорят.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Событие</th><th>Детали</th></tr></thead>
+        <tbody>
+          <tr><td>Награды сериала</td><td>Две номинации на Эмми (Individual Achievement и Animated Program) — и победа проекта.</td></tr>
+          <tr><td>Эмми за фильм</td><td>«Resurrection» номинирован на Outstanding Animated Program (проиграл «Foster's Home»), но арт-директор Сигэми Икэда получил Эмми за выдающиеся индивидуальные достижения — первая Эмми за японское анимационное производство.</td></tr>
+          <tr><td>Критика манги</td><td>Хвалили дизайн; ругали слабую историю и «скрибблы» композиции. Том 2 поднимался в топ-250 продаваемых манг (ComiPress, февраль 2009).</td></tr>
+          <tr><td>IGN</td><td>Поставил сериал на 90-е место в своём списке топ-100 анимационных сериалов (январь 2009): «бессмысленно жёсткое, причудливое и весёлое».</td></tr>
+          <tr><td>Продажи</td><td>Blu-ray сериала дебютировал на #16 чарта VideoScan.</td></tr>
+          <tr><td>Запрет в Китае</td><td>12 июня 2015 года Министерство культуры КНР включило «Afro Samurai» в список из 38 запрещённых аниме и манг.</td></tr>
+          <tr><td>Культурный след</td><td>Фраза и образ №1 цитируются в хип-хопе: трек Lupe Fiasco «No. 1 Headband» на альбоме Samurai (2024) — прямое отсылка.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section id="s13">
+    <h2 class="sec"><span class="num">13</span> Интересные факты</h2>
+    <ul>
+      <li>Окадзаки начал рисовать чернокожих персонажей, когда ему было лет 15 — на коробках из-под Kleenex и бумажках; самурайская тема смешалась с американским взглядом на Японию.</li>
+      <li>Сериал родился из фигурок: друг Окадзаки сделал малотиражные акшн-фигурки, их случайно увидел продюсер Gonzo — и предложил аниме. Тизер-трейлер попал к Сэмюэлу Л. Джексону — и тот согласился озвучивать.</li>
+      <li>«Ниндзя Ниндзя» и взрослого Афро озвучил один и тот же человек — это часть шутки и характера.</li>
+      <li>Джинно носит шлем-мишку, потому что так выглядел плюшевый мишка Оцуру из их детства в додзё.</li>
+      <li>По данным DVD-интервью сценаристов: Ниндзя Ниндзя официально «воображаемый», но он виден в бинокль Братца №2, ловит сигарету Афро ртом и двигает предметы — у проекта свой взгляд на «реальность» спутника. В «Resurrection» объясняют: он эманация повязки №2 и разума владельца.</li>
+      <li>В игре (2009) Афро сражается с Ниндзя Ниндзя внутри собственного сознания, чтобы вернуть человечность, — отдельная интерпретация финала.</li>
+      <li>«Afro Samurai» — одно из немногих западных коллабораций: японская анимация, американская озвучка и нью-йоркский хип-хоп в одном кадре.</li>
+      <li>Манга исследовала и тёмные места: О-Сати в изолированной общине понимает, что «Один» — это и есть «№1», и гибнет вся община.</li>
+    </ul>
+  </section>
+
+  <!-- 14 -->
+  <section id="s14">
+    <h2 class="sec"><span class="num">14</span> Итоговая карта истории</h2>
+    <p class="secsub">Сжатый пересказ одной фразой на этап.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Этап</th><th>Коротко</th></tr></thead>
+        <tbody>
+          <tr><td>Пролог</td><td>Джастис убивает отца Афро (№1) перед сыном. Афро берёт №2 и клянётся.</td></tr>
+          <tr><td>Воспитание</td><td>Додзё Мастера меча, дружба с Джинно и Оцуру.</td></tr>
+          <tr><td>Падение</td><td>Midnight Battle Under the Bodhi Tree: мастер и ученики мертвы, Афро получает №2.</td></tr>
+          <tr><td>Охота</td><td>Волны наёмников Empty Seven, Афро-Дроид, борьба на горе и в воздухе.</td></tr>
+          <tr><td>Предательство</td><td>Окику пытается убить и спасает Афро; её убивают «свои».</td></tr>
+          <tr><td>Клан пал</td><td>Братцы 1, 2, 4, 5, 6 повержены; Братец 3 жив.</td></tr>
+          <tr><td>Братство</td><td>Дуэль с Кумой-Джинноске.</td></tr>
+          <tr><td>Финал сериала</td><td>Джастис мёртв, №1 на Афро; Джинно возвращается за ним.</td></tr>
+          <tr><td>Resurrection</td><td>Сио и Джинно похищают тело отца; Афро находит №2, убивает клон-отца и отдаёт №2 Котаро.</td></tr>
+          <tr><td>Открытый конец</td><td>Ninja Ninja возвращается: цикл мести бесконечен. Джастис (в Director's Cut) снова жив — намёк на третий фильм.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section id="sources" class="sources">
+    <h2 class="sec"><span class="num">15</span> Источники</h2>
+    <ol>
+      <li><span class="t">Wikipedia — «Afro Samurai»</span> обзор манги, аниме, медиа; сюжет, серии, даты, звуки, запреты.<a href="https://en.wikipedia.org/wiki/Afro_Samurai" target="_blank" rel="noopener">en.wikipedia.org/wiki/Afro_Samurai</a></li>
+      <li><span class="t">Wikipedia — «Afro Samurai: Resurrection»</span> сюжет фильма, версии концовок, голоса, релизы.<a href="https://en.wikipedia.org/wiki/Afro_Samurai:_Resurrection" target="_blank" rel="noopener">en.wikipedia.org/wiki/Afro_Samurai:_Resurrection</a></li>
+      <li><span class="t">Wikipedia — «List of Afro Samurai characters»</span> детальные биографии персонажей, голоса, различия манги/аниме/игры.<a href="https://en.wikipedia.org/wiki/List_of_Afro_Samurai_characters" target="_blank" rel="noopener">en.wikipedia.org/wiki/List_of_Afro_Samurai_characters</a></li>
+      <li><span class="t">Anime News Network — новости франшизы</span> премьеры, DVD/Blu-ray, Эмми, игры (ссылки из статьи Википедии).<a href="https://www.animenewsnetwork.com/" target="_blank" rel="noopener">animenewsnetwork.com</a></li>
+      <li><span class="t">IGN — «Top 100 Animated Series» (#90, 2009)</span> место проекта в рейтинге сериалов.<a href="https://www.ign.com/" target="_blank" rel="noopener">ign.com</a></li>
+    </ol>
+    <p style="color:var(--muted);font-size:13px;margin-top:14px">Примечание: у проекта нет японского дубляжа — в Японии аниме транслировали на английском с субтитрами. Некоторые детали сюжета в манге, аниме и игре расходятся (разные смерти учеников, другая роль Такимото и т.п.); в разборе акцент — на аниме-версии.</p>
+  </section>
+
+</main>
+
+<footer>
+  Полный гид по «Афросамурай» собран автоматически · источники: Wikipedia и архивы Anime News Network · <a href="index.html">назад к списку страниц</a>
+</footer>
+
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>

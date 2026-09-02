@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Анализ YouTube — RotoMatic vs Mathrock Interactive</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --red: #f85149;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --purple: #a371f7;
+      --orange: #f78166;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2rem; margin-bottom: 4px; }
+    h1 span { color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+    h2 {
+      font-size: 1.3rem;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Channel cards */
+    .channel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    @media (max-width: 700px) { .channel-grid { grid-template-columns: 1fr; } }
+
+    .channel-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .channel-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .channel-card.rotomatic::before { background: linear-gradient(90deg, var(--orange), var(--red)); }
+    .channel-card.mathrock::before { background: linear-gradient(90deg, var(--accent), var(--purple)); }
+
+    .channel-card h3 { font-size: 1.2rem; margin-bottom: 4px; }
+    .channel-card .handle { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+    .channel-card .desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
+
+    .stat-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-align: center;
+      flex: 1;
+      min-width: 80px;
+    }
+    .stat-pill .val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: block;
+    }
+    .stat-pill .lbl {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    /* Tags */
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .tag {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .tag-red { background: #f8514922; color: var(--red); border: 1px solid #f8514944; }
+    .tag-blue { background: #58a6ff22; color: var(--accent); border: 1px solid #58a6ff44; }
+    .tag-green { background: #3fb95022; color: var(--green); border: 1px solid #3fb95044; }
+    .tag-orange { background: #f7816622; color: var(--orange); border: 1px solid #f7816644; }
+    .tag-purple { background: #a371f722; color: var(--purple); border: 1px solid #a371f744; }
+    .tag-yellow { background: #d2992222; color: var(--yellow); border: 1px solid #d2992244; }
+
+    /* Video table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin: 12px 0;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #21262d;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    tr:hover td { background: #21262d44; }
+    .views-bar {
+      display: inline-block;
+      height: 6px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    /* Comparison */
+    .compare-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    @media (max-width: 700px) { .compare-section { grid-template-columns: 1fr; } }
+
+    .compare-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .compare-box h4 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+    }
+    .compare-box ul {
+      padding-left: 18px;
+      font-size: 0.85rem;
+    }
+    .compare-box li { margin: 4px 0; }
+
+    /* Progress */
+    .progress-row { margin: 6px 0; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar .fill { height: 100%; border-radius: 3px; }
+    .fill-red { background: var(--red); }
+    .fill-blue { background: var(--accent); }
+    .fill-green { background: var(--green); }
+    .fill-orange { background: var(--orange); }
+    .fill-purple { background: var(--purple); }
+
+    /* Verdict */
+    .verdict {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .verdict h3 { margin-bottom: 12px; }
+    .verdict-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 700px) { .verdict-grid { grid-template-columns: 1fr; } }
+    .verdict-item {
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .verdict-item .emoji { font-size: 1.8rem; margin-bottom: 6px; }
+    .verdict-item .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    .verdict-item .name { font-size: 1rem; font-weight: 700; margin: 4px 0; }
+    .verdict-item .reason { font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<h1>Анализ YouTube-каналов: <span>RotoMatic vs Mathrock Interactive</span></h1>
+<p class="subtitle">Сравнительный анализ двух игровых каналов — контент, аудитория, стратегия роста</p>
+
+<!-- ============ OVERVIEW ============ -->
+<h2>&#128200; Обзор каналов</h2>
+
+<div class="channel-grid">
+  <!-- RotoMatic -->
+  <div class="channel-card rotomatic">
+    <h3>&#127918; RotoMatic</h3>
+    <div class="handle"><a href="https://www.youtube.com/@rotomatic">@rotomatic</a></div>
+    <div class="desc">Game edit контент — короткие шортсы с эпичными моментами из FromSoftware игр (Elden Ring, Sekiro). TikTok-first формат.</div>
+    <div class="tags">
+      <span class="tag tag-red">Elden Ring</span>
+      <span class="tag tag-orange">Sekiro</span>
+      <span class="tag tag-purple">Edits / Montage</span>
+      <span class="tag tag-yellow">TikTok crossover</span>
+    </div>
+    <div class="stat-row" style="margin-top:12px">
+      <div class="stat-pill">
+        <span class="val">~2022</span>
+        <span class="lbl">Старт</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">15</span>
+        <span class="lbl">Видео (RSS)</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">1.4M</span>
+        <span class="lbl">Просмотров ( выборка)</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">93K</span>
+        <span class="lbl">Ср. просм./видео</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mathrock Interactive -->
+  <div class="channel-card mathrock">
+    <h3>&#128296; Mathrock Interactive</h3>
+    <div class="handle"><a href="https://www.youtube.com/@mathrockinteractive">@mathrockinteractive</a></div>
+    <div class="desc">Инди-геймдев дуо. Devlog канала — Unreal Engine 5. Работают над <strong>Dawar: Ashes of the Snow</strong> (3D экшн-адвенчура без UI).</div>
+    <div class="tags">
+      <span class="tag tag-blue">UE5</span>
+      <span class="tag tag-green">Devlog</span>
+      <span class="tag tag-purple">Indie Game</span>
+      <span class="tag tag-yellow">2-person team</span>
+    </div>
+    <div class="stat-row" style="margin-top:12px">
+      <div class="stat-pill">
+        <span class="val">Авг 2024</span>
+        <span class="lbl">Старт</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">15</span>
+        <span class="lbl">Видео (RSS)</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">45.7K</span>
+        <span class="lbl">Просмотров всего</span>
+      </div>
+      <div class="stat-pill">
+        <span class="val">3K</span>
+        <span class="lbl">Ср. просм./видео</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ROTOMATIC DEEP DIVE ============ -->
+<h2>&#127916; RotoMatic — Детальный анализ</h2>
+
+<h3>Последние видео (выборка из 15)</h3>
+<table>
+  <thead>
+    <tr><th>Видео</th><th>Дата</th><th>Просмотры</th><th>Лайки</th><th>Engagement</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Why Didn't Elden Ring Have Deathblows</strong></td>
+      <td>1 сен</td>
+      <td>21,057 <span class="views-bar" style="width:8px;background:var(--orange)"></span></td>
+      <td>1,407</td>
+      <td>6.7%</td>
+    </tr>
+    <tr>
+      <td><strong>The Best Defence Is ONLY OFFENCE</strong></td>
+      <td>7 июл</td>
+      <td style="color:var(--green);font-weight:700">276,549 <span class="views-bar" style="width:120px;background:var(--green)"></span></td>
+      <td>7,957</td>
+      <td>2.9%</td>
+    </tr>
+    <tr>
+      <td><strong>I Just Like The BONK</strong></td>
+      <td>27 июл</td>
+      <td style="color:var(--green);font-weight:700">212,989 <span class="views-bar" style="width:92px;background:var(--green)"></span></td>
+      <td>6,156</td>
+      <td>2.9%</td>
+    </tr>
+    <tr>
+      <td><strong>7 Years And I'm Just Now Finding It</strong></td>
+      <td>18 авг</td>
+      <td style="color:var(--green);font-weight:700">161,718 <span class="views-bar" style="width:70px;background:var(--green)"></span></td>
+      <td>3,523</td>
+      <td>2.2%</td>
+    </tr>
+    <tr>
+      <td><strong>Not The Cricket Miniboss We Always Wanted</strong></td>
+      <td>9 июл</td>
+      <td style="color:var(--accent);font-weight:700">144,350 <span class="views-bar" style="width:62px;background:var(--accent)"></span></td>
+      <td>5,045</td>
+      <td>3.5%</td>
+    </tr>
+    <tr>
+      <td><strong>Just Throw Money at your Problems</strong></td>
+      <td>6 авг</td>
+      <td style="color:var(--accent);font-weight:700">129,324 <span class="views-bar" style="width:56px;background:var(--accent)"></span></td>
+      <td>3,237</td>
+      <td>2.5%</td>
+    </tr>
+    <tr>
+      <td><strong>also SEVEN SPEARS counter your Mikiri Counter</strong></td>
+      <td>21 июл</td>
+      <td>97,367</td>
+      <td>3,203</td>
+      <td>3.3%</td>
+    </tr>
+    <tr>
+      <td><strong>The Most Goated Mechanic In Souls Game</strong></td>
+      <td>6 июл</td>
+      <td>86,453</td>
+      <td>3,552</td>
+      <td>4.1%</td>
+    </tr>
+    <tr>
+      <td><strong>What Kinda Sorcery is This</strong></td>
+      <td>24 июл</td>
+      <td>63,770</td>
+      <td>2,748</td>
+      <td>4.3%</td>
+    </tr>
+    <tr>
+      <td><strong>Democratical Slugfest</strong></td>
+      <td>15 авг</td>
+      <td>57,527</td>
+      <td>1,547</td>
+      <td>2.7%</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="channel-grid">
+  <div class="compare-box">
+    <h4 style="color:var(--green)">&#9989; Сильные стороны</h4>
+    <ul>
+      <li><strong>Вирусный потенциал:</strong> Шортсы с 100K+ просмотрами — регулярно</li>
+      <li><strong>Engagement:</strong> 2.2-6.7% — отлично для шортсов</li>
+      <li><strong>Niche:</strong> FromSoftware — лояльная и активная аудитория</li>
+      <li><strong>Формат:</strong> Шортсы = алгоритм YouTube	push</li>
+      <li><strong>TikTok кросс-постинг:</strong> Dual-platform стратегия</li>
+    </ul>
+  </div>
+  <div class="compare-box">
+    <h4 style="color:var(--red)">&#10060; Слабые стороны</h4>
+    <ul>
+      <li><strong>Зависимость от IP:</strong> Все видео = FromSoftware. Нет собственного контента</li>
+      <li><strong>Только шортсы:</strong> Нет длинных видео = нет ad revenue</li>
+      <li><strong>Нет game dev:</strong> Не создаёт игры — потребитель контента</li>
+      <li><strong>Сложно монетизировать:</strong> Шортсы = низкий CPM</li>
+      <li><strong>Риск трансляции:</strong> FromSoftware может закрыть канал за использование footage</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ MATHROCK DEEP DIVE ============ -->
+<h2>&#128296; Mathrock Interactive — Детальный анализ</h2>
+
+<h3>Последние видео (выборка из 15)</h3>
+<table>
+  <thead>
+    <tr><th>Видео</th><th>Дата</th><th>Тип</th><th>Просмотры</th><th>Лайки</th><th>Engagement</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>We Replaced the Settings Menu with a 3D Object</strong></td>
+      <td>15 авг</td>
+      <td><span class="tag tag-blue" style="font-size:0.65rem">Devlog</span></td>
+      <td>4,911</td>
+      <td>182</td>
+      <td>3.7%</td>
+    </tr>
+    <tr>
+      <td><strong>How We Made Our Game's Opening Cinematic</strong></td>
+      <td>1 авг</td>
+      <td><span class="tag tag-orange" style="font-size:0.65rem">Short</span></td>
+      <td>1,255</td>
+      <td>24</td>
+      <td>1.9%</td>
+    </tr>
+    <tr>
+      <td><strong>Why PC Games Stutter (And How We Fixed It)</strong></td>
+      <td>22 июл</td>
+      <td><span class="tag tag-orange" style="font-size:0.65rem">Short</span></td>
+      <td>1,854</td>
+      <td>19</td>
+      <td>1.0%</td>
+    </tr>
+    <tr>
+      <td><strong>The REAL Reason Games Need Loading Screens</strong></td>
+      <td>19 июл</td>
+      <td><span class="tag tag-blue" style="font-size:0.65rem">Devlog</span></td>
+      <td>518</td>
+      <td>31</td>
+      <td>6.0%</td>
+    </tr>
+    <tr>
+      <td><strong>Sound Design is 50% of Game Feel</strong></td>
+      <td>25 июн</td>
+      <td><span class="tag tag-orange" style="font-size:0.65rem">Short</span></td>
+      <td>2,287</td>
+      <td>69</td>
+      <td>3.0%</td>
+    </tr>
+    <tr>
+      <td><strong>How We Made New Enemies From Scratch</strong></td>
+      <td>21 июн</td>
+      <td><span class="tag tag-blue" style="font-size:0.65rem">Devlog</span></td>
+      <td>2,845</td>
+      <td>158</td>
+      <td>5.6%</td>
+    </tr>
+    <tr>
+      <td><strong>Dawar: Ashes of the Snow | Announcement Trailer</strong></td>
+      <td>13 июн</td>
+      <td><span class="tag tag-green" style="font-size:0.65rem">Trailer</span></td>
+      <td>863</td>
+      <td>41</td>
+      <td>4.8%</td>
+    </tr>
+    <tr>
+      <td><strong>When the enemy AI becomes too smart</strong></td>
+      <td>11 апр</td>
+      <td><span class="tag tag-orange" style="font-size:0.65rem">Short</span></td>
+      <td>1,957</td>
+      <td>80</td>
+      <td>4.1%</td>
+    </tr>
+    <tr>
+      <td><strong>How We Built Smart Enemies From Scratch</strong></td>
+      <td>5 апр</td>
+      <td><span class="tag tag-blue" style="font-size:0.65rem">Devlog</span></td>
+      <td style="color:var(--green);font-weight:700">11,417 <span class="views-bar" style="width:50px;background:var(--green)"></span></td>
+      <td>712</td>
+      <td>6.2%</td>
+    </tr>
+    <tr>
+      <td><strong>How We Took Our Enemies to the NEXT LEVEL!</strong></td>
+      <td>8 мар</td>
+      <td><span class="tag tag-blue" style="font-size:0.65rem">Devlog</span></td>
+      <td style="color:var(--accent);font-weight:700">7,543 <span class="views-bar" style="width:33px;background:var(--accent)"></span></td>
+      <td>505</td>
+      <td>6.7%</td>
+    </tr>
+    <tr>
+      <td><strong>We gave our enemies Muhammad Ali's dodge</strong></td>
+      <td>28 мар</td>
+      <td><span class="tag tag-orange" style="font-size:0.65rem">Short</span></td>
+      <td>2,779</td>
+      <td>109</td>
+      <td>3.9%</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="channel-grid">
+  <div class="compare-box">
+    <h4 style="color:var(--green)">&#9989; Сильные стороны</h4>
+    <ul>
+      <li><strong>Очень высокий engagement:</strong> 3.7-6.7% — выше среднего для геймдев-ниши</li>
+      <li><strong>Собственная игра:</strong> Dawar: Ashes of the Snow — Steam wishlist</li>
+      <li><strong>Уникальная механика:</strong> "No-UI philosophy" — фирменная фишка</li>
+      <li><strong>Качество контента:</strong> Профессиональные devlog'и с техническими подробностями</li>
+      <li><strong>Shorts + Long-form:</strong> Гибридная стратегия</li>
+    </ul>
+  </div>
+  <div class="compare-box">
+    <h4 style="color:var(--red)">&#10060; Слабые стороны</h4>
+    <ul>
+      <li><strong>Маленькая аудитория:</strong> ~3K в среднем — канал на ранней стадии</li>
+      <li><strong>Низкая частота:</strong> 1-2 видео в месяц — алгоритм не любит паузы</li>
+      <li><strong>Narrow niche:</strong> UE5 devlog = маленькая аудитория</li>
+      <li><strong>Длинные видео:</strong> Меньше reach чем шортсы</li>
+      <li><strong>Дуо без бюджета:</strong> 2 человека = медленный прогресс</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ COMPARISON ============ -->
+<h2>&#128200; Сравнение</h2>
+
+<div class="compare-section">
+  <div class="compare-box">
+    <h4>&#127916; RotoMatic</h4>
+
+    <div class="progress-row">
+      <div class="progress-label"><span>Просмотры</span><span style="color:var(--green)">Высокие</span></div>
+      <div class="progress-bar"><div class="fill fill-green" style="width:90%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Engagement</span><span>Хороший (2-7%)</span></div>
+      <div class="progress-bar"><div class="fill fill-orange" style="width:65%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Монетизация</span><span style="color:var(--red)">Низкая</span></div>
+      <div class="progress-bar"><div class="fill fill-red" style="width:25%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Уникальность</span><span style="color:var(--yellow)">Средняя</span></div>
+      <div class="progress-bar"><div class="fill fill-orange" style="width:40%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Масштабируемость</span><span style="color:var(--green)">Высокая</span></div>
+      <div class="progress-bar"><div class="fill fill-green" style="width:80%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Собственный продукт</span><span style="color:var(--red)">Нет</span></div>
+      <div class="progress-bar"><div class="fill fill-red" style="width:5%"></div></div>
+    </div>
+  </div>
+
+  <div class="compare-box">
+    <h4>&#128296; Mathrock Interactive</h4>
+
+    <div class="progress-row">
+      <div class="progress-label"><span>Просмотры</span><span style="color:var(--yellow)">Низкие</span></div>
+      <div class="progress-bar"><div class="fill fill-orange" style="width:30%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Engagement</span><span style="color:var(--green)">Отличный (4-7%)</span></div>
+      <div class="progress-bar"><div class="fill fill-green" style="width:85%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Монетизация</span><span style="color:var(--yellow)">Потенциал (Steam)</span></div>
+      <div class="progress-bar"><div class="fill fill-blue" style="width:55%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Уникальность</span><span style="color:var(--green)">Высокая</span></div>
+      <div class="progress-bar"><div class="fill fill-green" style="width:85%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Масштабируемость</span><span style="color:var(--red)">Низкая</span></div>
+      <div class="progress-bar"><div class="fill fill-red" style="width:30%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span>Собственный продукт</span><span style="color:var(--green)">Dawar (Steam)</span></div>
+      <div class="progress-bar"><div class="fill fill-green" style="width:90%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTENT STRATEGY ============ -->
+<h2>&#128161; Стратегия контента</h2>
+
+<div class="compare-section">
+  <div class="compare-box">
+    <h4 style="color:var(--orange)">RotoMatic</h4>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Формат:</strong> YouTube Shorts (15-60 сек)</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Темы:</strong> FromSoftware игры — эпичные моменты, глитчи, "what if" сценарии</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Частота:</strong> 2-3 шортса в неделю</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Формула:</strong> Provocative hook → gameplay footage → punchline</p>
+    <p style="font-size:0.85rem;color:var(--muted)">Контент = edits/montage из чужих игр. Высокий reach, низкая монетизация.</p>
+  </div>
+  <div class="compare-box">
+    <h4 style="color:var(--accent)">Mathrock Interactive</h4>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Формат:</strong> Devlog (2-4 мин) + Shorts (30-60 сек)</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Темы:</strong> Разработка Dawar — AI, VFX, Level Design, Optimization</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Частота:</strong> 1-2 видео в месяц (нужно чаще!)</p>
+    <p style="font-size:0.85rem;margin-bottom:10px"><strong>Формула:</strong> Technical deep-dive → before/after → Steam wishlist CTA</p>
+    <p style="font-size:0.85rem;color:var(--muted)">Контент = собственная игра. Низкий reach, но долгосрочная ценность.</p>
+  </div>
+</div>
+
+<!-- ============ VIDEO CATEGORIES ============ -->
+<h2>&#128202; Распределение контента</h2>
+
+<table>
+  <thead>
+    <tr><th>Категория</th><th>RotoMatic</th><th>Mathrock</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Shots (< 60 сек)</td><td style="color:var(--green)">100% (15/15)</td><td>40% (6/15)</td></tr>
+    <tr><td>Devlog (1-5 мин)</td><td>0%</td><td style="color:var(--green)">40% (6/15)</td></tr>
+    <tr><td>Trailer</td><td>0%</td><td>20% (3/15)</td></tr>
+    <tr><td>FromSoftware контент</td><td style="color:var(--green)">100%</td><td>0%</td></tr>
+    <tr><td>Sobstvennaya igra</td><td style="color:var(--red)">0%</td><td style="color:var(--green)">100%</td></tr>
+    <tr><td>Technical tutorials</td><td>0%</td><td style="color:var(--green)">~50%</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ TOP VIDEOS ============ -->
+<h2>&#127942; Топ видео по просмотрам</h2>
+
+<div class="compare-section">
+  <div class="compare-box">
+    <h4 style="color:var(--orange)">RotoMatic — Топ-5</h4>
+    <table>
+      <tr><td>1</td><td>The Best Defence Is ONLY OFFENCE</td><td style="color:var(--green)">276K</td></tr>
+      <tr><td>2</td><td>I Just Like The BONK</td><td style="color:var(--green)">213K</td></tr>
+      <tr><td>3</td><td>7 Years And I'm Just Now Finding It</td><td style="color:var(--accent)">162K</td></tr>
+      <tr><td>4</td><td>Not The Cricket Miniboss</td><td style="color:var(--accent)">144K</td></tr>
+      <tr><td>5</td><td>Just Throw Money at your Problems</td><td style="color:var(--accent)">129K</td></tr>
+    </table>
+  </div>
+  <div class="compare-box">
+    <h4 style="color:var(--accent)">Mathrock — Топ-5</h4>
+    <table>
+      <tr><td>1</td><td>How We Built Smart Enemies From Scratch</td><td style="color:var(--green)">11.4K</td></tr>
+      <tr><td>2</td><td>How We Took Our Enemies to the NEXT LEVEL</td><td style="color:var(--accent)">7.5K</td></tr>
+      <tr><td>3</td><td>We Replaced the Settings Menu</td><td>4.9K</td></tr>
+      <tr><td>4</td><td>How We Made New Enemies From Scratch</td><td>2.8K</td></tr>
+      <tr><td>5</td><td>We gave enemies Muhammad Ali's dodge</td><td>2.8K</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============ KEY INSIGHTS ============ -->
+<h2>&#128161; Ключевые инсайты</h2>
+
+<div class="compare-section">
+  <div class="compare-box">
+    <h4>&#127919; Что работает</h4>
+    <ul>
+      <li><strong>RotoMatic:</strong> Provocative titles + FromSoftware footage = вирусность. "Why Didn't X" и "You Missed This" — проверенные кликбейт-форматы.</li>
+      <li><strong>Mathrock:</strong> "Before & After" формат и technical deep-dives = high engagement. "We replaced X with Y" = curiosity gap.</li>
+      <li><strong>Оба:</strong> Эмодзи в заголовках повышают CTR. Шортсы дают reach, длинные видео — loyalty.</li>
+    </ul>
+  </div>
+  <div class="compare-box">
+    <h4>&#128165; Что НЕ работает</h4>
+    <ul>
+      <li><strong>RotoMatic:</strong> Нет长视频 = нет ad revenue. Зависимость от чужого IP. Нет аудитории для продвижения собственного продукта.</li>
+      <li><strong>Mathrock:</strong> Слишком редко (1-2/мес). Слишком технически для широкой аудитории. Shorts转化率 низкий.</li>
+      <li><strong>Оба:</strong> Нет community building (Discord, Patreon).</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ VERDICT ============ -->
+<h2>&#127942; Вердикт</h2>
+
+<div class="verdict">
+  <h3>Кто из них успешнее?</h3>
+  <div class="verdict-grid">
+    <div class="verdict-item" style="border-color:var(--orange)">
+      <div class="emoji">&#128165;</div>
+      <div class="label">По просмотрам</div>
+      <div class="name" style="color:var(--orange)">RotoMatic</div>
+      <div class="reason">1.4M+ vs 45K. Шортсы + FromSoftware = огненная комбинация</div>
+    </div>
+    <div class="verdict-item" style="border-color:var(--green)">
+      <div class="emoji">&#128154;</div>
+      <div class="label">По engagement</div>
+      <div class="name" style="color:var(--green)">Mathrock</div>
+      <div class="reason">4-7% vs 2-3%. Аудитория реально вовлечена</div>
+    </div>
+    <div class="verdict-item" style="border-color:var(--accent)">
+      <div class="emoji">&#128176;</div>
+      <div class="label">По потенциалу</div>
+      <div class="name" style="color:var(--accent)">Mathrock</div>
+      <div class="reason">Собственная игра на Steam = долгосрочный доход</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RECOMMENDATIONS ============ -->
+<h2>&#128161; Рекомендации</h2>
+
+<div class="compare-section">
+  <div class="compare-box">
+    <h4 style="color:var(--orange)">Для RotoMatic</h4>
+    <ul>
+      <li><strong>Добавить длинные видео:</strong> Top 10, analysis, rankings — higher CPM</li>
+      <li><strong>Собственный IP:</strong> Использовать аудиторию для продвижения своей игры/персонажа</li>
+      <li><strong>Patreon/Membership:</strong> Фанаты FromSoftware готовы платить за эксклюзив</li>
+      <li><strong>Выйти за пределы FS:</strong> DMC, GOW, lies of P — расширить охват</li>
+      <li><strong>Создать бренд:</strong> Лого, мерч, узнаваемый стиль</li>
+    </ul>
+  </div>
+  <div class="compare-box">
+    <h4 style="color:var(--accent)">Для Mathrock Interactive</h4>
+    <ul>
+      <li><strong>Частота:</strong> Минимум 1 видео в неделю (shorts), 2 devlog'а в месяц</li>
+      <li><strong>Hook в первые 3 сек:</strong> "We did X and it broke everything" — curiosity</li>
+      <li><strong>Before/After контент:</strong> Работает отлично — делать чаще</li>
+      <li><strong>Collab:</strong> Найти других UE5 devloggers для cross-promotion</li>
+      <li><strong>TikTok/Reels:</strong> Дублировать шортсы на все платформы</li>
+      <li><strong>Wishlist campaign:</strong> Каждое видео = CTA на Steam wishlist</li>
+    </ul>
+  </div>
+</div>
+
+<p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-top:48px;padding-top:16px;border-top:1px solid var(--border)">
+  Данные собраны из YouTube RSS feeds и HTML pages. Сентябрь 2026.
+</p>
+
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>

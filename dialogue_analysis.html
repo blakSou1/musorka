@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Полный анализ диалоговых систем топовых gacha-игр</title>
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --panel: #161a2e;
+    --panel2: #1d2238;
+    --accent: #7c5cff;
+    --accent2: #ff5c9d;
+    --text: #e6e8f0;
+    --muted: #9aa0b5;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(1200px 600px at 70% -10%, #241b4d 0%, var(--bg) 55%);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0 0 80px;
+  }
+  header {
+    padding: 60px 24px 40px;
+    text-align: center;
+    border-bottom: 1px solid #262b45;
+    background: linear-gradient(180deg, rgba(124,92,255,.12), transparent);
+  }
+  header h1 {
+    font-size: clamp(26px, 4vw, 44px);
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 12px;
+  }
+  header p { color: var(--muted); max-width: 720px; margin: 0 auto; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  section { margin-top: 48px; }
+  h2 {
+    font-size: 24px;
+    margin-bottom: 18px;
+    padding-left: 14px;
+    border-left: 4px solid var(--accent);
+  }
+  h3 { font-size: 18px; margin: 22px 0 10px; color: #c9b8ff; }
+  p { color: var(--text); margin-bottom: 12px; }
+  .muted { color: var(--muted); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    background: var(--panel);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #262b45; font-size: 14px; }
+  th { background: var(--panel2); color: #c9b8ff; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .card {
+    background: var(--panel);
+    border: 1px solid #262b45;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin: 14px 0;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(124,92,255,.18);
+    color: #c9b8ff;
+    margin: 2px 4px 2px 0;
+  }
+  ul { padding-left: 22px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  .layer {
+    border-left: 4px solid var(--accent2);
+    background: var(--panel2);
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+  .layer b { color: #ff9ecb; }
+  .check li { list-style: none; padding-left: 28px; position: relative; }
+  .check li::before {
+    content: "✔"; color: var(--ok); position: absolute; left: 0; font-weight: bold;
+  }
+  .note {
+    background: rgba(251,191,36,.08);
+    border: 1px solid rgba(251,191,36,.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #ffe9b0;
+    font-size: 14px;
+  }
+  footer { text-align: center; color: var(--muted); margin-top: 60px; font-size: 13px; }
+  a { color: var(--accent2); }
+
+  /* ---- Visualization section ---- */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .tab {
+    cursor: pointer; padding: 10px 18px; border-radius: 999px;
+    background: var(--panel); border: 1px solid #2c3252; color: var(--muted);
+    font-size: 14px; transition: .2s;
+  }
+  .tab:hover { color: var(--text); border-color: var(--accent); }
+  .tab.active { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; }
+  .vtab { display: none; }
+  .vtab.active { display: block; animation: fade .3s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .vnode {
+    background: var(--panel); border: 1px solid #2c3252; border-radius: 12px;
+    padding: 16px; cursor: pointer; transition: .2s;
+  }
+  .vnode:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .vnode h4 { font-size: 15px; margin-bottom: 6px; color: #c9b8ff; }
+  .vnode p { font-size: 13px; color: var(--muted); margin: 0; }
+
+  .chiprow { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 18px; }
+  .chip {
+    padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .detail {
+    margin-top: 18px; padding: 16px 18px; border-radius: 12px;
+    background: var(--panel2); border-left: 4px solid var(--accent); font-size: 14px;
+  }
+  .detail b { color: #c9b8ff; }
+  svg text { font-family: "Segoe UI", sans-serif; }
+  .legend { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* ---- Visualization section 7 detail ---- */
+  .vizbox { background: var(--panel); border: 1px solid #2c3252; border-radius: 12px; padding: 16px; margin: 6px 0 14px; overflow: auto; }
+  #vizTitle .muted { font-weight: 400; font-size: 14px; }
+  ol.steps { margin: 6px 0 0; padding-left: 0; list-style: none; counter-reset: s; }
+  ol.steps li { position: relative; padding: 9px 8px 9px 44px; border-bottom: 1px dashed #2c3252; font-size: 14px; color: var(--text); }
+  ol.steps li:last-child { border-bottom: none; }
+  ol.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 6px; top: 9px; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  ol.steps li b { color: #c9b8ff; }
+  .mock-cap { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .minibtn { display:inline-block; padding:6px 12px; margin:3px; border-radius:8px; background:#28304c; border:1px solid #4a527e; font-size:13px; }
+
+  /* ---- Interactive widgets (section 7) ---- */
+  .ibox{display:flex;gap:10px;align-items:flex-end;--accent:#7c5cff;}
+  .ibox .iport{width:56px;height:56px;border-radius:10px;background:#2a2f4d;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none;}
+  .ibox .ipanel{flex:1;min-width:0;}
+  .ibox .iname{display:inline-block;background:var(--accent);color:#fff;padding:2px 10px;border-radius:6px 6px 0 0;font-size:12px;font-weight:700;}
+  .ibox .itext{background:rgba(20,24,40,.92);border:1px solid var(--accent);border-radius:0 10px 10px 10px;padding:10px;font-size:14px;min-height:42px;cursor:pointer;}
+  .ichoices{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+  .ichoice{padding:9px 12px;border-radius:10px;background:rgba(40,46,76,.9);border:1px solid #4a527e;color:#e6e8f0;cursor:pointer;font-size:14px;text-align:left;transition:.15s;}
+  .ichoice:hover{background:linear-gradient(90deg,rgba(124,92,255,.35),rgba(255,92,157,.35));border-color:var(--accent);transform:translateX(3px);}
+  .ichoice:active{transform:scale(.98);}
+  .iscene{position:relative;height:170px;display:flex;align-items:flex-end;justify-content:center;}
+  .inpc{position:relative;font-size:42px;cursor:pointer;}
+  .ibubble{position:absolute;bottom:62px;left:50%;transform:translateX(-50%) scale(.8);background:#fff;color:#111;padding:6px 10px;border-radius:12px;font-size:12px;white-space:nowrap;opacity:0;transition:.18s;pointer-events:none;}
+  .inpc:hover .ibubble{opacity:1;transform:translateX(-50%) scale(1);}
+  .ichat{max-height:170px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+  .ichat .msg{font-size:13px;padding:6px 10px;border-radius:10px;max-width:82%;}
+  .ichat .bot{background:#1d2238;align-self:flex-start;}
+  .ichat .me{background:#3a2b5a;align-self:flex-end;}
+  .iradial{position:relative;height:175px;}
+  .iradial .rc.port{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:#2a2f4d;border:2px solid #2de2ff;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .iradial .rc.b{position:absolute;left:50%;width:64px;height:64px;border-radius:50%;background:#1d2238;border:1px solid #2de2ff;color:#d8fbff;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.15s;}
+  .iradial .rc.b:hover{background:#2de2ff;color:#06202a;}
+  .iradial .rc.b:nth-child(2){top:4px;transform:translateX(-50%);}
+  .iradial .rc.b:nth-child(3){top:48px;right:4px;left:auto;transform:none;}
+  .iradial .rc.b:nth-child(4){top:48px;left:4px;transform:none;}
+  .iplayer{display:flex;align-items:center;gap:10px;}
+  .iplay{width:38px;height:38px;border-radius:50%;border:none;background:linear-gradient(90deg,#7c5cff,#ff5c9d);color:#fff;cursor:pointer;font-size:14px;flex:none;}
+  .ibar{flex:1;height:10px;background:#1d2238;border-radius:6px;overflow:hidden;}
+  .ifill{height:100%;width:0;background:linear-gradient(90deg,#7c5cff,#ff5c9d);transition:width .1s linear;}
+  .itime{font-size:12px;color:var(--muted);min-width:36px;}
+  .icam{height:150px;display:flex;align-items:center;justify-content:center;}
+  .camframe{width:150px;height:100px;border-radius:10px;background:#0e1220;border:1px solid #2c3252;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .camport{font-size:30px;transition:transform .5s;}
+  .camport.zoom{transform:scale(1.6) translateY(-6px);}
+  .ihexp .hrow{padding:6px 8px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid transparent;}
+  .ihexp .hrow:hover{background:#1d2238;}
+  .ihexp .hrow.sel{background:#2a1b3d;border-color:#ff5c9d;}
+  .iitem{color:#ffcf8a;border-bottom:1px dotted #ffcf8a;cursor:help;position:relative;}
+  .iitem:hover::after{content:attr(data-tip);position:absolute;left:0;top:135%;background:#000;color:#fff;padding:6px 8px;border-radius:6px;font-size:12px;white-space:nowrap;z-index:5;}
+  .icut{height:130px;display:flex;align-items:center;justify-content:center;font-size:34px;}
+  .icut .cutinner{transition:.3s;opacity:.5;}
+  .icut .cutinner.play{animation:cut 1.5s;}
+  @keyframes cut{0%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}100%{opacity:.5;transform:scale(1)}}
+  .anim line,.anim path{stroke-dasharray:700;stroke-dashoffset:700;}
+  .anim.go line,.anim.go path{animation:draw 1.3s forwards;}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  /* ---- Live dialogue simulator ---- */
+  .stylebar { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .sbtn {
+    cursor: pointer; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    background: var(--panel); border: 1px solid #2c3252; color: var(--muted); transition: .2s;
+  }
+  .sbtn:hover { color: var(--text); }
+  .sbtn.active { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; border-color: transparent; }
+
+  .stage {
+    margin: 18px 0; padding: 32px 20px; border-radius: 16px;
+    background: linear-gradient(135deg, #20243d, #14182b);
+    display: flex; align-items: flex-end; justify-content: center; min-height: 280px;
+    position: relative; overflow: hidden;
+  }
+  .stage::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(400px 200px at 30% 20%, rgba(124,92,255,.18), transparent),
+                radial-gradient(400px 200px at 80% 80%, rgba(255,92,157,.15), transparent);
+  }
+  .dlg {
+    position: relative; z-index: 2; width: 100%; max-width: 640px;
+    display: grid; grid-template-columns: 88px 1fr; gap: 14px; align-items: end;
+  }
+  .dlg .portrait {
+    width: 88px; height: 88px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 44px; background: #2a2f4d; border: 2px solid #3a4068; user-select: none;
+  }
+  .dlg .panel { position: relative; }
+  .dlg .nameplate {
+    display: inline-block; padding: 4px 14px; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 700;
+    background: #3a4068; color: #fff; margin-bottom: -1px;
+  }
+  .dlg .textbox {
+    padding: 14px 16px; border-radius: 0 12px 12px 12px; min-height: 80px; font-size: 15px; line-height: 1.55;
+    background: rgba(20,24,40,.92); border: 1px solid #3a4068; cursor: pointer; color: var(--text);
+  }
+  .dlg .choices { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .dlg .choices button {
+    text-align: left; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 14px;
+    background: rgba(40,46,76,.9); border: 1px solid #4a527e; color: var(--text); transition: .15s;
+  }
+  .dlg .choices button:hover { border-color: var(--accent); background: rgba(60,66,110,.95); }
+  .caret { display: inline-block; width: 8px; }
+  .hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  /* HSR — comic */
+  .dlg.hsr .textbox { border: 3px solid #c9b8ff; border-radius: 4px 14px 14px 14px; box-shadow: 4px 4px 0 rgba(124,92,255,.35); font-weight: 500; }
+  .dlg.hsr .nameplate { background: linear-gradient(90deg,#7c5cff,#ff5c9d); }
+  .dlg.hsr .portrait { border-radius: 6px; border: 3px solid #c9b8ff; transform: rotate(-2deg); }
+
+  /* ZZZ — neon */
+  .dlg.zzz .textbox { border: 1px solid #2de2ff; box-shadow: 0 0 14px rgba(45,226,255,.5), inset 0 0 10px rgba(255,92,157,.2); background: rgba(10,14,28,.92); border-radius: 14px; }
+  .dlg.zzz .nameplate { background: #ff2d95; box-shadow: 0 0 10px #ff2d95; }
+  .dlg.zzz .portrait { border-radius: 50%; border: 2px solid #2de2ff; box-shadow: 0 0 14px #2de2ff; }
+  .dlg.zzz .textbox { color: #d8fbff; letter-spacing: .3px; }
+
+  /* Genshin — clean epic */
+  .dlg.genshin .textbox { border: 1px solid #c9a227; background: rgba(18,20,32,.85); border-radius: 10px; backdrop-filter: blur(2px); }
+  .dlg.genshin .nameplate { background: linear-gradient(90deg,#b8860b,#e6c34a); color:#1a1408; }
+  .dlg.genshin .portrait { border-radius: 10px; border: 2px solid #c9a227; }
+  .dlg.genshin .textbox { font-family: "Times New Roman", Georgia, serif; }
+
+  /* Reverse 1999 — art deco */
+  .dlg.reverse .textbox { border: 2px solid #d4af37; background: #1c160e; border-radius: 2px; color: #f0e2c0; }
+  .dlg.reverse .nameplate { background: #8a6d1f; color: #f5e9c8; border-radius: 2px; }
+  .dlg.reverse .portrait { border-radius: 2px; border: 2px solid #d4af37; background:#241a0e; }
+  .dlg.reverse .textbox { font-family: Georgia, "Times New Roman", serif; font-style: italic; }
+
+  /* Arknights — operator module */
+  .dlg.arknights .textbox { border: 1px solid #4ade80; background: #0e1a14; border-radius: 4px; color: #d7ffe6; font-family: "Consolas", monospace; }
+  .dlg.arknights .nameplate { background: #14532d; color: #4ade80; border-radius: 2px; font-family: monospace; }
+  .dlg.arknights .portrait { border-radius: 4px; border: 1px solid #4ade80; background:#0c160f; }
+
+  /* Nikke — pop */
+  .dlg.nikke .textbox { border: 2px solid #ff7ac4; background: rgba(40,16,40,.9); border-radius: 18px; color: #ffe3f3; }
+  .dlg.nikke .nameplate { background: linear-gradient(90deg,#ff7ac4,#ffb3d9); color:#3a0a26; border-radius: 14px; }
+  .dlg.nikke .portrait { border-radius: 50% 50% 12px 12px; border: 2px solid #ff7ac4; background:#3a1430; }
+
+</style>
+</head>
+<body>
+<header>
+  <h1>Полный анализ диалоговых систем топовых gacha-игр</h1>
+  <p>Архитектура, UX, сравнение HoYoverse / Kuro / Project Moon / Bluepoch и связанные системы. Эталонный разбор для разработчиков и аналитиков.</p>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>1. Кто в топе по диалоговым системам</h2>
+    <table>
+      <thead>
+        <tr><th>Игра</th><th>Студия</th><th>Тип диалога</th><th>Сильная сторона</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Honkai: Star Rail</td><td>HoYoverse</td><td>Ветвящийся VN + карточки</td><td>Лучшая структура выборов, «телефон», мини-игры</td></tr>
+        <tr><td>Zenless Zone Zero</td><td>HoYoverse</td><td>Радиальное меню, быстрые реплики</td><td>Скорость, «vibe», динамичность</td></tr>
+        <tr><td>Genshin Impact</td><td>HoYoverse</td><td>Линейный + упрощённые выборы</td><td>Масштаб, локализация</td></tr>
+        <tr><td>Wuthering Waves</td><td>Kuro Games</td><td>VN + скип, дубляж 4 языка</td><td>Качество озвучки, скип-система</td></tr>
+        <tr><td>Reverse: 1999</td><td>Bluepoch</td><td>Полноценный VN</td><td>Стиль, текст, атмосфера</td></tr>
+        <tr><td>Limbus Company</td><td>Project Moon</td><td>Текстовый роман + выборы</td><td>Нарратив, моральные дилеммы</td></tr>
+        <tr><td>Arknights</td><td>Hypergryph</td><td>Стори-модули, VN</td><td>Глубина лора, Side Stories</td></tr>
+        <tr><td>Fate/Grand Order</td><td>Type-Moon</td><td>VN-классика</td><td>Объём сценария, дубляж</td></tr>
+        <tr><td>Nikke</td><td>Shift Up</td><td>VN + селфи/комната</td><td>Персональность персонажей</td></tr>
+        <tr><td>Granblue Fantasy</td><td>Cygames</td><td>VN</td><td>Традиционная JRPG-ветка</td></tr>
+      </tbody>
+    </table>
+    <div class="note">HoYoverse (HSR/ZZZ) — текущий золотой стандарт «игровой» подачи диалога. Project Moon и Bluepoch — стандарт «литературного» качества.</div>
+  </section>
+
+  <section>
+    <h2>2. Архитектура диалоговой системы</h2>
+    <p class="muted">Любая серьёзная система строится из слоёв:</p>
+
+    <div class="layer"><b>A. Data-слой (скрипт диалога)</b><br>
+      Формат: YAML / JSON / CSV или собственный node-graph (Unity Yarn Spinner, Ink, Ren'Py, либо кастом HoYoverse). Сущности: <span class="tag">Speaker</span><span class="tag">Line</span><span class="tag">Choice</span><span class="tag">Condition</span><span class="tag">Branch</span><span class="tag">CameraCue</span><span class="tag">Emote</span><span class="tag">VoiceClip</span><span class="tag">Subtitle</span><span class="tag">LocalizedText</span>. Диалог должен быть <b>data-driven</b>, отделён от кода. HSR хранит сцены как граф с узлами — это даёт ветвление и переиспользование.</div>
+
+    <div class="layer"><b>B. Локализация (i18n pipeline)</b><br>
+      Минимум 13 языков у HoYoverse. Текст → таблицы → TM (translation memory) → QC. Проблема: длина строк (нем./рус. длиннее китайского в 2–3 раза) → адаптивный UI (auto-fit, wrap, dynamic box). Voice lip-sync: озвучка пишется под оригинал (CN/JP), субтитры локализуются отдельно → рассинхрон (типично для WuWa/Genshin). Решение HoYoverse — «soft subtitle timing».</div>
+
+    <div class="layer"><b>C. Presentation-слой (UI/HUD)</b><br>
+      Dialogue box, nameplate, avatar/portrait, expression sprites. Speed lines, типографика, кинематографичные рамки (HSR — стиль «комикс», ZZZ — неон/glitch). Слой камеры: диалог управляет камерой (<code>CameraCue</code>) — зум, focus на говорящем, depth-of-field.</div>
+
+    <div class="layer"><b>D. Audio / VO-слой</b><br>
+      Streaming VO по фразам, привязка к subtitle timing. Выбор языка озвучки независимо от текста. «Auto» / «Skip» / «History» — стандарт VN-функций.</div>
+
+    <div class="layer"><b>E. Interaction-слой</b><br>
+      Выборы (branches), радиальное меню (ZZZ), QTE-вставки, мини-игры (телефон HSR, «Video Play»). Системы «Trust / Companionship», влияющие на доступные реплики.</div>
+  </section>
+
+  <section>
+    <h2>3. Сравнительный разбор механик</h2>
+
+    <div class="card">
+      <h3>Honkai: Star Rail — эталон «геймифицированного» диалога</h3>
+      <ul>
+        <li><b>Ветвление с возвратом:</b> выборы ведут к разным репликам, но сходятся к одной сюжетной точке (illusion of agency). Дешевле настоящих концовок.</li>
+        <li><b>Система «Телефон»:</b> чаты, звонки, соцсеть «Interastral Peace», мини-игры — диалог живёт вне катсцен.</li>
+        <li><b>Выражения и позы:</b> портреты меняются (happy / serious / shocked) → эмоциональность без full motion.</li>
+        <li><b>Companion quests и guest conversations:</b> рост отношений через повторяющиеся диалоги.</li>
+        <li><b>Динамический бокс:</b> адаптация под длину текста + иконки предметов/персонажей внутри текста (rich text).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Zenless Zone Zero — скорость и стиль</h3>
+      <ul>
+        <li><b>Радиальное/быстрое меню выбора:</b> реплики появляются как пузыри, выбор мгновенный, pacing быстрее HSR.</li>
+        <li><b>«Vibe» диалог:</b> короткие реплики, сленг, break-the-fourth-wall (обращение к игроку как к «Proxy»).</li>
+        <li>Меньше длинных монологов, больше banter — снижает усталость от чтения.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Wuthering Waves — фокус на озвучку и скип</h3>
+      <ul>
+        <li>Полный дубляж на 4 языках с самого релиза (исправили провал 1.0).</li>
+        <li>Агрессивный <b>skip</b> и auto-play — уважение ко времени игрока.</li>
+        <li>Диалог в мире (NPC overhead bubbles) + VN для стори.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Reverse: 1999 / Limbus Company — нарративный упор</h3>
+      <ul>
+        <li>Reverse: 1999 — стилизация под 1920-е, диалог как литература, богатый текст.</li>
+        <li>Limbus Company — текстовые логи, выборы с моральными последствиями, интеграция с боёвкой через «указания».</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Arknights — модульная подача</h3>
+      <ul>
+        <li>Story modules, операторские записи, Side Stories. Диалог часто в «окне оператора» + катсцены.</li>
+        <li>Глубокий лор через кодекс и неявные связи.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Связанные системы (что окружает диалог)</h2>
+    <div class="grid">
+      <div class="card"><b>Character / Affinity</b><br><span class="muted">Уровни привязанности (HSR «Companionship», Genshin «Hangout Events» с ветвящимися концовками, WuWa квесты). Диалог — главный канал прокачки отношений.</span></div>
+      <div class="card"><b>Quest / Story</b><br><span class="muted">Диалог привязан к квестам через триггеры и флаги состояния (state machine сюжета).</span></div>
+      <div class="card"><b>Codex / Lore</b><br><span class="muted">Собранные диалоги, записи, архивы (Arknights, HSR «Data Bank»).</span></div>
+      <div class="card"><b>Event system</b><br><span class="muted">Временные диалоги, часто легче и юморнее основного сюжета.</span></div>
+      <div class="card"><b>Photo / Interaction</b><br><span class="muted">Nikke (комната, селфи), Genshin (питомцы) — физическое взаимодействие как продолжение диалога.</span></div>
+      <div class="card"><b>System / Settings</b><br><span class="muted">Скорость текста, язык VO, субтитры, auto/skip/history — часть UX диалога.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Ключевые паттерны и метрики успеха</h2>
+    <ul>
+      <li><b>Illusion of choice</b> — ветвление, сходящееся к канону (экономия бюджета при ощущении агентства).</li>
+      <li><b>Pacing</b> — чередование VN ↔ экшен, чтобы не утомлять. ZZZ/HSR — лучшие.</li>
+      <li><b>Character voice consistency</b> — у каждого персонажа «речевой паттерн» (ZZZ использует сленг / break-4th-wall).</li>
+      <li><b>Accessibility</b> — скип, история, скорость, размер шрифта.</li>
+      <li><b>Replayability диалога</b> — архивы и повторные беседы (HSR guest convos).</li>
+      <li><b>Качество локализации > количество языков.</b> Плохой перевод убивает погружение сильнее, чем отсутствие VO.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Чек-лист для своей системы</h2>
+    <ul class="check">
+      <li>Data-driven граф диалога (Ink / Yarn / кастом) с узлами line / choice / condition / camera.</li>
+      <li>i18n из коробки: единый источник строк + адаптивный UI под длину.</li>
+      <li>VO streaming с независимым выбором языка + soft subtitle timing.</li>
+      <li>Ветвление с возвратом + система флагов/состояний сюжета.</li>
+      <li>Внесценический диалог: чат / телефон / соцсеть для «живого» мира.</li>
+      <li>Affinity-layer, связанный с уникальными репликами и концовками (hangout-style).</li>
+      <li>UX-триада: Auto / Skip / History + настраиваемая скорость и шрифт.</li>
+      <li>Camera cues в диалоге для кинематографичности без full motion video.</li>
+      <li>Архив / кодекс всех пройденных диалогов.</li>
+      <li>QC-пайплайн: lip-sync check, overflow check, translation memory.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>7. Визуализации: элементы, типы, стили, методы, ситуации, приёмы</h2>
+    <p class="muted">Кликай по любому блоку — откроется визуализация и пошаговое описание: как это работает и создаётся, буквально по шагам. Раскрыто для всех элементов, типов, стилей, методов, ситуаций и приёмов.</p>
+    <div class="tabs" id="vizTabs">
+      <div class="tab active" data-tab="elements">Элементы</div>
+      <div class="tab" data-tab="types">Типы</div>
+      <div class="tab" data-tab="styles">Стили</div>
+      <div class="tab" data-tab="methods">Методы</div>
+      <div class="tab" data-tab="situations">Ситуации</div>
+      <div class="tab" data-tab="techniques">Приёмы</div>
+    </div>
+    <div class="grid" id="vizGrid"></div>
+    <div class="detail" id="vizDetail">
+      <div id="vizTitle" style="font-size:18px;font-weight:700;margin-bottom:4px;"></div>
+      <div class="vizbox" id="vizViz"></div>
+      <ol class="steps" id="vizSteps"></ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>8. Живые диалоговые окна (потыкай сам)</h2>
+    <p class="muted">Переключай стиль и кликай по окну диалога, чтобы пролистать. В местах выбора нажимай на варианты — реакция меняется.</p>
+    <div class="stylebar">
+      <div class="sbtn active" data-style="hsr">HSR (комикс)</div>
+      <div class="sbtn" data-style="zzz">ZZZ (неон)</div>
+      <div class="sbtn" data-style="genshin">Genshin (эпик)</div>
+      <div class="sbtn" data-style="reverse">Reverse:1999</div>
+      <div class="sbtn" data-style="arknights">Arknights</div>
+      <div class="sbtn" data-style="nikke">Nikke</div>
+    </div>
+    <div class="stage">
+      <div class="dlg hsr" id="dlg">
+        <div class="portrait" id="dPortrait">😄</div>
+        <div class="panel">
+          <span class="nameplate" id="dName">Марх</span>
+          <div class="textbox" id="dText"></div>
+          <div class="choices" id="dChoices"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">Клик по тексту — следующая реплика · клик во время печати — показать всё сразу</div>
+  </section>
+
+  <section>
+    <h2>9. Примеры диалоговых ситуаций из практики</h2>
+    <p class="muted">Конкретные кейсы, которые иллюстрируют, как работают системы в реальных играх:</p>
+
+    <div class="card">
+      <h3>Ситуация A — «Иллюзия выбора» (HSR, выбор реплики персонажу)</h3>
+      <p>Игрок выбирает тон ответа NPC: дружелюбный / нейтральный / саркастичный. Каждая ветка даёт уникальную реплику-реакцию, но через 2–3 шага сюжет сходится к одной и той же точке. Это создаёт ощущение влияния без необходимости писать 3 полноценные концовки.</p>
+      <span class="tag">branch</span><span class="tag">converge</span><span class="tag">reuse</span>
+    </div>
+
+    <div class="card">
+      <h3>Ситуация B — Внесценический чат (HSR «Телефон»)</h3>
+      <p>Персонаж пишет в «Interastral Peace» между миссиями. Диалог не блокирует геймплей — это асинхронное сообщение. Решается через очередь событий (event queue) + отдельный UI-слой поверх мира. Важно: такие реплики не должны нести критичный для сюжета контент, иначе игрок пропустит его.</p>
+      <span class="tag">async</span><span class="tag">overlay UI</span><span class="tag">non-blocking</span>
+    </div>
+
+    <div class="card">
+      <h3>Ситуация C — Радиальное меню (ZZZ)</h3>
+      <p>Вместо списка вариантов снизу — пузыри реплик вокруг портрета, выбор мгновенный. Это меняет архитектуру: выборы должны рендериться в координатах экрана (world/UI space), а не в фиксированном боксе. Pacing ускоряется, но теряется «чтение» — подходит для казуального банаterа, не для драмы.</p>
+      <span class="tag">radial menu</span><span class="tag">pacing</span><span class="tag">screen-space</span>
+    </div>
+
+    <div class="card">
+      <h3>Ситуация D — Hangout Events (Genshin)</h3>
+      <p>Мини-квест с деревом решений и несколькими концовками для одного персонажа. Здесь ветвление НАСТОЯЩЕЕ: выбор меняет финал, а прогресс сохраняется в отдельный state (не в глобальный сюжет). Проблема: нужна отдельная система «пройденных веток», чтобы игрок мог добрать остальные концовки.</p>
+      <span class="tag">true branch</span><span class="tag">multiple endings</span><span class="tag">separate state</span>
+    </div>
+
+    <div class="card">
+      <h3>Ситуация E — Моральная дилемма (Limbus Company)</h3>
+      <p>Выбор «указания» в бою и диалоге влияет на отношение команды и доступный текст позже. Здесь диалог связан с боевым state machine — реплики зависят от переменных (relations, sanity). Требует единого контекста данных между боём и диалогом.</p>
+      <span class="tag">state-driven</span><span class="tag">cross-system</span><span class="tag">variables</span>
+    </div>
+
+    <div class="card">
+      <h3>Ситуация F — Локализация длины (Genshin / WuWa)</h3>
+      <p>Китайская фраза в 10 иероглифов на русском превращается в 3 строки. Если бокс фиксированный — текст обрезается или вылезает. Решение: динамическая высота бокса + auto-wrap + минимальный/максимальный padding, плюс лимиты символов при написании оригинала.</p>
+      <span class="tag">i18n</span><span class="tag">auto-fit</span><span class="tag">overflow</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>10. Проблемы, которые приходится решать при создании</h2>
+    <div class="grid">
+      <div class="card"><b>1. Lip-sync рассинхрон</b><br><span class="muted">VO пишется под оригинал (CN/JP), локализованные субтитры длиннее. Фраза кончается, а текст ещё читают. Решение: soft timing, паузы, «grace period».</span></div>
+      <div class="card"><b>2. State spaghetti</b><br><span class="muted">Флаги сюжета растут, ветки пересекаются. Баг: «персонаж здоровается как в первый раз» на 20-м часе. Решение: явный quest state machine, версионирование сюжета.</span></div>
+      <div class="card"><b>3. Непереиспользуемость контента</b><br><span class="muted">Каждая сцена пишется руками. Решение: шаблоны реплик, теги переменных ({player_name}, {item}), data-driven подход.</span></div>
+      <div class="card"><b>4. Производительность VO</b><br><span class="muted">Тысячи аудиофайлов. Грузить все нельзя. Решение: streaming по фразам, префетч следующей реплики, кэш коротких SFX.</span></div>
+      <div class="card"><b>5. Скип и целостность</b><br><span class="muted">Игрок скипает диалог — теряет контекст и потом не понимает квест. Решение: архив/кодекс, краткое резюме пропущенного, обязательные «якорные» строки без скипа.</span></div>
+      <div class="card"><b>6. Доступность</b><br><span class="muted">Дислексия, слабое зрение, глухота. Решение: размер шрифта, контраст, субтитры обязательны при VO, TTS-хук.</span></div>
+      <div class="card"><b>7. Контент-пайплайн</b><br><span class="muted">Сценаристы пишут в Excel/Google Docs, инженеры ждут JSON. Решение: единый редактор (Ink/Yarn/кастом tool), авто-экспорт, preview в редакторе.</span></div>
+      <div class="card"><b>8. Ветвление и бюджет</b><br><span class="muted">Каждая ветка = запись VO + локализация × 13 языков. Решение: converge-паттерн, озвучка только ключевых веток, остальное текстом.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>11. Практики и решения (how-to)</h2>
+    <ul class="check">
+      <li><b>Единый формат данных:</b> описывай диалог как граф узлов, а не список строк. Узел = {id, speaker, text, choices[], next[], conditions[], camera, vo}.</li>
+      <li><b>Разделяй контент и код:</b> сценаристы не должны трогать движок. Давайте им визуальный редактор с live-preview.</li>
+      <li><b>Переменные в тексте:</b> используйте токены ({name}, {gender}, {item_icon}) — один скрипт на все локали и пол персонажа.</li>
+      <li><b>Converge-ветвление:</b> давайте 2–4 уникальные реплики реакции, но возвращайте к общему стволу — экономия VO/локали.</li>
+      <li><b>Якорные строки:</b> помечайте критичные реплики флагом no-skip, чтобы сюжет не терялся при скипе.</li>
+      <li><b>Адаптивный бокс:</b> auto-height + max-lines + scroll для переполнения; лимиты символов при написании.</li>
+      <li><b>VO streaming + preload:</b> грузите следующую фразу заранее, кэшируйте; soft subtitle timing под локаль.</li>
+      <li><b>State machine сюжета:</b> храните прогресс как явные состояния, версионируйте при патчах, избегайте хаоса флагов.</li>
+      <li><b>Архив/кодекс:</b> сохраняйте пройденные диалоги для повторного чтения и для тех, кто скипнул.</li>
+      <li><b>QC-автоматизация:</b> боты проверяют overflow, пустые поля локали, отсутствие VO, битые теги — до релиза.</li>
+      <li><b>Accessibility по умолчанию:</b> настраиваемый шрифт/скорость/контраст и обязательные субтитры при озвучке.</li>
+      <li><b>Телеметрия:</b> метрики skip-rate и time-on-dialog подсказывают, где диалог затянут или скучен.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Анализ диалоговых систем gacha-игр · сгенерировано как справочный материал.<br>
+    Лучшие практики: HoYoverse (HSR/ZZZ), Kuro Games (WuWa), Project Moon, Bluepoch.
+  </footer>
+
+</div>
+
+<script>
+  // ===== Section 7: Visualization explorer engine =====
+  function cap(t){ return '<div class="mock-cap">'+t+'</div>'; }
+  function box(p,n,t,a){ return '<div style="display:flex;gap:10px;align-items:flex-end;"><div style="width:52px;height:52px;border-radius:10px;background:#2a2f4d;border:2px solid '+a+';display:flex;align-items:center;justify-content:center;font-size:26px;">'+p+'</div><div style="flex:1;min-width:0;"><div style="display:inline-block;background:'+a+';color:#fff;padding:2px 10px;border-radius:6px 6px 0 0;font-size:12px;font-weight:700;">'+n+'</div><div style="background:rgba(20,24,40,.92);border:1px solid '+a+';border-radius:0 10px 10px 10px;padding:10px;font-size:13px;">'+t+'</div></div></div>'; }
+  function svg(inner,h){ return '<svg viewBox="0 0 600 '+(h||180)+'" width="100%" style="background:var(--panel);border-radius:10px;">'+inner+'</svg>'; }
+  var AR='<defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7c5cff"/></marker></defs>';
+
+  var DATA = {
+    elements: [
+      { icon:'📦', title:'Диалоговое окно (Dialogue Box)', sub:'Базовый контейнер реплики',
+        viz: box('😄','Марх','Привет! Рад тебя видеть здесь.','#7c5cff')+cap('Базовый бокс: портрет + имя + текст'),
+        steps:[
+          {b:'Загрузка узла', t:'Движок берёт текущий узел скрипта (id, speaker, text) из графа диалога.'},
+          {b:'Подстановка портрета', t:'UI берёт аватар говорящего из атласа спрайтов и ставит в левую панель.'},
+          {b:'Рендер nameplate+текста', t:'Рисуется имя и textbox; текст выводится эффектом печати (typewriter).'},
+          {b:'Ожидание ввода', t:'Система ждёт клик/кнопку «далее» → переход к next-узлу.'},
+          {b:'Обработка выбора', t:'Если у узла есть choices — вместо авто-перехода рисуются кнопки выбора.'}
+        ]},
+      { icon:'🏷️', title:'Табличка имени (Nameplate)', sub:'Кто говорит',
+        viz: box('🙂','','— имя появляется здесь —','#7c5cff').replace('border-radius:0 10px 10px 10px','border-radius:0 10px 10px 10px;margin-top:6px'),
+        steps:[
+          {b:'Определение speaker-id', t:'Из узла берётся id говорящего.'},
+          {b:'Локализация имени', t:'Имя достаётся из таблицы персонажей на текущем языке.'},
+          {b:'Цвет по фракции', t:'Применяется стиль/цвет nameplate (герой — золото, враг — красный).'},
+          {b:'Позиционирование', t:'Плашка рисуется поверх верхней грани бокса, чтобы не перекрывать текст.'},
+          {b:'Смена говорящего', t:'При смене реплики nameplate плавно обновляется (fade).'}
+        ]},
+      { icon:'😐', title:'Портрет и эмоция (Expression)', sub:'Спрайты настроения',
+        viz: '<div style="display:flex;gap:12px;">'+box('🙂','Марх','neutral','#888').replace('align-items:flex-end','align-items:center')+box('😱','Марх','shocked','#ff5c9d').replace('align-items:flex-end','align-items:center')+'</div>'+cap('Два состояния одного персонажа'),
+        steps:[
+          {b:'Набор спрайтов', t:'У персонажа есть neutral/happy/serious/shocked и т.д.'},
+          {b:'Поле emotion', t:'Узел содержит emotion → выбирается нужный спрайт.'},
+          {b:'Cross-fade', t:'При смене эмоции проигрывается плавный переход между кадрами.'},
+          {b:'Поза/масштаб', t:'Важная реплика может дать lean-in (приближение) портрета.'},
+          {b:'Fallback', t:'Если спрайта нет — силуэт/иконка по умолчанию.'}
+        ]},
+      { icon:'🔘', title:'Кнопки выбора (Choices)', sub:'Ветвление внутри сцены',
+        viz: '<div style="max-width:320px;">'+['«Я друг, не бойся.»','«Я просто прохожий.»','«(молчать)»'].map(function(c){return '<div class="minibtn" style="display:block;">'+c+'</div>';}).join('')+'</div>'+cap('Список вариантов'),
+        steps:[
+          {b:'Массив choices', t:'Узел содержит choices:[{label, next}].'},
+          {b:'Скрытие «далее»', t:'UI прячет авто-переход и рисует вертикальный список кнопок.'},
+          {b:'Hover-состояние', t:'Каждая кнопка подсвечивается при наведении.'},
+          {b:'Запись выбора', t:'По клику сохраняется выбор (статистика/повторы) и грузится next-узел.'},
+          {b:'Влияние на сюжет', t:'Если выбор важен — выставляется флаг/переменная состояния.'}
+        ]},
+      { icon:'🔊', title:'Привязка озвучки (VO binding)', sub:'Аудио к реплике',
+        viz: svg(AR+'<rect x="20" y="70" width="430" height="26" rx="6" fill="#1d2238" stroke="#2c3252"/><rect x="40" y="74" width="220" height="18" rx="4" fill="#7c5cff"/><text x="30" y="125" fill="#9aa0b5" font-size="12">VO (язык EN)</text><circle cx="250" cy="83" r="6" fill="#fff"/>',160)+cap('Таймлайн аудиофрагмента'),
+        steps:[
+          {b:'Сопоставление файла', t:'Каждой реплике сопоставлен vo_<node>_<lang>.audio.'},
+          {b:'Стриминг', t:'При показе узла движок стримит файл выбранного языка.'},
+          {b:'Тайминг', t:'Субтитры показываются параллельно по таймкодам из файла.'},
+          {b:'Смена языка', t:'Переключение языка VO — перепривязка без перезагрузки сцены.'},
+          {b:'Нет VO', t:'Если языка нет — только субтитры, auto-play ускоряется.'}
+        ]},
+      { icon:'⏱️', title:'Синхронизация субтитров', sub:'Soft subtitle timing',
+        viz: svg(AR+'<rect x="20" y="40" width="160" height="22" rx="5" fill="#7c5cff"/><text x="20" y="30" fill="#9aa0b5" font-size="11">VO (коротко)</text><rect x="20" y="100" width="300" height="22" rx="5" fill="#ff5c9d"/><text x="20" y="90" fill="#9aa0b5" font-size="11">Субтитры (длиннее → пауза)</text>',140)+cap('Локаль длиннее оригинала'),
+        steps:[
+          {b:'Длительность VO', t:'VO-файл имеет длительность T.'},
+          {b:'Чанки субтитров', t:'Текст разбит на куски с таймкодами [start,end].'},
+          {b:'Grace-period', t:'Локализованный текст длиннее → добавляются паузы компенсации.'},
+          {b:'Учёт скорости чтения', t:'Auto-play ждёт конца фразы + минимальную паузу, если игрок медленный.'},
+          {b:'Скип', t:'При скипе тайминги игнорируются, текст показывается сразу.'}
+        ]},
+      { icon:'🎥', title:'Режиссура камеры (Camera cue)', sub:'Зум/фокус в диалоге',
+        viz: svg(AR+'<rect x="40" y="30" width="520" height="120" rx="8" fill="#0e1220" stroke="#2c3252"/><circle cx="180" cy="90" r="34" fill="#2a2f4d" stroke="#7c5cff"/><text x="180" y="96" fill="#fff" font-size="20" text-anchor="middle">😄</text><circle cx="180" cy="90" r="50" fill="none" stroke="#ff5c9d" stroke-dasharray="4 4"/><path d="M260 90 L320 90" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/>',170)+cap('Фокус на говорящем + зум'),
+        steps:[
+          {b:'Поле camera', t:'Узел содержит camera:{mode,target,dur}.'},
+          {b:'Команда камере', t:'Движок передаёт зум/пан/DoF.'},
+          {b:'Плавный переход', t:'Камера lerp-ом за dur мс переходит в состояние.'},
+          {b:'Фокус говорящего', t:'На реплике говорящий крупнее; при смене — перенацеливание.'},
+          {b:'Возврат', t:'По концу сцены камера возвращается к gameplay-пресету.'}
+        ]},
+      { icon:'📜', title:'История / Лог (History)', sub:'Перечитать пропущенное',
+        viz: '<div style="font-size:12px;line-height:1.7;">🗨 <b>Марх:</b> Привет!<br>🗨 <b>Марх:</b> Тут странно...<br>🗨 <b>???:</b> Кто здесь?</div>'+cap('Прокручиваемый список реплик'),
+        steps:[
+          {b:'Кольцевой буфер', t:'Каждый показанный узел добавляется в лог сессии.'},
+          {b:'Открытие Log', t:'По кнопке History — прокручиваемый список всех реплик.'},
+          {b:'Навигация', t:'Скролл вверх/вниз; закрытие возвращает к текущей точке.'},
+          {b:'Сессия', t:'Лог живёт в рамках сессии (не между запусками, кроме архива).'},
+          {b:'Польза', t:'Важно в длинных сценах, где забыл, о чём речь.'}
+        ]},
+      { icon:'⏩', title:'Skip / Auto', sub:'Комфорт чтения',
+        viz: '<div><span class="minibtn">▶ Auto</span><span class="minibtn">⏩ Skip</span><span class="minibtn">📜 Log</span></div>'+cap('Триада UX-кнопок'),
+        steps:[
+          {b:'Skip', t:'Клик/удержание проматывает узлы, текст сразу, без ожидания VO.'},
+          {b:'Auto', t:'Авто-переход к next после окончания реплики + пауза.'},
+          {b:'Якорные узлы', t:'no-skip узлы блокируют скип до прочтения.'},
+          {b:'Настройка', t:'Скорость auto задаётся в settings (мс паузы).'},
+          {b:'Конец сцены', t:'По финалу auto/skip автоматически отключаются.'}
+        ]},
+      { icon:'✨', title:'Rich text (иконки в тексте)', sub:'Предметы и имена в строке',
+        viz: box('📦','Система','Возьми <span style="color:#ffcf8a">⚔ Меч</span> и встреть <span style="color:#7c5cff">Марх</span>.','#7c5cff'),
+        steps:[
+          {b:'Теги в тексте', t:'В строке теги {item:123}, {char:Name}.'},
+          {b:'Парсер', t:'Тег заменяется на инлайн-иконку/цветное имя.'},
+          {b:'Атлас UI', t:'Иконка берётся из атласа по id предмета.'},
+          {b:'Тултип', t:'При наведении на иконку — название/описание.'},
+          {b:'Локализация', t:'Теги сохраняются во всех языках → иконки совпадают.'}
+        ]}
+    ],
+
+    types: [
+      { icon:'📜', title:'VN-новелла', sub:'Текст + портреты + выборы',
+        viz: box('😊','Персонаж','Это был обычный день...','#7c5cff'),
+        steps:[
+          {b:'Загрузка сцены', t:'Движок грузит скрипт новеллы (линейный или ветвящийся).'},
+          {b:'Показ реплики', t:'Рендерится фон + портрет + textbox, текст печатается.'},
+          {b:'Выбор (опц.)', t:'В точках ветвления появляются кнопки; выбор меняет next.'},
+          {b:'Переход', t:'Клик ведёт к следующему узлу или к концу главы.'},
+          {b:'Сохранение', t:'Прогресс фиксируется в save-слот (HoYoverse, FGO, Reverse).'}
+        ]},
+      { icon:'💬', title:'Мирной оверлей (Bubbles)', sub:'Реплики в открытом мире',
+        viz: svg(AR+'<rect x="40" y="90" width="60" height="60" rx="8" fill="#2a2f4d" stroke="#7c5cff"/><text x="70" y="128" fill="#fff" font-size="22" text-anchor="middle">🧑</text><rect x="110" y="60" width="200" height="40" rx="12" fill="#fff"/><path d="M120 100 L110 100 L118 108 Z" fill="#fff"/><text x="130" y="85" fill="#111" font-size="12">Привет, путник!</text>',170)+cap('Пузырь над головой NPC'),
+        steps:[
+          {b:'Триггер в мире', t:'NPC в зоне видимости/близости запускает bubble.'},
+          {b:'Overlay-слой', t:'Пузырь рисуется поверх мира, геймплей не ставится на паузу.'},
+          {b:'Авто-скрытие', t:'Через N сек или при уходе пузырь исчезает.'},
+          {b:'Не блокирует', t:'Игрок может двигаться/драться, читая реплику.'},
+          {b:'Озвучка', t:'Короткие VO-вставки, часто без субтитров (WuWa, Genshin).'}
+        ]},
+      { icon:'📱', title:'Асинхронный чат (Телефон)', sub:'Сообщения вне катсцен',
+        viz: '<div style="max-width:300px;margin:0 auto;">'+['💬 Марх: ты где?','📷 [фото]','🔔 новое сообщение'].map(function(c){return '<div style="background:#1d2238;border:1px solid #2c3252;border-radius:10px;padding:8px;margin:4px;font-size:12px;">'+c+'</div>';}).join('')+'</div>'+cap('Входящее сообщение'),
+        steps:[
+          {b:'Событие в очереди', t:'Система кладёт сообщение в event queue.'},
+          {b:'UI-оверлей', t:'Чат рисуется поверх всего (телефон/соцсеть).'},
+          {b:'Уведомление', t:'Звук/индикатор, что пришло сообщение.'},
+          {b:'Чтение вне сцены', t:'Игрок читает когда хочет, сюжет не блокируется.'},
+          {b:'Связь с квестом', t:'Иногда ответ в чате триггерит квест (HSR Interastral Peace).'}
+        ]},
+      { icon:'🎯', title:'Радиальное меню', sub:'Быстрые реплики (ZZZ)',
+        viz: svg(AR+'<circle cx="300" cy="90" r="40" fill="#2a2f4d" stroke="#2de2ff"/><text x="300" y="98" fill="#fff" font-size="20" text-anchor="middle">🙂</text><circle cx="300" cy="30" r="26" fill="#1d2238" stroke="#2de2ff"/><text x="300" y="35" fill="#d8fbff" font-size="11" text-anchor="middle">Ок!</text><circle cx="380" cy="70" r="26" fill="#1d2238" stroke="#2de2ff"/><text x="380" y="75" fill="#d8fbff" font-size="11" text-anchor="middle">Хм</text><circle cx="220" cy="70" r="26" fill="#1d2238" stroke="#2de2ff"/><text x="220" y="75" fill="#d8fbff" font-size="11" text-anchor="middle">Нет</text>',170)+cap('Пузыри вокруг портрета'),
+        steps:[
+          {b:'Точка выбора', t:'В диалоге появляется радиальная раскладка реплик.'},
+          {b:'Screen-space', t:'Кнопки позиционируются вокруг портрета в координатах экрана.'},
+          {b:'Мгновенный выбор', t:'Клик по пузырю сразу даёт реакцию — pacing быстрый.'},
+          {b:'Мало текста', t:'Короткие фразы, больше banter, меньше монологов.'},
+          {b:'Архитектура', t:'Рендер выборов иной, чем фиксированный бокс снизу.'}
+        ]},
+      { icon:'🌿', title:'True branch (настоящее ветвление)', sub:'Выбор меняет концовку',
+        viz: svg(AR+'<rect x="30" y="70" width="100" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="80" y="90" fill="#fff" font-size="11" text-anchor="middle">Выбор</text><rect x="220" y="30" width="120" height="28" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="49" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка A</text><rect x="220" y="80" width="120" height="28" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="99" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка B</text><rect x="220" y="130" width="120" height="28" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="149" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка C</text><line x1="130" y1="85" x2="218" y2="44" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="130" y1="85" x2="218" y2="94" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="130" y1="85" x2="218" y2="144" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/>',180)+cap('Разные финалы'),
+        steps:[
+          {b:'Точка решения', t:'Hangout-квест предлагает выбор с ветвлением.'},
+          {b:'Отдельный state', t:'Прогресс ветки пишется в отдельный state, не в глобальный сюжет.'},
+          {b:'Финал', t:'Каждая ветка ведёт к своей концовке.'},
+          {b:'Трекинг', t:'Система помечает пройденные ветки.'},
+          {b:'Перепрохождение', t:'Игрок добирает остальные концовки (Genshin Hangout).'}
+        ]},
+      { icon:'🎬', title:'Кинематографичная катсцена', sub:'Camera cues + анимация',
+        viz: svg(AR+'<rect x="20" y="20" width="560" height="140" rx="8" fill="#0e1220" stroke="#2c3252"/><rect x="60" y="50" width="120" height="70" rx="6" fill="#2a2f4d" stroke="#7c5cff"/><text x="120" y="92" fill="#fff" font-size="24" text-anchor="middle">😠</text><rect x="320" y="50" width="160" height="14" rx="4" fill="#1d2238"/><rect x="320" y="74" width="200" height="14" rx="4" fill="#1d2238"/><rect x="320" y="98" width="140" height="14" rx="4" fill="#1d2238"/>',170)+cap('Полноэкранная сцена'),
+        steps:[
+          {b:'Запуск сцены', t:'Триггер ставит геймплей на паузу, грузит катсцену.'},
+          {b:'Анимация/модели', t:'Проигрывается анимация персонажей и окружения.'},
+          {b:'Camera cues', t:'Скрипт управляет зумом/ракурсом через camera-узлы.'},
+          {b:'Субтитры+VO', t:'Параллельно идут озвучка и субтитры (часто预-rendered).'},
+          {b:'Завершение', t:'Возврат управления игроку, разморозка мира.'}
+        ]}
+    ],
+
+    styles: [
+      { icon:'🟣', title:'HSR — комикс', sub:'Рамки, speed-lines, яркость',
+        viz: box('😄','Марх','О, ты пришёл!','#7c5cff').replace('border:1px solid #7c5cff','border:3px solid #c9b8ff').replace('border-radius:0 10px 10px 10px','border-radius:4px 14px 14px 14px;box-shadow:4px 4px 0 rgba(124,92,255,.35)'),
+        steps:[
+          {b:'Комикс-рамка', t:'Textbox с толстой обводкой и «сдвигом» тени — ощущение панели.'},
+          {b:'Градиент nameplate', t:'Имя в ярком градиенте (фиолет→розовый).'},
+          {b:'Портрет под углом', t:'Аватар с лёгким наклоном (-2deg) для динамики.'},
+          {b:'Speed-lines', t:'Фоновые линии/акценты при эмоциональных репликах.'},
+          {b:'Читаемость', t:'Крупный шрифт, высокий контраст — легко сканировать.'}
+        ]},
+      { icon:'🔵', title:'ZZZ — неон', sub:'Glitch, street, glow',
+        viz: box('🙂','Proxy','...ты готов?','#2de2ff').replace('border:1px solid #2de2ff','border:1px solid #2de2ff;box-shadow:0 0 14px rgba(45,226,255,.5)'),
+        steps:[
+          {b:'Неоновая обводка', t:'Бокс с glow (box-shadow) цианового/розового.'},
+          {b:'Круглый аватар', t:'Портрет в круге с неоновым кольцом.'},
+          {b:'Глитч-акценты', t:'При смене — лёгкий glitch-эффект.'},
+          {b:'Сленг/бантер', t:'Текст короткий, живой, break-4th-wall.'},
+          {b:'Быстрый ритм', t:'Минимум монологов, максимум реакций.'}
+        ]},
+      { icon:'🟤', title:'Reverse: 1999 — арт-деко', sub:'Литературный, винтаж',
+        viz: box('🎩','Б Vertin','Дождь стучал по стеклу...','#d4af37').replace('border:1px solid #d4af37','border:2px solid #d4af37').replace('border-radius:0 10px 10px 10px','border-radius:2px').replace('background:rgba(20,24,40,.92)','background:#1c160e').replace('color:#fff','color:#f0e2c0'),
+        steps:[
+          {b:'Золотая рамка', t:'Тонкая золотая обводка, прямые углы — арт-деко.'},
+          {b:'Сепия-фон', t:'Тёмно-коричневый бокс, тёплый текст.'},
+          {b:'Курсив/сериф', t:'Шрифт с засечками, иногда курсив — литературность.'},
+          {b:'Насыщенный текст', t:'Длинные, описательные реплики, стиль эпохи.'},
+          {b:'Атмосфера', t:'Акцент на настроении, а не на action.'}
+        ]},
+      { icon:'⛓️', title:'Limbus — текстовый лог', sub:'Мрачно, системно',
+        viz: '<div style="font-size:12px;color:#cfd2e6;background:#14121a;border:1px solid #3a1b1b;border-radius:8px;padding:10px;">[Лог 12:04] Мы входим в туннель.<br>[Лог 12:05] «Укажи действие.»</div>'+cap('Логи вместо бокса'),
+        steps:[
+          {b:'Лог-форма', t:'Диалог подаётся как текстовые записи/логи.'},
+          {b:'Мрачная палитра', t:'Тёмно-серый/багровый, минимум яркого.'},
+          {b:'Дилеммы', t:'Выбор «указания» влияет на отношения и текст позже.'},
+          {b:'Связь с боем', t:'Текст и боевые команды используют общие переменные.'},
+          {b:'Нарратив', t:'Упор на мораль и тон, а не на визуал.'}
+        ]},
+      { icon:'🟢', title:'Arknights — окно оператора', sub:'Модульно, строго',
+        viz: box('🛡️','Amiya','Приказ принят.','#4ade80').replace('border:1px solid #4ade80','border:1px solid #4ade80;background:#0e1a14;font-family:monospace').replace('border-radius:0 10px 10px 10px','border-radius:4px').replace('color:#fff','color:#d7ffe6'),
+        steps:[
+          {b:'Модульный бокс', t:'Прямоугольное «окно оператора», техно-стиль.'},
+          {b:'Моноширинный шрифт', t:'Текст как терминал/консоль.'},
+          {b:'Зелёный акцент', t:'Цвет фракции Rhodes Island.'},
+          {b:'Side Stories', t:'Диалоги группируются в модули-истории.'},
+          {b:'Лор через кодекс', t:'Глубина раскрывается в архивах, а не в болтовне.'}
+        ]},
+      { icon:'🌸', title:'Nikke — поп', sub:'Персонально, мило',
+        viz: box('💖','Rapi','Я рядом, командир.','#ff7ac4').replace('border:1px solid #ff7ac4','border:2px solid #ff7ac4').replace('border-radius:0 10px 10px 10px','border-radius:18px').replace('background:rgba(20,24,40,.92)','background:rgba(40,16,40,.9)').replace('color:#fff','color:#ffe3f3'),
+        steps:[
+          {b:'Розовая рамка', t:'Скруглённый поп-бокс, мягкий glow.'},
+          {b:'Округлый аватар', t:'Портрет в «капле» (овал с плоским низом).'},
+          {b:'Персональность', t:'Акцент на отношениях, комнате, селфи.'},
+          {b:'Эмоциональность', t:'Реплики близкие, «командир»-обращение.'},
+          {b:'Юмор/милота', t:'Чередование драмы и комедии.'}
+        ]},
+      { icon:'🟡', title:'Genshin — эпик', sub:'Чисто, золото, серьёзно',
+        viz: box('⚔️','Паймон','Пойдём туда!','#c9a227').replace('border:1px solid #c9a227','border:1px solid #c9a227').replace('background:rgba(20,24,40,.92)','background:rgba(18,20,32,.85)').replace('border-radius:0 10px 10px 10px','border-radius:10px'),
+        steps:[
+          {b:'Тонкая золотая рамка', t:'Сдержанная обводка, полупрозрачный бокс.'},
+          {b:'Серифный шрифт', t:'Изящная типографика, эпический тон.'},
+          {b:'Backdrop blur', t:'Лёгкое размытие фона под боксом.'},
+          {b:'Линейность', t:'Чаще линейный диалог с упрощёнными выборами.'},
+          {b:'Масштаб', t:'Единообразие на огромном объёме контента.'}
+        ]}
+    ],
+
+    methods: [
+      { icon:'🔀', title:'Converge-ветвление', sub:'Ветвимся и сходимся',
+        viz: svg(AR+'<rect x="20" y="80" width="90" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="65" y="100" fill="#fff" font-size="11" text-anchor="middle">Выбор</text><rect x="170" y="30" width="100" height="26" rx="8" fill="#1d2238" stroke="#2c3252"/><text x="220" y="48" fill="#9aa0b5" font-size="11" text-anchor="middle">Реакция A</text><rect x="170" y="80" width="100" height="26" rx="8" fill="#1d2238" stroke="#2c3252"/><text x="220" y="98" fill="#9aa0b5" font-size="11" text-anchor="middle">Реакция B</text><rect x="170" y="130" width="100" height="26" rx="8" fill="#1d2238" stroke="#2c3252"/><text x="220" y="148" fill="#9aa0b5" font-size="11" text-anchor="middle">Реакция C</text><rect x="430" y="80" width="130" height="30" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="495" y="100" fill="#ff9ecb" font-size="11" text-anchor="middle">Общий ствол</text><line x1="110" y1="95" x2="168" y2="43" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="110" y1="95" x2="168" y2="93" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="110" y1="95" x2="168" y2="143" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="270" y1="43" x2="428" y2="90" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/><line x1="270" y1="93" x2="428" y2="95" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/><line x1="270" y1="143" x2="428" y2="100" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/>',180)+cap('Иллюзия выбора'),
+        steps:[
+          {b:'Точка выбора', t:'Игрок видит 2–4 варианта реплики.'},
+          {b:'Уникальные реакции', t:'Каждая ветка даёт свою реплику-ответ.'},
+          {b:'Схождение', t:'Через 1–2 шага все ветки возвращаются к общему стволу.'},
+          {b:'Экономия', t:'Не нужно писать 3 полных сюжета — только реакции.'},
+          {b:'Масштаб', t:'Работает на ×13 языков и тысячи узлов (HSR).'}
+        ]},
+      { icon:'🧭', title:'State machine сюжета', sub:'Явные состояния',
+        viz: svg(AR+'<rect x="20" y="60" width="110" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="75" y="80" fill="#fff" font-size="11" text-anchor="middle">Act 1</text><rect x="200" y="60" width="110" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="255" y="80" fill="#fff" font-size="11" text-anchor="middle">Act 2</text><rect x="380" y="60" width="110" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="435" y="80" fill="#fff" font-size="11" text-anchor="middle">Act 3</text><rect x="530" y="60" width="50" height="30" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="555" y="80" fill="#ff9ecb" font-size="11" text-anchor="middle">End</text><line x1="130" y1="75" x2="198" y2="75" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="310" y1="75" x2="378" y2="75" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="490" y1="75" x2="528" y2="75" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/>',130)+cap('Состояния, а не флаги'),
+        steps:[
+          {b:'Перечень состояний', t:'Сюжет разбит на явные состояния (Act/Chapter/Phase).'},
+          {b:'Переходы', t:'Переход между состояниями — по завершении узлов.'},
+          {b:'Вместо флагов', t:'Не куча bool-переменных, а одно поле state.'},
+          {b:'Версионирование', t:'При патче меняется граф состояний, старая логика не ломается.'},
+          {b:'Отладка', t:'Легко понять, где застрял игрок (текущее состояние).'}
+        ]},
+      { icon:'⏱️', title:'Async / event queue', sub:'Сообщения вне сцены',
+        viz: svg(AR+'<rect x="20" y="30" width="120" height="24" rx="6" fill="#1d2238" stroke="#2c3252"/><text x="30" y="47" fill="#9aa0b5" font-size="11">push(msg)</text><rect x="20" y="80" width="120" height="60" rx="6" fill="#0e1220" stroke="#7c5cff"/><text x="30" y="100" fill="#fff" font-size="10">queue:</text><text x="30" y="116" fill="#c9b8ff" font-size="10">[msg1,msg2]</text><rect x="380" y="80" width="160" height="40" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="460" y="104" fill="#ff9ecb" font-size="11" text-anchor="middle">Overlay UI</text><line x1="140" y1="110" x2="378" y2="100" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/>',160)+cap('Очередь → оверлей'),
+        steps:[
+          {b:'Событие', t:'Система пушит сообщение в очередь событий.'},
+          {b:'Буфер', t:'Очередь хранит непрочитанные сообщения.'},
+          {b:'Оверлей', t:'UI рисует чат/уведомление поверх геймплея.'},
+          {b:'Не блокирует', t:'Сюжет и мир продолжают работать.'},
+          {b:'Доставка', t:'Игрок читает в удобный момент (HSR телефон).'}
+        ]},
+      { icon:'🕸️', title:'Data-driven граф', sub:'Контент отделён от кода',
+        viz: svg(AR+'<circle cx="90" cy="90" r="26" fill="#1d2238" stroke="#7c5cff"/><text x="90" y="95" fill="#fff" font-size="11" text-anchor="middle">n1</text><circle cx="250" cy="50" r="26" fill="#1d2238" stroke="#2c3252"/><text x="250" y="55" fill="#9aa0b5" font-size="11" text-anchor="middle">n2</text><circle cx="250" cy="130" r="26" fill="#1d2238" stroke="#2c3252"/><text x="250" y="135" fill="#9aa0b5" font-size="11" text-anchor="middle">n3</text><circle cx="430" cy="90" r="26" fill="#2a1b3d" stroke="#ff5c9d"/><text x="430" y="95" fill="#ff9ecb" font-size="11" text-anchor="middle">n4</text><line x1="116" y1="80" x2="224" y2="58" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="116" y1="100" x2="224" y2="122" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="276" y1="60" x2="404" y2="82" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/><line x1="276" y1="120" x2="404" y2="98" stroke="#ff5c9d" stroke-width="2" marker-end="url(#ar2)"/>',180)+cap('Узлы и связи'),
+        steps:[
+          {b:'Узел = данные', t:'Каждый узел: {id, speaker, text, choices, next, conditions, camera, vo}.'},
+          {b:'Формат', t:'Хранится в YAML/JSON/кастомном формате, не в коде.'},
+          {b:'Редактор', t:'Сценаристы правят граф в визуальном туле.'},
+          {b:'Runtime', t:'Движок просто грузит узел по id и исполняет.'},
+          {b:'Переиспользование', t:'Один узел можно вызывать из разных мест.'}
+        ]},
+      { icon:'📐', title:'Soft subtitle timing', sub:'Гибкая привязка',
+        viz: svg(AR+'<rect x="20" y="40" width="180" height="20" rx="5" fill="#7c5cff"/><text x="20" y="30" fill="#9aa0b5" font-size="11">VO</text><rect x="20" y="100" width="320" height="20" rx="5" fill="#ff5c9d"/><text x="20" y="90" fill="#9aa0b5" font-size="11">Субтитры (длиннее)</text><path d="M210 60 Q260 80 210 95" stroke="#fff" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>',140)+cap('Компенсация длины'),
+        steps:[
+          {b:'Длительность VO', t:'Берём T из аудиофайла оригинала.'},
+          {b:'Локаль длиннее', t:'Перевод занимает больше времени.'},
+          {b:'Grace-period', t:'Добавляем паузу, чтобы дочитали.'},
+          {b:'Не жёстко', t:'Субтитры не привязаны кадр-в-кадр к губам.'},
+          {b:'Комфорт', t:'Исчезают по таймауту, а не обрезаются.'}
+        ]},
+      { icon:'📏', title:'Adaptive UI', sub:'Подстройка под длину',
+        viz: '<div style="max-width:340px;">'+'<div style="background:#1d2238;border:1px solid #7c5cff;border-radius:8px;padding:6px 10px;font-size:12px;margin-bottom:6px;">Коротко.</div>'+'<div style="background:#1d2238;border:1px solid #7c5cff;border-radius:8px;padding:6px 10px;font-size:12px;margin-bottom:6px;min-height:54px;">Очень длинная фраза на русском, которая не влезает в одну строку и требует переноса и роста бокса по высоте.</div>'+'</div>'+cap('Бокс растёт под текст'),
+        steps:[
+          {b:'Замер текста', t:'UI измеряет высоту после wrap.'},
+          {b:'Auto-height', t:'Бокс растягивается под контент (min/max).'},
+          {b:'Max-lines', t:'При переполнении — scroll внутри бокса.'},
+          {b:'Лимиты при написании', t:'Сценаристам задают лимит символов под язык.'},
+          {b:'Без обрезки', t:'Текст RU/DE никогда не теряется (Genshin/WuWa).'}
+        ]}
+    ],
+
+    situations: [
+      { icon:'🎭', title:'Ситуация: Иллюзия выбора (HSR)', sub:'Как сделано',
+        viz: box('😊','Марх','Как ответить?','#7c5cff'),
+        steps:[
+          {b:'Сценарист пишет узел', t:'Выбор из 3 тонов (друж/нейтр/сарка).'},
+          {b:'Узлы-реакции', t:'Каждая ветка — своя реплика NPC.'},
+          {b:'Converge', t:'Все ветки сходятся к следующему каноничному узлу.'},
+          {b:'Сохранение', t:'Выбор пишется в статистику персонажа.'},
+          {b:'Результат', t:'Игрок чувствует агентство, бюджет не растёт.'}
+        ]},
+      { icon:'📨', title:'Ситуация: Внесценический чат', sub:'Как сделано',
+        viz: '<div style="max-width:280px;margin:0 auto;">'+['💬 Марх: ты где?','📷 [фото]','🔔 новое сообщение'].map(function(c){return '<div style="background:#1d2238;border:1px solid #2c3252;border-radius:10px;padding:8px;margin:4px;font-size:12px;">'+c+'</div>';}).join('')+'</div>',
+        steps:[
+          {b:'Триггер события', t:'Квест/таймер кладёт сообщение в queue.'},
+          {b:'Overlay', t:'Чат рисуется поверх мира, паузы нет.'},
+          {b:'Не критично', t:'Важный сюжет не прячут только в чат.'},
+          {b:'Ответ', t:'Иногда ответ в чате запускает квест.'},
+          {b:'Архив', t:'Переписка сохраняется в телефоне.'}
+        ]},
+      { icon:'⚡', title:'Ситуация: Радиальное меню (ZZZ)', sub:'Как сделано',
+        viz: svg(AR+'<circle cx="300" cy="90" r="38" fill="#2a2f4d" stroke="#2de2ff"/><text x="300" y="98" fill="#fff" font-size="18" text-anchor="middle">🙂</text><circle cx="300" cy="34" r="24" fill="#1d2238" stroke="#2de2ff"/><text x="300" y="39" fill="#d8fbff" font-size="10" text-anchor="middle">Ок</text><circle cx="376" cy="68" r="24" fill="#1d2238" stroke="#2de2ff"/><text x="376" y="73" fill="#d8fbff" font-size="10" text-anchor="middle">Хм</text><circle cx="224" cy="68" r="24" fill="#1d2238" stroke="#2de2ff"/><text x="224" y="73" fill="#d8fbff" font-size="10" text-anchor="middle">Нет</text>',170),
+        steps:[
+          {b:'Точка выбора', t:'Появляется радиальная раскладка.'},
+          {b:'Screen-space', t:'Пузыри позиционируются вокруг портрета.'},
+          {b:'Мгновенный клик', t:'Выбор сразу даёт реакцию.'},
+          {b:'Короткие фразы', t:'Banter вместо монологов.'},
+          {b:'Pacing', t:'Диалог летит быстро, не утомляет.'}
+        ]},
+      { icon:'🌳', title:'Ситуация: Hangout Events (Genshin)', sub:'Как сделано',
+        viz: svg(AR+'<rect x="30" y="70" width="90" height="28" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="75" y="89" fill="#fff" font-size="11" text-anchor="middle">Выбор</text><rect x="220" y="30" width="120" height="26" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="49" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка A</text><rect x="220" y="80" width="120" height="26" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="99" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка B</text><rect x="220" y="130" width="120" height="26" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="280" y="149" fill="#ff9ecb" font-size="11" text-anchor="middle">Концовка C</text><line x1="120" y1="84" x2="218" y2="43" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="120" y1="84" x2="218" y2="93" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/><line x1="120" y1="84" x2="218" y2="143" stroke="#7c5cff" stroke-width="2" marker-end="url(#ar2)"/>',180),
+        steps:[
+          {b:'Мини-квест', t:'Отдельная активность с деревом решений.'},
+          {b:'Отдельный state', t:'Прогресс ветки не трогает глобальный сюжет.'},
+          {b:'Несколько концовок', t:'Выбор реально меняет финал.'},
+          {b:'Трекинг', t:'Помечаются пройденные ветки.'},
+          {b:'Перепрохождение', t:'Игрок добирает остальные концовки.'}
+        ]},
+      { icon:'⚖️', title:'Ситуация: Моральная дилемма (Limbus)', sub:'Как сделано',
+        viz: box('🤔','???','Укажи действие.','#ff9b9b'),
+        steps:[
+          {b:'Контекст', t:'Сцена ставит выбор с этической ценой.'},
+          {b:'Переменные', t:'Выбор меняет отношения команды/состояние.'},
+          {b:'Кросс-система', t:'Результат влияет и на бой, и на последующий текст.'},
+          {b:'Отложенный эффект', t:'Последствия проявляются позже в диалоге.'},
+          {b:'Реиграбельность', t:'Разные выборы → разный тон истории.'}
+        ]},
+      { icon:'🌍', title:'Ситуация: Локализация длины', sub:'Как решается',
+        viz: '<div style="max-width:340px;">'+'<div style="background:#1d2238;border:1px solid #7c5cff;border-radius:8px;padding:6px 10px;font-size:12px;margin-bottom:6px;">中文：十個字</div>'+'<div style="background:#1d2238;border:1px solid #ff5c9d;border-radius:8px;padding:6px 10px;font-size:12px;margin-bottom:6px;min-height:48px;">РУС: целых три строки текста, которые не влезают в один ряд</div>'+'</div>',
+        steps:[
+          {b:'Замер', t:'RU/DE длиннее CN/JP в 2–3 раза.'},
+          {b:'Adaptive box', t:'Бокс растягивается / скроллится.'},
+          {b:'Лимиты', t:'Сценаристам задают лимит символов.'},
+          {b:'Проверка QC', t:'Бот ищет overflow в каждой локали.'},
+          {b:'Font-size', t:'При необходимости уменьшается шрифт.'}
+        ]}
+    ],
+
+    techniques: [
+      { icon:'🎭', title:'Illusion of choice', sub:'Видимость агентства',
+        viz: box('😊','Марх','Выбери тон ответа.','#7c5cff'),
+        steps:[
+          {b:'Дать выбор', t:'Показать 2–4 варианта реплики.'},
+          {b:'Уникальная реакция', t:'Каждая ветка отвечает по-своему.'},
+          {b:'Схождение', t:'Вернуть к общему стволу сюжета.'},
+          {b:'Сохранить выбор', t:'Записать для статистики/отношений.'},
+          {b:'Эффект', t:'Игрок чувствует влияние, бюджет под контролем.'}
+        ]},
+      { icon:'🥁', title:'Pacing (VN ↔ экшен)', sub:'Чередование ритма',
+        viz: svg(AR+'<rect x="20" y="70" width="90" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="65" y="90" fill="#fff" font-size="11" text-anchor="middle">Диалог</text><rect x="170" y="70" width="90" height="30" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="215" y="90" fill="#ff9ecb" font-size="11" text-anchor="middle">Бой</text><rect x="320" y="70" width="90" height="30" rx="8" fill="#1d2238" stroke="#7c5cff"/><text x="365" y="90" fill="#fff" font-size="11" text-anchor="middle">Диалог</text><rect x="470" y="70" width="90" height="30" rx="8" fill="#2a1b3d" stroke="#ff5c9d"/><text x="515" y="90" fill="#ff9ecb" font-size="11" text-anchor="middle">Бой</text>',130)+cap('Ритм сцены'),
+        steps:[
+          {b:'Блок диалога', t:'Подаём порцию сюжета.'},
+          {b:'Блок экшена', t:'Переключаем в геймплей/бой.'},
+          {b:'Чередование', t:'Не держим долго в одном режиме.'},
+          {b:'Кульминация', t:'Диалог → бой → развязка.'},
+          {b:'Отдых', t:'После тяжёлой сцены — лёгкий бантер (ZZZ/HSR).'}
+        ]},
+      { icon:'🗣️', title:'Character voice consistency', sub:'Узнаваемый тон',
+        viz: box('😎','Персонаж','Слышь, я так не делаю.','#2de2ff'),
+        steps:[
+          {b:'Речевой паттерн', t:'У персонажа свой сленг/манера.'},
+          {b:'Глоссарий', t:'Сценаристы держат лист голоса персонажа.'},
+          {b:'Отсечь чужое', t:'Реплики проверяют на «звучит ли это как он».'},
+          {b:'Сквозь локали', t:'Паттерн сохраняется во всех языках.'},
+          {b:'Узнаваемость', t:'Игрок угадывает персонажа по фразе.'}
+        ]},
+      { icon:'🪟', title:'Break-the-fourth-wall', sub:'Обращение к игроку',
+        viz: box('🙂','Proxy','Эй, ты там, за экраном...','#2de2ff'),
+        steps:[
+          {b:'Роль игрока', t:'Персонаж знает, что «ты» — игрок (ZZZ Proxy).'},
+          {b:'Прямое обращение', t:'Реплики типа «эй, ты, управляющий».'},
+          {b:'Юмор/связь', t:'Создаёт близость и лёгкость.'},
+          {b:'Дозировка', t:'Не переборщить, иначе ломает погружение.'},
+          {b:'Стиль', t:'Чаще в неон/бантер-играх, реже в эпике.'}
+        ]},
+      { icon:'✨', title:'Rich text (иконки)', sub:'Предмет в строке',
+        viz: box('📦','Система','Возьми <span style="color:#ffcf8a">⚔ Меч</span>.','#7c5cff'),
+        steps:[
+          {b:'Тег', t:'В тексте {item:id}.'},
+          {b:'Парсер', t:'Заменяет тег на иконку.'},
+          {b:'Атлас', t:'Иконка из UI-атласа.'},
+          {b:'Тултип', t:'Наведение → название.'},
+          {b:'Локаль', t:'Теги сохраняются во всех языках.'}
+        ]},
+      { icon:'📌', title:'Anchor lines (no-skip)', sub:'Якорные строки',
+        viz: box('⚠️','Система','Важно: запомни этот код.','#fbbf24').replace('border:1px solid #fbbf24','border:2px solid #fbbf24'),
+        steps:[
+          {b:'Пометка', t:'Критичный узел получает флаг no-skip.'},
+          {b:'Блокировка', t:'Skip не проматывает такой узел.'},
+          {b:'Обязателен', t:'Игрок вынужден прочитать важное.'},
+          {b:'Коды/ключи', t:'Чаще всего — пароли, инструкции, сюжетные повороты.'},
+          {b:'Баланс', t:'Таких узлов мало, иначе скип бесполезен.'}
+        ]}
+    ]
+  };
+
+  var vizGrid = document.getElementById('vizGrid');
+  var vizTitle = document.getElementById('vizTitle');
+  var vizViz = document.getElementById('vizViz');
+  var vizSteps = document.getElementById('vizSteps');
+  var vizTabs = document.getElementById('vizTabs');
+
+  // ===== Interactive mini-widgets =====
+  function tw(node,str,done){ clearInterval(node._t); node._typing=true; node._full=str; node._done=done; node.textContent=''; var k=0; node._t=setInterval(function(){ node.textContent=str.slice(0,++k); if(k>=str.length){ clearInterval(node._t); node._typing=false; if(done)done(); } },18); }
+  function twFin(node){ if(node._typing){ clearInterval(node._t); node._typing=false; node.textContent=node._full||''; var d=node._done; node._done=null; if(d)d(); } }
+
+  function runDlg(c, accent, nodes){
+    c.innerHTML='<div class="ibox" style="--accent:'+accent+'"><div class="iport">😊</div><div class="ipanel"><div class="iname">Имя</div><div class="itext">…</div></div></div>';
+    var ip=c.querySelector('.iport'), inn=c.querySelector('.iname'), itt=c.querySelector('.itext'), panel=c.querySelector('.ipanel');
+    var i=0;
+    function setLine(n){
+      ip.textContent=n.p||'🙂'; inn.textContent=n.n||'';
+      panel.querySelectorAll('.ichoices').forEach(function(x){x.remove();});
+      itt.onclick=null;
+      tw(itt, n.t||'', function(){ if(n.choices){ renderChoices(n.choices); } else if(n.end){ var r=document.createElement('div'); r.className='ichoices'; var rb=document.createElement('button'); rb.className='ichoice'; rb.textContent='↺ ещё раз'; rb.onclick=function(){ setLine(nodes[n.again]); }; r.appendChild(rb); panel.appendChild(r); } else { itt.onclick=adv; } });
+    }
+    function renderChoices(choices){
+      var w=document.createElement('div'); w.className='ichoices';
+      choices.forEach(function(ch){ var b=document.createElement('button'); b.className='ichoice'; b.textContent=ch.label;
+        b.onclick=function(ev){ ev.stopPropagation(); if(ch.res){ setLine(ch.res); } else if(ch.next!==undefined){ i=ch.next; setLine(nodes[i]); } };
+        w.appendChild(b); });
+      panel.appendChild(w);
+    }
+    function adv(){ if(itt._typing){ twFin(itt); return; } i++; if(i<nodes.length) setLine(nodes[i]); else { itt.textContent='— конец демо —'; itt.onclick=null; } }
+    setLine(nodes[0]);
+  }
+
+  function runMiniDlg(c, styleClass){
+    c.innerHTML='<div class="dlg '+styleClass+'"><div class="portrait">😄</div><div class="panel"><span class="nameplate">Марх</span><div class="textbox"></div><div class="choices"></div></div></div>';
+    var tb=c.querySelector('.textbox'), ch=c.querySelector('.choices'), pt=c.querySelector('.portrait'), nm=c.querySelector('.nameplate');
+    var i=0;
+    var nodes=[{p:'😄',n:'Марх',t:'Привет! Это живой пример стиля.'},{p:'🤔',n:'Марх',t:'Кликни по тексту, чтобы читать дальше.'},{p:'😊',n:'Марх',t:'Оформление меняется вместе со вкладкой.'}];
+    function set(n){ pt.textContent=n.p||'😄'; nm.textContent=n.n||''; ch.innerHTML=''; tw(tb,n.t||'', function(){ if(n.choices){ n.choices.forEach(function(cc){ var b=document.createElement('button'); b.textContent=cc.label; b.onclick=function(ev){ev.stopPropagation(); set(cc.res);}; ch.appendChild(b); }); } }); }
+    tb.onclick=function(){ if(tb._typing){ twFin(tb); return; } i++; if(i<nodes.length) set(nodes[i]); else { tb.textContent='— конец —'; tb.onclick=null; } };
+    set(nodes[0]);
+  }
+
+  function wireVO(c){ c.innerHTML='<div class="iplayer"><button class="iplay" id="vp">▶</button><div class="ibar"><div class="ifill" id="vf"></div></div><div class="itime" id="vt">0.0s</div></div><div class="mock-cap">Проигрывание аудиофрагмента (демо)</div>'; var fill=c.querySelector('#vf'), time=c.querySelector('#vt'), btn=c.querySelector('#vp'), t=0, id=null; btn.onclick=function(){ if(id){ clearInterval(id); id=null; btn.textContent='▶'; } else { btn.textContent='⏸'; id=setInterval(function(){ t+=0.1; if(t>=2.2){t=2.2;clearInterval(id);id=null;btn.textContent='▶';} fill.style.width=(t/2.2*100)+'%'; time.textContent=t.toFixed(1)+'s'; },60); } }; }
+  function wireSub(c){ c.innerHTML='<div class="iplayer"><button class="iplay" id="sp">▶</button><div style="flex:1"><div style="font-size:11px;color:var(--muted)">VO (коротко)</div><div class="ibar"><div class="ifill" id="sf1" style="background:#7c5cff"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">Субтитры (длиннее)</div><div class="ibar"><div class="ifill" id="sf2" style="background:#ff5c9d"></div></div></div></div><div class="mock-cap">Субтитры дольше VO → добавляется пауза (grace)</div>'; var b=c.querySelector('#sp'), f1=c.querySelector('#sf1'), f2=c.querySelector('#sf2'), id=null, t=0; b.onclick=function(){ if(id){clearInterval(id);id=null;b.textContent='▶';return;} b.textContent='⏸'; id=setInterval(function(){ t+=0.1; if(t>=2.4){t=2.4;clearInterval(id);id=null;b.textContent='▶';} f1.style.width=Math.min(100,t/2.0*100)+'%'; f2.style.width=Math.min(100,t/2.4*100)+'%'; },60); }; }
+  function wireCam(c){ c.innerHTML='<div class="icam"><div class="camframe"><div class="camport" id="cp">😄</div></div></div><button class="iplay" id="cpb" style="display:block;margin:10px auto 0;">▶ Сыграть</button><div class="mock-cap">Камера зумит на говорящего</div>'; var cp=c.querySelector('#cp'), btn=c.querySelector('#cpb'); btn.onclick=function(){ var on=cp.classList.toggle('zoom'); btn.textContent=on?'⏸ Сброс':'▶ Сыграть'; }; }
+  function wireHistory(c){ c.innerHTML='<div class="ihexp" id="hl"></div><div class="mock-cap">Кликни по записи — подсветится</div>'; var hl=c.querySelector('#hl'); [['Марх','Привет!'],['Марх','Тут странно...'],['???','Кто здесь?']].forEach(function(l){ var d=document.createElement('div'); d.className='hrow'; d.innerHTML='<b>'+l[0]+':</b> '+l[1]; d.onclick=function(){ c.querySelectorAll('.hrow').forEach(function(x){x.classList.remove('sel');}); d.classList.add('sel'); }; hl.appendChild(d); }); }
+  function wireAuto(c){ c.innerHTML='<div class="ibox" style="--accent:#7c5cff"><div class="iport">🙂</div><div class="ipanel"><div class="iname">Система</div><div class="itext" id="at">Демо auto/skip...</div></div></div><div class="ichoices"><button class="ichoice" id="ab">▶ Auto</button><button class="ichoice" id="sb">⏩ Skip</button></div>'; var at=c.querySelector('#at'), i=0, id=null; var lines=['Демо auto/skip...','Строка 2 с текстом','Строка 3, ещё чуть-чуть','Конец демо.']; function set(s){ tw(at,s); } c.querySelector('#ab').onclick=function(){ if(id){clearInterval(id);id=null;return;} id=setInterval(function(){ i++; if(i>=lines.length){i=lines.length-1;clearInterval(id);id=null;} set(lines[i]); },900); }; c.querySelector('#sb').onclick=function(){ clearInterval(id); id=null; at.textContent='⏩ пропущено'; }; set(lines[0]); }
+  function wireRich(c){ c.innerHTML='<div class="ibox" style="--accent:#7c5cff"><div class="iport">📦</div><div class="ipanel"><div class="iname">Система</div><div class="itext">Возьми <span class="iitem" data-tip="Меч — оружие ближнего боя">⚔ Меч</span> и встреть <span class="iitem" data-tip="Марх — твой спутник">Марх</span>.</div></div></div><div class="mock-cap">Наведи на подсвеченный фрагмент — тултип</div>'; }
+  function wireBubble(c){ c.innerHTML='<div class="iscene"><div class="inpc">🧑<div class="ibubble">Привет, путник!</div></div></div><div class="mock-cap">Наведи курсор на персонажа — появляется пузырь</div>'; }
+  function wireChat(c){ c.innerHTML='<div class="ichat" id="ch"></div>'; var ch=c.querySelector('#ch'); function add(who,text){ var d=document.createElement('div'); d.className='msg '+(who==='bot'?'bot':'me'); d.textContent=text; ch.appendChild(d); ch.scrollTop=ch.scrollHeight; } add('bot','Марх: ты где?'); var wrap=document.createElement('div'); wrap.className='ichoices'; var reps={'Я рядом!':'Марх: отлично, бегом!','Сейчас приду':'Марх: жду у входа.','Не жди меня':'Марх: ладно, потом.'}; ['Я рядом!','Сейчас приду','Не жди меня'].forEach(function(t){ var b=document.createElement('button'); b.className='ichoice'; b.textContent=t; b.onclick=function(){ add('me',t); setTimeout(function(){ add('bot',reps[t]); },400); }; wrap.appendChild(b); }); c.appendChild(wrap); }
+  function wireRadial(c){ c.innerHTML='<div class="iradial"><div class="rc port">🙂</div><div class="rc b">Ок!</div><div class="rc b">Хм</div><div class="rc b">Нет</div></div><div class="itext" id="rr" style="margin-top:8px;text-align:center">Кликни по пузырю-варианту</div>'; c.querySelectorAll('.rc.b').forEach(function(b){ b.onclick=function(){ c.querySelector('#rr').textContent='Ответ: «'+b.textContent+'» → реакция NPC.'; }; }); }
+  function wireBranch(c){ c.innerHTML='<div class="itext" id="bs" style="margin-bottom:8px">Выбери путь:</div><div class="ichoices" id="bc"></div>'; var opts=[['Помочь','Концовка A: вы спасли город.'],['Уйти','Концовка B: город пал.'],['Предать','Концовка C: вы правитель тьмы.']]; var bc=c.querySelector('#bc'), bs=c.querySelector('#bs'); function build(){ bc.innerHTML=''; opts.forEach(function(o){ var b=document.createElement('button'); b.className='ichoice'; b.textContent=o[0]; b.onclick=function(){ bs.textContent=o[1]; build2(); }; bc.appendChild(b); }); } function build2(){ bc.innerHTML=''; var b=document.createElement('button'); b.className='ichoice'; b.textContent='↺ заново'; b.onclick=function(){ bs.textContent='Выбери путь:'; build(); }; bc.appendChild(b); } build(); }
+  function wireCut(c){ c.innerHTML='<div class="icut"><div class="cutinner" id="ci">🎬</div></div><button class="iplay" id="cb" style="display:block;margin:10px auto 0;">▶ Сыграть</button><div class="mock-cap">Полноэкранная анимация (демо)</div>'; c.querySelector('#cb').onclick=function(){ var ci=c.querySelector('#ci'); ci.classList.add('play'); setTimeout(function(){ci.classList.remove('play');},1600); }; }
+  function wireAnim(c){ var svg=c.querySelector('svg'); if(!svg) return; svg.classList.add('anim'); var b=document.createElement('button'); b.className='ichoice'; b.textContent='▶ анимировать путь'; b.style.marginTop='8px'; b.onclick=function(){ svg.classList.remove('go'); void svg.offsetWidth; svg.classList.add('go'); }; c.appendChild(b); }
+  function wireAdapt(c){ c.innerHTML='<div id="abx" style="background:#1d2238;border:1px solid #7c5cff;border-radius:8px;padding:6px 10px;font-size:13px;max-width:340px;max-height:54px;overflow:auto;">Коротко.</div><button class="ichoice" id="abtn" style="margin-top:8px">➕ добавить текст</button><div class="mock-cap">Бокс растёт под длинный текст (адаптивный UI)</div>'; var box=c.querySelector('#abx'), btn=c.querySelector('#abtn'), long=' Очень длинная фраза на русском, которая не влезает в одну строку и требует переноса и роста бокса по высоте, а при переполнении даёт скролл.'; var grown=false; btn.onclick=function(){ if(!grown){ box.textContent+=' '+long; grown=true; btn.textContent='➖ сбросить'; } else { box.textContent='Коротко.'; grown=false; btn.textContent='➕ добавить текст'; } }; }
+  function wireDilemma(c){ c.innerHTML='<div class="ibox" style="--accent:#ff9b9b"><div class="iport">🤔</div><div class="ipanel"><div class="iname">???</div><div class="itext">Укажи действие. Кликни по выбору ↓</div></div></div><div class="ichoices"><button class="ichoice" id="d1">Спасти всех</button><button class="ichoice" id="d2">Спасти себя</button></div><div class="itext" id="dr" style="margin-top:8px;color:var(--muted)">Последствие проявится позже...</div>'; var dr=c.querySelector('#dr'); c.querySelector('#d1').onclick=function(){ dr.textContent='Отношения команды ↑. Позже напарник вспомнит этот выбор.'; }; c.querySelector('#d2').onclick=function(){ dr.textContent='Отношения команды ↓. Позже сцена станет холоднее.'; }; }
+  function wirePacing(c){ c.innerHTML='<div id="pc" style="display:flex;gap:8px;flex-wrap:wrap"></div><button class="ichoice" id="pb" style="margin-top:8px">▶ проиграть ритм</button>'; var pc=c.querySelector('#pc'); var seq=[['Диалог','#7c5cff'],['Бой','#ff5c9d'],['Диалог','#7c5cff'],['Бой','#ff5c9d'],['Развязка','#4ade80']]; var i=0,id=null; c.querySelector('#pb').onclick=function(){ if(id){clearInterval(id);id=null;} else { id=setInterval(function(){ pc.innerHTML=''; var s=seq[i%seq.length]; var d=document.createElement('div'); d.style.cssText='padding:6px 12px;border-radius:8px;background:'+s[1]+';color:#fff;font-size:12px;'; d.textContent=s[0]; pc.appendChild(d); i++; if(i>=seq.length){clearInterval(id);id=null;} },700); } }; }
+  function wireFW(c){ c.innerHTML='<div class="ibox" style="--accent:#2de2ff"><div class="iport">🙂</div><div class="ipanel"><div class="iname">Proxy</div><div class="itext">…</div></div></div>'; var itt=c.querySelector('.itext'); tw(itt,'Эй, ты там, за экраном... да-да, ты управляешь мной.'); itt.onclick=function(){ if(itt._typing) twFin(itt); }; }
+  function wireAnchor(c){ c.innerHTML='<div class="ibox" style="--accent:#fbbf24"><div class="iport">⚠️</div><div class="ipanel"><div class="iname">Система</div><div class="itext">…</div></div></div><div class="ichoices"><button class="ichoice" id="sk">⏩ Skip</button></div>'; var itt=c.querySelector('.itext'); tw(itt,'Важно: запомни этот код — 7-Х.'); itt.onclick=function(){ if(itt._typing) twFin(itt); }; c.querySelector('#sk').onclick=function(){ itt.textContent='⛔ Этот узел защищён от скипа — прочитай обязательно.'; }; }
+
+  var INTERACTIVE = {
+    'Диалоговое окно (Dialogue Box)': function(c){ runDlg(c,'#7c5cff',[{p:'😄',n:'Марх',t:'Привет! Рад тебя видеть здесь.'},{p:'🤔',n:'Марх',t:'Этот город не такой, каким кажется.'},{p:'😠',n:'Марх',t:'Нужно действовать — кликни, чтобы продолжить.'}]); },
+    'Кнопки выбора (Choices)': function(c){ runDlg(c,'#7c5cff',[{p:'😊',n:'Марх',t:'Как ответить?',choices:[{label:'Дружелюбно',res:{p:'😊',n:'Марх',t:'Рад, что ты такой! (ветка A)',end:true,again:0}},{label:'Нейтрально',res:{p:'😐',n:'Марх',t:'Понял, без лишнего. (ветка B)',end:true,again:0}},{label:'Саркастично',res:{p:'😏',n:'Марх',t:'Хе, остряк... (ветка C)',end:true,again:0}}]}]); },
+    'Портрет и эмоция (Expression)': function(c){ c.innerHTML='<div class="ibox" style="--accent:#7c5cff"><div class="iport" id="ep">😊</div><div class="ipanel"><div class="iname">Марх</div><div class="itext">Кликни по эмоции ↓</div></div></div><div class="ichoices" id="eb"></div>'; var eb=c.querySelector('#eb'), ep=c.querySelector('#ep'); [['🙂','neutral'],['😄','happy'],['😠','serious'],['😱','shocked']].forEach(function(x){ var b=document.createElement('button'); b.className='ichoice'; b.textContent=x[0]; b.onclick=function(){ ep.textContent=x[0]; c.querySelector('.itext').textContent='Эмоция: '+x[1]; }; eb.appendChild(b); }); },
+    'Привязка озвучки (VO binding)': wireVO,
+    'Синхронизация субтитров': wireSub,
+    'Режиссура камеры (Camera cue)': wireCam,
+    'История / Лог (History)': wireHistory,
+    'Skip / Auto': wireAuto,
+    'Rich text (иконки в тексте)': wireRich,
+    'VN-новелла': function(c){ runDlg(c,'#7c5cff',[{p:'😊',n:'Персонаж',t:'Это был обычный день...'},{p:'😊',n:'Персонаж',t:'Пока всё не изменилось.'},{p:'😱',n:'Персонаж',t:'Кликни, чтобы читать дальше.'}]); },
+    'Мирной оверлей (Bubbles)': wireBubble,
+    'Асинхронный чат (Телефон)': wireChat,
+    'Радиальное меню': wireRadial,
+    'True branch (настоящее ветвление)': wireBranch,
+    'Кинематографичная катсцена': wireCut,
+    'HSR — комикс': function(c){ runMiniDlg(c,'hsr'); },
+    'ZZZ — неон': function(c){ runMiniDlg(c,'zzz'); },
+    'Reverse: 1999 — арт-деко': function(c){ runMiniDlg(c,'reverse'); },
+    'Limbus — текстовый лог': function(c){ runMiniDlg(c,'arknights'); },
+    'Arknights — окно оператора': function(c){ runMiniDlg(c,'arknights'); },
+    'Nikke — поп': function(c){ runMiniDlg(c,'nikke'); },
+    'Genshin — эпик': function(c){ runMiniDlg(c,'genshin'); },
+    'Converge-ветвление': wireAnim,
+    'State machine сюжета': wireAnim,
+    'Async / event queue': wireAnim,
+    'Data-driven граф': wireAnim,
+    'Soft subtitle timing': wireSub,
+    'Adaptive UI': wireAdapt,
+    'Ситуация: Иллюзия выбора (HSR)': function(c){ runDlg(c,'#7c5cff',[{p:'😊',n:'Марх',t:'Как ответить?',choices:[{label:'Дружелюбно',res:{p:'😊',n:'Марх',t:'Рад, что ты такой!',end:true,again:0}},{label:'Саркастично',res:{p:'😏',n:'Марх',t:'Хе, остряк...',end:true,again:0}}]}]); },
+    'Ситуация: Внесценический чат': wireChat,
+    'Ситуация: Радиальное меню (ZZZ)': wireRadial,
+    'Ситуация: Hangout Events (Genshin)': wireBranch,
+    'Ситуация: Моральная дилемма (Limbus)': wireDilemma,
+    'Ситуация: Локализация длины': wireAdapt,
+    'Illusion of choice': function(c){ runDlg(c,'#7c5cff',[{p:'😊',n:'Марх',t:'Выбери тон ответа.',choices:[{label:'Вежливо',res:{p:'😊',n:'Марх',t:'Спасибо! (реакция A)',end:true,again:0}},{label:'Грубо',res:{p:'😠',n:'Марх',t:'Ну и ладно... (реакция B)',end:true,again:0}}]}]); },
+    'Pacing (VN ↔ экшен)': wirePacing,
+    'Character voice consistency': function(c){ runDlg(c,'#2de2ff',[{p:'😎',n:'Персонаж',t:'Слышь, я так не делаю.'},{p:'😎',n:'Персонаж',t:'Это не по-моему.'}]); },
+    'Break-the-fourth-wall': wireFW,
+    'Rich text (иконки)': wireRich,
+    'Anchor lines (no-skip)': wireAnchor
+  };
+
+  function renderDetail(it){
+    vizTitle.innerHTML = it.icon + ' ' + it.title + '  <span class="muted">— ' + it.sub + '</span>';
+    vizViz.innerHTML = it.viz;
+    if(INTERACTIVE[it.title]){ INTERACTIVE[it.title](vizViz); }
+    vizSteps.innerHTML = '';
+    (it.steps||[]).forEach(function(st){
+      var li = document.createElement('li');
+      li.innerHTML = st.b ? ('<b>'+st.b+'.</b> '+st.t) : st;
+      vizSteps.appendChild(li);
+    });
+  }
+  function renderGrid(tab){
+    vizGrid.innerHTML = '';
+    (DATA[tab]||[]).forEach(function(it){
+      var d = document.createElement('div');
+      d.className = 'vnode';
+      d.innerHTML = '<h4>'+it.icon+' '+it.title+'</h4><p>'+it.sub+'</p>';
+      d.addEventListener('click', function(){ renderDetail(it); });
+      vizGrid.appendChild(d);
+    });
+    if(DATA[tab] && DATA[tab][0]) renderDetail(DATA[tab][0]);
+  }
+  vizTabs.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      vizTabs.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      renderGrid(t.dataset.tab);
+    });
+  });
+  renderGrid('elements');
+
+  // ---- Live dialogue simulator ----
+  var dlg = document.getElementById('dlg');
+  document.querySelectorAll('.sbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      dlg.className = 'dlg ' + b.dataset.style;
+    });
+  });
+
+  var SCRIPT = [
+    {s:'Марх', e:'😄', t:'О, ты пришёл! Я как раз хотел всё объяснить.'},
+    {s:'Марх', e:'🤔', t:'Этот город... он не такой, каким кажется снаружи.'},
+    {s:'???', e:'👁️', t:'Кто здесь бродит?', choices:[
+        {label:'Я друг, не бойся.', r:'Ты... друг? Ладно, верю. Но будь осторожен.'},
+        {label:'Я просто прохожий.', r:'Прохожий? Хм. В таком месте их не бывает.'},
+        {label:'（молчать）', r:'...Молчишь? Ну и ладно, сам разберусь.'}
+    ]},
+    {s:'Марх', e:'😠', t:'Слушай, тут аномалия. Нужно решать быстро.'},
+    {s:'Система', e:'⚙️', t:'Цель обновлена: найди источник сигнала.', choices:[
+        {label:'Пойти на сигнал.', r:'Храбро. Я за тобой.'},
+        {label:'Сначала разведка.', r:'Разумно. Осмотримся с краю.'}
+    ]},
+    {s:'Марх', e:'😊', t:'Спасибо, что рядом. Поехали!'}
+  ];
+
+  var dPortrait=document.getElementById('dPortrait');
+  var dName=document.getElementById('dName');
+  var dText=document.getElementById('dText');
+  var dChoices=document.getElementById('dChoices');
+  var i=0, timer=null, typing=false, full='', queued=null, choiceIdx=-1;
+
+  function typewrite(str){
+    clearInterval(timer); typing=true; full=str; dText.textContent='';
+    var k=0;
+    timer=setInterval(function(){
+      dText.textContent = str.slice(0,++k);
+      if(k>=str.length){ clearInterval(timer); typing=false; }
+    }, 22);
+  }
+  function show(line){
+    dPortrait.textContent = line.e || '🙂';
+    dName.textContent = line.s || '';
+    typewrite(line.t || '');
+    dChoices.innerHTML='';
+    if(line.choices){
+      line.choices.forEach(function(c){
+        var b=document.createElement('button');
+        b.textContent = c.label;
+        b.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          choiceIdx = i;
+          queued = {s: line.s, e: line.e, t: c.r};
+          advance();
+        });
+        dChoices.appendChild(b);
+      });
+    }
+  }
+  function advance(){
+    if(queued){ var q=queued; queued=null; i=choiceIdx+1; show(q); return; }
+    i++;
+    if(i < SCRIPT.length) show(SCRIPT[i]);
+    else { dText.textContent='— конец демо —'; dChoices.innerHTML=''; }
+  }
+  dText.addEventListener('click', function(){
+    if(typing){ clearInterval(timer); typing=false; dText.textContent=full; return; }
+    if(dChoices.children.length) return;
+    advance();
+  });
+  show(SCRIPT[0]);
+</script>
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GDD Pack — Анализ трендов itch.io</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent2: #f78166;
+      --accent3: #7ee787;
+      --accent4: #d2a8ff;
+      --accent5: #ff7b72;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 260px;
+      height: 100vh;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .sidebar h2 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+    .sidebar .subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 8px 12px;
+      margin: 2px 0;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.85rem;
+      transition: background .15s;
+    }
+    .sidebar nav a:hover { background: #21262d; }
+    .sidebar nav a.active { background: #1f6feb22; color: var(--accent); font-weight: 600; }
+    .sidebar .nav-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+    .sidebar .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 8px 12px 4px;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 260px;
+      padding: 40px 48px;
+      max-width: 960px;
+    }
+
+    /* HERO */
+    .hero {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero .tagline {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 600px;
+    }
+    .hero .meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .hero .meta span {
+      background: #21262d;
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    /* SECTION */
+    section {
+      margin-bottom: 56px;
+    }
+    section > h2 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    section > h2 .icon {
+      font-size: 1.3rem;
+    }
+    h3 {
+      font-size: 1.1rem;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    h4 {
+      font-size: 0.95rem;
+      margin: 16px 0 8px;
+      color: var(--muted);
+    }
+    p { margin: 8px 0; }
+    ul, ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    li { margin: 4px 0; }
+    a { color: var(--accent); }
+
+    /* CARDS */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+    .card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    .card .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin: 4px 4px 0 0;
+      font-weight: 600;
+    }
+    .badge-blue { background: #1f6feb33; color: var(--accent); border: 1px solid #1f6feb55; }
+    .badge-green { background: #23863633; color: var(--green); border: 1px solid #23863655; }
+    .badge-orange { background: #d2992233; color: var(--yellow); border: 1px solid #d2992255; }
+    .badge-red { background: #f8514933; color: var(--accent5); border: 1px solid #f8514955; }
+    .badge-purple { background: #a371f733; color: var(--accent4); border: 1px solid #a371f755; }
+
+    /* RANK */
+    .rank-list {
+      list-style: none;
+      padding: 0;
+    }
+    .rank-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      margin: 6px 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .rank-num {
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .rank-num.gold { background: #d2992233; color: var(--yellow); border: 1px solid #d2992255; }
+    .rank-num.blue { background: #1f6feb33; color: var(--accent); border: 1px solid #1f6feb55; }
+    .rank-num.gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #21262d;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+    }
+    tr:hover td { background: #21262d44; }
+
+    /* GDD BLOCK */
+    .gdd-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 20px 0;
+    }
+    .gdd-block h3 {
+      font-size: 1.3rem;
+      margin: 0 0 4px;
+    }
+    .gdd-block .gdd-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .gdd-block .gdd-section {
+      margin: 16px 0;
+      padding: 16px;
+      background: #0d111788;
+      border-radius: 8px;
+      border: 1px solid #21262d;
+    }
+    .gdd-block .gdd-section h4 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .gdd-block .gdd-section p,
+    .gdd-block .gdd-section li {
+      font-size: 0.88rem;
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 4px 0;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .3s;
+    }
+    .fill-blue { background: var(--accent); }
+    .fill-green { background: var(--green); }
+    .fill-orange { background: var(--yellow); }
+
+    /* STAT */
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      min-width: 120px;
+      flex: 1;
+    }
+    .stat .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .stat .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* COMPARISON */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .comparison .col {
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .comparison .col.pro { background: #23863611; border-color: #23863644; }
+    .comparison .col.con { background: #f8514911; border-color: #f8514944; }
+    .comparison .col h4 { margin-top: 0; }
+
+    /* TOC (mobile) */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      z-index: 200;
+    }
+    .mobile-nav select {
+      width: 100%;
+      padding: 8px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 800px) {
+      .sidebar { display: none; }
+      .mobile-nav { display: block; }
+      .main {
+        margin-left: 0;
+        padding: 60px 16px 32px;
+      }
+      .cards { grid-template-columns: 1fr; }
+      .comparison { grid-template-columns: 1fr; }
+      .stat-row { flex-direction: column; }
+    }
+
+    /* SCROLL */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+    /* ANCHOR OFFSET */
+    [id] { scroll-margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <select onchange="document.getElementById(this.value).scrollIntoView({behavior:'smooth'})">
+    <option value="overview">Обзор</option>
+    <option value="trends">Тренды</option>
+    <option value="gdd1">GDD: SortGrim</option>
+    <option value="gdd2">GDD: ThreadScape</option>
+    <option value="gdd3">GDD: MossHeart</option>
+    <option value="gdd4">GDD: SoulForge</option>
+    <option value="gdd5">GDD: Voices Below</option>
+  </select>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h2>GDD Pack</h2>
+  <p class="subtitle">Анализ itch.io — Сен 2026</p>
+  <nav>
+    <a href="#overview" class="active">Обзор</a>
+    <a href="#trends">Тренды itch.io</a>
+    <a href="#top10">Топ-10 жанров</a>
+    <a href="#pricing">Цены и модели</a>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Game Design Documents</div>
+    <a href="#gdd1">SortGrim — Horror + Sorting</a>
+    <a href="#gdd2">ThreadScape — VN + Social</a>
+    <a href="#gdd3">MossHeart — Cozy Incremental</a>
+    <a href="#gdd4">SoulForge — Roguelike Deckbuilder</a>
+    <a href="#gdd5">Voices Below — Underwater Horror</a>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Итоги</div>
+    <a href="#recommendation">Рекомендации</a>
+  </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero" id="overview">
+    <h1>GDD Pack: <span>5 игр для разработки</span></h1>
+    <p class="tagline">Анализ трендов itch.io (312K+ игр, 1.5M+ в каталоге) и 5 готовых Game Design Documents для потенциально успешных инди-игр.</p>
+    <div class="meta">
+      <span>Сентябрь 2026</span>
+      <span>312,084 игр в Top Rated</span>
+      <span>1,518,763 в каталоге</span>
+      <span>itchdb.info — недоступен</span>
+    </div>
+  </div>
+
+  <!-- TRENDS -->
+  <section id="trends">
+    <h2><span class="icon">&#128200;</span> Ключевые тренды itch.io</h2>
+    <p>Данные собраны из разделов <strong>Top Rated</strong>, <strong>New &amp; Popular</strong> и <strong>Top Sellers</strong> за сентябрь 2026.</p>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="label">Top Rated</div>
+        <div class="value">312K</div>
+      </div>
+      <div class="stat">
+        <div class="label">Каталог</div>
+        <div class="value">1.5M</div>
+      </div>
+      <div class="stat">
+        <div class="label">Paid игр</div>
+        <div class="value">78K</div>
+      </div>
+      <div class="stat">
+        <div class="label">Лидер по ratings</div>
+        <div class="value">12.3K</div>
+        <div class="label" style="font-size:0.65rem;margin-top:2px">FNF</div>
+      </div>
+    </div>
+
+    <h3>Самые успешные игры на itch.io</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Игра</th>
+          <th>Жанр</th>
+          <th>Рейтинг</th>
+          <th>Ratings</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Friday Night Funkin'</td><td>Rhythm</td><td>4.7</td><td>12,354</td></tr>
+        <tr><td>Sort the Court!</td><td>Simulation</td><td>4.7</td><td>10,965</td></tr>
+        <tr><td>The Freak Circus</td><td>Visual Novel (Yandere)</td><td>4.9</td><td>10,709</td></tr>
+        <tr><td>We Become What We Behold</td><td>Meta/Puzzle</td><td>4.8</td><td>8,744</td></tr>
+        <tr><td>Our Life: Beginnings &amp; Always</td><td>Visual Novel</td><td>4.9</td><td>7,663</td></tr>
+        <tr><td>Six Cats Under</td><td>Puzzle</td><td>4.8</td><td>7,482</td></tr>
+        <tr><td>Adventures With Anxiety!</td><td>Interactive Story</td><td>4.9</td><td>7,420</td></tr>
+        <tr><td>Doki Doki Literature Club!</td><td>Visual Novel (Meta)</td><td>4.8</td><td>6,415</td></tr>
+        <tr><td>Blooming Panic</td><td>Visual Novel</td><td>4.9</td><td>6,211</td></tr>
+        <tr><td>14 Days With You</td><td>Visual Novel</td><td>4.9</td><td>5,861</td></tr>
+        <tr><td>A Date with Death</td><td>Dating Sim</td><td>4.9</td><td>5,857</td></tr>
+        <tr><td>Voices Of The Void</td><td>Simulation</td><td>4.9</td><td>5,777</td></tr>
+        <tr><td>Killer Chat!</td><td>Visual Novel</td><td>4.9</td><td>5,343</td></tr>
+        <tr><td>goodbye, doggy</td><td>Puzzle</td><td>4.8</td><td>5,242</td></tr>
+        <tr><td>HoloCure</td><td>Action (Survivors-like)</td><td>4.9</td><td>5,198</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TOP 10 -->
+  <section id="top10">
+    <h2><span class="icon">&#127919;</span> Топ-10 трендов</h2>
+
+    <ol class="rank-list">
+      <li>
+        <span class="rank-num gold">1</span>
+        <div>
+          <strong>Visual Novels</strong> — абсолютный король itch.io<br>
+          <span style="color:var(--muted);font-size:0.85rem">~60% Top Rated. Поджанры: yandere, dating sim, otome, BL, LGBT, horror VN. Лидеры: The Freak Circus (10.7K), Our Life (7.7K), DDLC (6.4K)</span>
+          <div><span class="badge badge-blue">Safe bet</span> <span class="badge badge-green">Высокий ROI</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num gold">2</span>
+        <div>
+          <strong>Инкрементальные / Organizing</strong> — главный тренд 2026<br>
+          <span style="color:var(--muted);font-size:0.85rem">The Grand Book Archive, Cosmic Forge, Clown Hole — все в New &amp; Popular. Сортировка, клики, прогрессия.</span>
+          <div><span class="badge badge-green">Растёт</span> <span class="badge badge-orange">Low effort</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num gold">3</span>
+        <div>
+          <strong>Horror</strong> — стабильный продавец<br>
+          <span style="color:var(--muted);font-size:0.85rem">PS1-style (Puppet Combo), liminal spaces, psychological. $2-5 price point, высокий ROI.</span>
+          <div><span class="badge badge-red">Horror</span> <span class="badge badge-green">Продаётся</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num blue">4</span>
+        <div>
+          <strong>Retro / Pixel Art</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">Тег "retro" в топе продаж. Pico-8, NES/SNES, CRT effects. Низкие затраты + аутентичность.</span>
+          <div><span class="badge badge-purple">Эстетика</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num blue">5</span>
+        <div>
+          <strong>Social Media / Chat VN</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">Blooming Panic (Discord VN), Killer Chat, Online Obsession. Формат мессенджера как игра.</span>
+          <div><span class="badge badge-blue">Unique twist</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num blue">6</span>
+        <div>
+          <strong>Survivors-like / Roguelite</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">HoloCure (5.2K), Pawned Souls (trending新品). Roguelite + уникальная тема.</span>
+          <div><span class="badge badge-green">Trending</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num blue">7</span>
+        <div>
+          <strong>Simulation / Ambient</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">Voices Of The Void (5.8K), Sort the Court (11K). "Симуляция работы" — неожиданно популярно.</span>
+          <div><span class="badge badge-orange">Low barrier</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num gray">8</span>
+        <div>
+          <strong>Cute / Cozy</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">"Cute" в топ-10. Mushroom Oasis, A Short Hike, animal games. Стабильный рынок.</span>
+          <div><span class="badge badge-green">Low risk</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num gray">9</span>
+        <div>
+          <strong>LGBT / Queer narratives</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">Butterfly Soup, Lookouts, Hell of a Date. Лояльная аудитория, высокий engagement.</span>
+          <div><span class="badge badge-purple">Loyal audience</span></div>
+        </div>
+      </li>
+      <li>
+        <span class="rank-num gray">10</span>
+        <div>
+          <strong>Meta / Fourth-wall-breaking</strong><br>
+          <span style="color:var(--muted);font-size:0.85rem">DDLC, We Become What We Behold. Вирусный потенциал, обсуждения.</span>
+          <div><span class="badge badge-red">Viral</span></div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <h2><span class="icon">&#128176;</span> Ценовые модели</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Free (Donations)</h3>
+        <p>Большинство топовых игр. Монетизация через tip jar, Patreon, Steam Keys.</p>
+        <span class="badge badge-green">Самый частый</span>
+      </div>
+      <div class="card">
+        <h3>$2 — $5</h3>
+        <p>Малые paid игры. Horror, VN, пазлы. Высокий ROI при низких затратах.</p>
+        <span class="badge badge-orange">Sweet spot</span>
+      </div>
+      <div class="card">
+        <h3>$5 — $10</h3>
+        <p>Полноценные VN, roguelikes. Оптимальная цена для itch.io.</p>
+        <span class="badge badge-blue">Рекомендуется</span>
+      </div>
+      <div class="card">
+        <h3>$10 — $20</h3>
+        <p>Коммерческие инди (Celeste, Andromeda Six). Нужен известный бренд.</p>
+        <span class="badge badge-purple">Для амбициозных</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- GDD 1: SortGrim -->
+  <section id="gdd1">
+    <h2><span class="icon">&#128128;</span> GDD #1: SortGrim</h2>
+    <div class="gdd-block">
+      <h3>SortGrim</h3>
+      <div class="gdd-meta">
+        <span class="badge badge-red">Horror</span>
+        <span class="badge badge-blue">Simulation</span>
+        <span class="badge badge-orange">Incremental</span>
+        <span class="badge badge-green">Puzzle</span>
+        &nbsp;|&nbsp; Web (HTML5), Windows
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127919; Концепция</h4>
+        <p><strong>Horror-симулятор сортировки.</strong> Вы — призрак, запертый в лиминальном пространстве библиотеки между мирами. Сортируйте книги, документы и артефакты, чтобы восстановить порядок и освободиться. Каждая сортировка раскрывает фрагменты жуткой истории.</p>
+        <p><em>Аналоги:</em> Sort the Court! (10.9K ratings, 4.7★) + The Grand Book Archive (инкрементальный тренд) + last seen online (horror puzzle) + лиминальные пространства.</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#9989; Почему это будет успешно</h4>
+        <ul>
+          <li><strong>Пересечение двух трендов:</strong> "cozy organizing" (главный тренд 2026) + horror (стабильно продаётся)</li>
+          <li><strong>Низкая сложность:</strong> Механики сортировки просты, контент — текст и арты</li>
+          <li><strong>Вирусный потенциал:</strong> Контраст "милая сортировка" → "жуткий хоррор" = YouTube/TikTok</li>
+          <li><strong>Браузерная доступность:</strong> HTML5, без скачивания</li>
+          <li><strong>Цена:</strong> Free demo + $3.99 полная игра</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127918; Ключевые механики</h4>
+        <ul>
+          <li><strong>Система сортировки:</strong> Классификация книг/артефактов по категориям. Инкрементальная прогрессия: unlocks новых категорий, расширение библиотеки.</li>
+          <li><strong>Narrative Layering:</strong> Правильная сортировка = фрагмент лора. Неправильная = скримеры или альтернативные ветки. 5 концовок.</li>
+          <li><strong>Ambient Horror:</strong> Музыка меняется по жанру книг. Тени в проходах. Книги "двигаются". HUD деформируется.</li>
+          <li><strong>Meta-механика:</strong> Консоль с подсказками от "другого призрака". Финал: сортировка своих воспоминаний.</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128218; Структура контента</h4>
+        <table>
+          <thead><tr><th>Глава</th><th>Описание</th><th>Механика</th></tr></thead>
+          <tbody>
+            <tr><td>1. Вестибюль</td><td>Туториал</td><td>Yes/No сортировка (как Sort the Court!)</td></tr>
+            <tr><td>2. Читальный зал</td><td>Документы с шифрами</td><td>Drag &amp; drop с категориями</td></tr>
+            <tr><td>3. Архив запретных</td><td>Опасные книги</td><td>Risk/reward, скримеры</td></tr>
+            <tr><td>4. Зеркальный зал</td><td>Зеркальные копии</td><td>Mind-bending пазлы</td></tr>
+            <tr><td>5. Выход</td><td>Финал</td><td>Моральная дилемма</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128196; Монетизация</h4>
+        <p><strong>Free:</strong> Глава 1 (туториал) &nbsp;|&nbsp; <strong>Paid:</strong> $3.99 — полная игра &nbsp;|&nbsp; <strong>DLC:</strong> $1.99 — "Потерянные страницы"</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128197; Время разработки</h4>
+        <p>2-3 месяца (1 чел.) / 1-1.5 месяца (команда 2-3)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GDD 2: ThreadScape -->
+  <section id="gdd2">
+    <h2><span class="icon">&#128172;</span> GDD #2: ThreadScape</h2>
+    <div class="gdd-block">
+      <h3>ThreadScape</h3>
+      <div class="gdd-meta">
+        <span class="badge badge-blue">Visual Novel</span>
+        <span class="badge badge-green">Simulation</span>
+        <span class="badge badge-red">Horror</span>
+        <span class="badge badge-purple">Interactive Fiction</span>
+        &nbsp;|&nbsp; Web (HTML5), Windows, macOS
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127919; Концепция</h4>
+        <p><strong>VN + Social Media Sim + Psychological Horror.</strong> Вы — модератор нового соцсети в альтернативном 2009-м. Решаете, какой контент одобрять, с кем дружить. Постепенно понимаете: некоторые пользователи не существуют.</p>
+        <p><em>Аналоги:</em> Blooming Panic (6.2K ratings, 4.9★) + last seen online + Online Obsession (3.7K, 4.8★) + The Choicer Voicer (top seller).</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#9989; Почему это будет успешно</h4>
+        <ul>
+          <li><strong>Доказанный формат:</strong> VN в оболочке мессенджера — успешный поджанр на itch.io</li>
+          <li><strong>Актуальная тема:</strong> Соцсети, приватность, онлайн-идентичность</li>
+          <li><strong>Уникальная механика:</strong> Модерация контента как геймплей</li>
+          <li><strong>Ретро-ностальгия:</strong> Эстетика early 2010s (ВКонтакте, Tumblr)</li>
+          <li><strong>Вирусный потенциал:</strong> "Choose who gets banned" = TikTok контент</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127918; Ключевые механики</h4>
+        <ul>
+          <li><strong>Модерация:</strong> Лента постов → одобрить / удалить / забанить. Выбор влияет на историю. Метрики: "Довольные" vs "Безопасность".</li>
+          <li><strong>Direct Messages:</strong> Развитие отношений в личке. Некоторые — боты или "мёртвые души". Чаты деформируются.</li>
+          <li><strong>Mystery Layer:</strong> Пользователи ≠ те, за кого себя выдают. Конспирологические теории оказались правдой.</li>
+          <li><strong>Meta-уровень:</strong> Игра "выходит за пределы соцсети". Рабочий стол, файлы разработчика. Финал зависит от всех решений.</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128100; Персонажи</h4>
+        <table>
+          <thead><tr><th>Имя</th><th>Архетип</th><th>Секрет</th></tr></thead>
+          <tbody>
+            <tr><td>Луна</td><td>Основатель платформы</td><td>Знает правду о коде</td></tr>
+            <tr><td>Кай</td><td>Тролль, но добрый</td><td>На самом деле ребёнок</td></tr>
+            <tr><td>Ника</td><td>Активистка</td><td>Бот, созданный для тестов</td></tr>
+            <tr><td>Рэй</td><td>Тихий пользователь</td><td>Исчез 3 года назад</td></tr>
+            <tr><td>Олег</td><td>Конспиролог</td><td>Единственный говорит правду</td></tr>
+            <tr><td>Алиса</td><td>"Реальный мир"</td><td>Связана с создателем</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128218; Структура</h4>
+        <table>
+          <thead><tr><th>Глава</th><th>Описание</th><th>Ключевой момент</th></tr></thead>
+          <tbody>
+            <tr><td>1. Первый день</td><td>Туториал модерации</td><td>Новый пост от Луны</td></tr>
+            <tr><td>2. Нарастание</td><td>Конфликт пользователей</td><td>Первый "бан" с последствиями</td></tr>
+            <tr><td>3. Трещины</td><td>Странные посты, глитчи</td><td>Рэй появляется после исчезновения</td></tr>
+            <tr><td>4. Код</td><td>Раскрытие тайны</td><td>Meta-момент: игра "ломается"</td></tr>
+            <tr><td>5. Лог-аут</td><td>Финал</td><td>Правда или безопасность?</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128196; Монетизация</h4>
+        <p><strong>Free:</strong> Глава 1-2 &nbsp;|&nbsp; <strong>Paid:</strong> $5.99 — полная игра &nbsp;|&nbsp; <strong>DLC:</strong> $2.99 — дополнительные персонажи</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128197; Время разработки</h4>
+        <p>3-4 месяца (1-2 чел.)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GDD 3: MossHeart -->
+  <section id="gdd3">
+    <h2><span class="icon">&#127807;</span> GDD #3: MossHeart</h2>
+    <div class="gdd-block">
+      <h3>MossHeart</h3>
+      <div class="gdd-meta">
+        <span class="badge badge-green">Incremental</span>
+        <span class="badge badge-blue">Simulation</span>
+        <span class="badge badge-orange">Cozy</span>
+        <span class="badge badge-purple">Management</span>
+        &nbsp;|&nbsp; Web (HTML5), Android, iOS
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127919; Концепция</h4>
+        <p><strong>Cozy incremental/organizing game в мире мелких зверей.</strong> Вы — барсук-инженер, строящий подземный город для лесных жителей. Копайте тоннели, стройте комнаты, собирайте ресурсы, привлекайте жителей. Медленный, уютный, бесконечный прогресс.</p>
+        <p><em>Аналоги:</em> Serenitrove (3.8K ratings, 4.9★) + Sort the Court + инкременталки (Cosmic Forge, The Grand Book Archive) + A Short Hike (4.4K, 4.9★).</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#9989; Почему это будет успешно</h4>
+        <ul>
+          <li><strong>Инкременталки — #1 тренд 2026:</strong> The Grand Book Archive, Cosmic Forge, Clown Hole — все trending</li>
+          <li><strong>Cozy стабильно:</strong> "Cute" в топ-10 трендов itch.io</li>
+          <li><strong>Малый объём:</strong> Инкременталки не требуют сложного арта/анимаций</li>
+          <li><strong>Долгосрочная вовлечённость:</strong> Бесконечный прогресс</li>
+          <li><strong>Нет конкурентов:</strong> Cozy + incremental + animals в браузере — уникальная комбинация</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127918; Ключевые механики</h4>
+        <ul>
+          <li><strong>Копание и строительство:</strong> Клик на землю → тоннели. Автоматическое копание после upgrades.</li>
+          <li><strong>Экономика:</strong> Глина, камень, moss, грибы, семена, вода. Цепочки крафта. Автоматизация (mole-助手).</li>
+          <li><strong>Жители:</strong> Ёжики, белки, лягушки, совы. Каждый вид = уникальный бонус. Счастливые привлекают новых.</li>
+          <li><strong>Season System:</strong> 4 сезона меняют ресурсы и события. Зимой — тёплые комнаты, весной — размножение.</li>
+          <li><strong>Decoration:</strong> Декорируйте комнаты. Фотоальбом автоматических скриншотов города.</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128218; Прогрессия</h4>
+        <table>
+          <thead><tr><th>Этап</th><th>Описание</th><th>Unlock</th></tr></thead>
+          <tbody>
+            <tr><td>1. Нора</td><td>Барсук один, копает</td><td>Базовые ресурсы</td></tr>
+            <tr><td>2. Подземелье</td><td>Первые жители</td><td>Крафт, торговля</td></tr>
+            <tr><td>3. Город</td><td>Автоматизация</td><td>Технологии, исследование</td></tr>
+            <tr><td>4. Подземная река</td><td>Новые биомы</td><td>Водные постройки</td></tr>
+            <tr><td>5. Лесная сеть</td><td>Связь с другими норами</td><td>Multiplayer-lite</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128196; Монетизация</h4>
+        <p><strong>Free:</strong> Базовая игра (до Этапа 2) &nbsp;|&nbsp; <strong>Paid:</strong> $2.99 — полная &nbsp;|&nbsp; <strong>IAP:</strong> Косметика $0.99-2.99</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128197; Время разработки</h4>
+        <p>2-3 месяца (1 чел.) для MVP, затем итеративно</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GDD 4: SoulForge -->
+  <section id="gdd4">
+    <h2><span class="icon">&#9876;&#65039;</span> GDD #4: SoulForge</h2>
+    <div class="gdd-block">
+      <h3>SoulForge</h3>
+      <div class="gdd-meta">
+        <span class="badge badge-red">Roguelike</span>
+        <span class="badge badge-blue">Deckbuilder</span>
+        <span class="badge badge-orange">Action RPG</span>
+        <span class="badge badge-purple">Souls-like</span>
+        &nbsp;|&nbsp; Windows, macOS, Linux
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127919; Концепция</h4>
+        <p><strong>Roguelike deckbuilder + Souls-like combat.</strong> Карта вашей души определяет стиль боя. Собирайте "фрагменты души", комбинируйте в колоду, сражайтесь с боссами, олицетворяющими ваши слабости.</p>
+        <p><em>Аналоги:</em> Pawned Souls (trending新品) + HoloCure (5.2K, 4.9★) + Friday Night Funkin' (12.4K) + The Ruins of Calaworm (top seller).</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#9989; Почему это будет успешно</h4>
+        <ul>
+          <li><strong>Souls-like + deckbuilder:</strong> Pawned Souls trending — спрос подтверждён</li>
+          <li><strong>Roguelike структура:</strong> Высокий replay value, контент для стримов</li>
+          <li><strong>Уникальная механика:</strong> "Карта души" = олицетворение внутреннего мира</li>
+          <li><strong>Визуал:</strong> Пиксель-арт + dark fantasy — проверенная формула</li>
+          <li><strong>Цена:</strong> $7.99 — идеальный price point</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127918; Ключевые механики</h4>
+        <ul>
+          <li><strong>Soul Cards:</strong> Каждая карта — фрагмент души (страх, надежда, ярость, покой). Комбинации = build. Меняет статы + визуал.</li>
+          <li><strong>Souls-like Combat:</strong> Пошаговые бои. Stamina management, timing windows. Perfect timing = крит. Phase transitions боссов.</li>
+          <li><strong>Roguelike:</strong> Случайные комнаты, карты, боссы. Death = reset, но "мудрость" остаётся. 6 Worlds, Blessings.</li>
+          <li><strong>Narrative Through Combat:</strong> Каждый босс = аспект прошлого. Победа = принятие. Финальный босс = "Вы сами".</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128171; Build Diversity</h4>
+        <table>
+          <thead><tr><th>Стиль</th><th>Механика</th><th>Визуал</th></tr></thead>
+          <tbody>
+            <tr><td>Rage</td><td>Мощные атаки, низкая защита</td><td>Красный огонь</td></tr>
+            <tr><td>Sorrow</td><td>Лечение, debuffs, замедление</td><td>Синий туман</td></tr>
+            <tr><td>Hope</td><td>Блокировка, counter-attacks</td><td>Золотой свет</td></tr>
+            <tr><td>Void</td><td>Random effects, high risk</td><td>Чёрные трещины</td></tr>
+            <tr><td>Harmony</td><td>Баланс всех статов</td><td>Разноцветные узоры</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127758; Миры</h4>
+        <table>
+          <thead><tr><th>#</th><th>Мир</th><th>Босс</th><th>Механика</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Зеркальный лес</td><td>The Watcher</td><td>Карты переворачиваются</td></tr>
+            <tr><td>2</td><td>Кристальный город</td><td>The Architect</td><td>Стройте "стены" из карт</td></tr>
+            <tr><td>3</td><td>Пепельные поля</td><td>The Wanderer</td><td>Карты исчезают после использования</td></tr>
+            <tr><td>4</td><td>Бездонный колодец</td><td>The Furnace</td><td>Ускоренный темп</td></tr>
+            <tr><td>5</td><td>Небесный сад</td><td>The Gardener</td><td>Карты "растут" (эволюционируют)</td></tr>
+            <tr><td>6</td><td>Точка</td><td>Ваше "Я"</td><td>Все механики в одном</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128196; Монетизация</h4>
+        <p><strong>Paid:</strong> $7.99 (itch.io), $9.99 (Steam) &nbsp;|&nbsp; <strong>DLC:</strong> $3.99 — "New Game+"</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128197; Время разработки</h4>
+        <p>4-6 месяцев (команда 2-3) / 8-10 месяцев (1 чел.)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GDD 5: Voices Below -->
+  <section id="gdd5">
+    <h2><span class="icon">&#127754;</span> GDD #5: Voices Below</h2>
+    <div class="gdd-block">
+      <h3>Voices Below</h3>
+      <div class="gdd-meta">
+        <span class="badge badge-red">Horror</span>
+        <span class="badge badge-blue">Simulation</span>
+        <span class="badge badge-orange">Interactive Fiction</span>
+        <span class="badge badge-purple">Atmospheric</span>
+        &nbsp;|&nbsp; Web (HTML5), Windows
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127919; Концепция</h4>
+        <p><strong>Horror-симулятор глубоководной станции.</strong> Вы — оператор радара на подводной базе в 1987-м. Ловите аномальные сигналы из глубин океана. Каждый сигнал — нечто нечеловеческое. И они начинают отвечать.</p>
+        <p><em>Аналоги:</em> Voices Of The Void (5.8K, 4.9★ — сбор сигналов из космоса) + ANATOMY (top seller) + Feed the Fish ($2, top seller) + Baldi's Basics (top seller).</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#9989; Почему это будет успешно</h4>
+        <ul>
+          <li><strong>VotV — хит itch.io:</strong> Сбор "сигналов" — доказанно популярная механика</li>
+          <li><strong>Underwater horror — ниша:</strong> Subnautica доказал: океан = страх</li>
+          <li><strong>Ретро 80-е:</strong> CRT мониторы, VHS — главный horror-тренд</li>
+          <li><strong>Низкая сложность:</strong> Основной геймплей — радар + текст</li>
+          <li><strong>Стриминг:</strong> Идеально для Twitch (зрители кричат "не смотри!")</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#127918; Ключевые механики</h4>
+        <ul>
+          <li><strong>Радар-интерфейс:</strong> Экран радара с волнами. Курсор → аномалия → реакция. Захват → фильтры (frequency analysis).</li>
+          <li><strong>Signal Analysis:</strong> Частота, амплитуда, "настроение". Мини-игры: настройка частоты, расшифровка паттернов. Записи людей... и не только.</li>
+          <li><strong>Sanity System:</strong> Аномальные сигналы = влияние. Галлюцинации, странные звуки, "друзья" по рации. 3 пути: сопротивление, принятие, трансцендентность.</li>
+          <li><strong>Тайна базы:</strong> Секретные документы. Другие операторы... не совсем люди? База — не исследовательская.</li>
+          <li><strong>Dynamic Events:</strong> Отключение питания, стук в стену, шторм, blackout.</li>
+        </ul>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128218; Структура</h4>
+        <table>
+          <thead><tr><th>Неделя</th><th>Описание</th><th>Ключевой сигнал</th></tr></thead>
+          <tbody>
+            <tr><td>1. Тишина</td><td>Туториал</td><td>Первый аномальный шёпот</td></tr>
+            <tr><td>2. Шёпот</td><td>Сигналы усиливаются</td><td>Запись тонущего корабля</td></tr>
+            <tr><td>3. Ответ</td><td>Сигналы ОТВЕЧАЮТ</td><td>"Они знают ваше имя"</td></tr>
+            <tr><td>4. Бунт</td><td>Другие операторы странно себя ведут</td><td>"Не доверяйте рации"</td></tr>
+            <tr><td>5. Глубина</td><td>Раскрытие правды</td><td>Финальный сигнал</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128196; Монетизация</h4>
+        <p><strong>Free:</strong> Демо (Неделя 1) &nbsp;|&nbsp; <strong>Paid:</strong> $4.99 — полная игра &nbsp;|&nbsp; <strong>DLC:</strong> $2.99 — "Сигналы из архива"</p>
+      </div>
+
+      <div class="gdd-section">
+        <h4>&#128197; Время разработки</h4>
+        <p>2-3 месяца (1 чел.) / 1.5 месяца (команда 2)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECOMMENDATION -->
+  <section id="recommendation">
+    <h2><span class="icon">&#128161;</span> Итоговые рекомендации</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h3>&#9889; Быстрый ROI</h3>
+        <p><strong>SortGrim</strong> или <strong>Voices Below</strong></p>
+        <p>2-3 месяца разработки. Низкая сложность. Уникальная механика. High viral potential.</p>
+        <div style="margin-top:8px">
+          <div style="font-size:0.75rem;color:var(--muted)">Сложность разработки</div>
+          <div class="progress-bar"><div class="fill fill-green" style="width:30%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;color:var(--muted)">Потенциал дохода</div>
+          <div class="progress-bar"><div class="fill fill-blue" style="width:70%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>&#127942; Максимальный потенциал</h3>
+        <p><strong>ThreadScape</strong></p>
+        <p>VN — king of itch.io. Соцсеть-формат + horror twist. Высокий replay value.</p>
+        <div style="margin-top:8px">
+          <div style="font-size:0.75rem;color:var(--muted)">Сложность разработки</div>
+          <div class="progress-bar"><div class="fill fill-orange" style="width:55%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;color:var(--muted)">Потенциал дохода</div>
+          <div class="progress-bar"><div class="fill fill-blue" style="width:90%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>&#128737; Самый безопасный</h3>
+        <p><strong>MossHeart</strong></p>
+        <p>Cozy incremental — минимальные риски. Главный тренд 2026. Масштабируемость.</p>
+        <div style="margin-top:8px">
+          <div style="font-size:0.75rem;color:var(--muted)">Сложность разработки</div>
+          <div class="progress-bar"><div class="fill fill-green" style="width:25%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;color:var(--muted)">Потенциал дохода</div>
+          <div class="progress-bar"><div class="fill fill-blue" style="width:60%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>&#128640; Самый амбициозный</h3>
+        <p><strong>SoulForge</strong></p>
+        <p>Roguelike deckbuilder. Для команды 2+. Высокий потенциал, но долгая разработка.</p>
+        <div style="margin-top:8px">
+          <div style="font-size:0.75rem;color:var(--muted)">Сложность разработки</div>
+          <div class="progress-bar"><div class="fill fill-orange" style="width:80%"></div></div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;color:var(--muted)">Потенциал дохода</div>
+          <div class="progress-bar"><div class="fill fill-blue" style="width:95%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Сравнительная таблица</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>GDD</th>
+          <th>Жанр</th>
+          <th>Сложность</th>
+          <th>Время</th>
+          <th>Цена</th>
+          <th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SortGrim</strong></td>
+          <td>Horror + Sorting</td>
+          <td style="color:var(--green)">Низкая</td>
+          <td>2-3 мес</td>
+          <td>$3.99</td>
+          <td style="color:var(--green)">Низкий</td>
+        </tr>
+        <tr>
+          <td><strong>ThreadScape</strong></td>
+          <td>VN + Social</td>
+          <td style="color:var(--yellow)">Средняя</td>
+          <td>3-4 мес</td>
+          <td>$5.99</td>
+          <td style="color:var(--yellow)">Средний</td>
+        </tr>
+        <tr>
+          <td><strong>MossHeart</strong></td>
+          <td>Cozy Incremental</td>
+          <td style="color:var(--green)">Низкая</td>
+          <td>2-3 мес</td>
+          <td>$2.99</td>
+          <td style="color:var(--green)">Низкий</td>
+        </tr>
+        <tr>
+          <td><strong>SoulForge</strong></td>
+          <td>Roguelike Deckbuilder</td>
+          <td style="color:var(--accent5)">Высокая</td>
+          <td>4-10 мес</td>
+          <td>$7.99</td>
+          <td style="color:var(--yellow)">Средний</td>
+        </tr>
+        <tr>
+          <td><strong>Voices Below</strong></td>
+          <td>Underwater Horror</td>
+          <td style="color:var(--green)">Низкая</td>
+          <td>1.5-3 мес</td>
+          <td>$4.99</td>
+          <td style="color:var(--green)">Низкий</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="comparison" style="margin-top:24px">
+      <div class="col pro">
+        <h4 style="color:var(--green)">&#9989; Что делать</h4>
+        <ul>
+          <li>Начинать с Free demo для валидации</li>
+          <li>Фокус на уникальной механике (не клонировать)</li>
+          <li>Использовать itch.io для early audience</li>
+          <li>Ценовой диапазон $3-8</li>
+          <li>Браузерная версия = больше охват</li>
+        </ul>
+      </div>
+      <div class="col con">
+        <h4 style="color:var(--red)">&#10060; Чего избегать</h4>
+        <ul>
+          <li>Слишком долгая разработка без релиза</li>
+          <li>Копирование успешных игр без unique twist</li>
+          <li>Сложные 3D механики для solo-dev</li>
+          <li>Цена выше $10 на itch.io</li>
+          <li>Игнорирование мобильной аудитории</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>

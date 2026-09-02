@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ядовитая красота — дизайн-философия персонажей для гача-соулс</title>
+<style>
+  :root{
+    --bg:#0b0c10; --panel:#141318; --panel2:#1c1a24; --line:#262331; --line2:#39344a;
+    --acid:#8cff2a; --acid2:#5ee06b; --purple:#b06bff; --danger:#ff3b57;
+    --gold:#ffcf56; --txt:#e9e6ef; --muted:#9d97ab;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}
+  header{padding:56px 20px 44px;text-align:center;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#0a1205 0%,#0d1a10 35%,#131026 100%);border-bottom:1px solid var(--line2)}
+  header::before{content:"";position:absolute;inset:0;opacity:.55;
+    background:
+      radial-gradient(circle at 20% 25%,rgba(140,255,42,.16),transparent 42%),
+      radial-gradient(circle at 80% 75%,rgba(176,107,255,.16),transparent 42%),
+      radial-gradient(circle at 60% 40%,rgba(255,59,87,.08),transparent 30%)}
+  header .wrap{position:relative;max-width:880px;margin:0 auto}
+  .kicker{color:var(--acid);letter-spacing:4px;font-size:13px;text-transform:uppercase;font-weight:800}
+  header h1{font-size:clamp(28px,5vw,50px);font-weight:900;margin:12px 0 8px;letter-spacing:1px;
+    text-shadow:0 0 28px rgba(140,255,42,.28)}
+  header .sub{color:var(--muted);font-size:15px;max-width:700px;margin:0 auto}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .badge{background:rgba(140,255,42,.1);border:1px solid var(--line2);color:var(--txt);
+    padding:5px 14px;border-radius:20px;font-size:12.5px;font-weight:600}
+
+  main{max-width:960px;margin:0 auto;padding:30px 18px 44px}
+
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:30px}
+  .toc h2{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--acid);margin-bottom:10px}
+  .toc ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 20px;counter-reset:t}
+  .toc a{color:var(--muted);text-decoration:none;font-size:14px;display:flex;gap:8px;padding:5px 8px;border-radius:8px;transition:.15s}
+  .toc a::before{content:counter(t);counter-increment:t;color:var(--acid);font-weight:800}
+  .toc a:hover{background:var(--panel2);color:var(--txt)}
+
+  section{margin:52px 0}
+  h2.sec{font-size:26px;font-weight:800;margin-bottom:6px;padding-left:16px;border-left:4px solid var(--acid)}
+  h2.sec .num{color:var(--acid2);margin-right:8px}
+  .secsub{color:var(--muted);font-size:14px;margin:4px 0 16px;padding-left:16px}
+  h3{font-size:19px;margin:22px 0 8px}
+  h4{font-size:15.5px;margin:16px 0 6px;color:var(--gold)}
+  p{margin:10px 0;color:#d3cee0}
+  strong{color:var(--txt)}
+  em{color:var(--acid);font-style:normal;font-weight:600}
+  ul,ol{margin:10px 0;padding-left:26px;color:#d3cee0}
+  li{margin:6px 0}
+
+  .statband{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat b{display:block;font-size:23px;color:var(--acid)}
+  .stat span{color:var(--muted);font-size:12px;line-height:1.35;display:block;margin-top:4px}
+
+  .table-wrap{overflow-x:auto;margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:#d3cee0}
+  th{background:var(--panel2);color:var(--acid);font-weight:700;white-space:nowrap}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  td b{color:var(--txt)}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .mini{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .mini h4{color:var(--acid);font-size:15px;margin-bottom:6px}
+  .mini p{color:var(--muted);font-size:13.5px;margin:4px 0}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+  .card.trap{background:linear-gradient(135deg,#101b0a,#14101f);border-color:var(--line2)}
+  .card.risk{background:linear-gradient(135deg,#1d0d12,#10121c);border-color:#4a2a38}
+
+  .quote{border-left:4px solid var(--acid2);background:var(--panel);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin:14px 0;color:var(--muted);font-size:14.5px;font-style:italic}
+  .quote b{color:var(--acid);font-style:normal;display:block;margin-top:6px}
+
+  .rule{border-left:3px solid var(--line2);background:var(--panel);
+    border-radius:0 12px 12px 0;padding:12px 16px;margin:12px 0;font-size:14.5px;color:#d3cee0}
+  .rule.bad{border-color:var(--danger)}
+  .rule.bad::before{content:"не так — ";color:var(--danger);font-weight:800}
+  .rule.good{border-color:var(--acid)}
+  .rule.good::before{content:"так — ";color:var(--acid);font-weight:800}
+
+  .pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+    padding:2px 9px;border-radius:12px;border:1px solid var(--line2);color:var(--muted)}
+  .pill.ok{color:var(--acid);border-color:rgba(140,255,42,.4);background:rgba(140,255,42,.07)}
+  .pill.warn{color:var(--danger);border-color:rgba(255,59,87,.4);background:rgba(255,59,87,.07)}
+
+  .srcnote{color:var(--muted);font-size:12.5px;margin-top:12px}
+
+  @media (max-width:640px){header{padding:40px 16px 32px}h2.sec{font-size:21px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">DESIGN PHILOSOPHY · gacha · souls-vibe</div>
+    <h1>Ядовитая красота</h1>
+    <p class="sub">Дизайн-философия персонажей для мрачной гача-боёвки: открытая броня и «мнимая доступность» — не язык соблазна, а язык угрозы. Теория, природа, ростер-матрица, боевые механики и чек-лист.</p>
+    <div class="badges">
+      <span class="badge">Формула: приглашение против угрозы</span>
+      <span class="badge">Апосематизм</span>
+      <span class="badge">Анормально-редкие веномы</span>
+      <span class="badge">0 секса · M-рейтинг</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <nav class="toc">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#s1">Формула одной фразой</a></li>
+      <li><a href="#s2">Учимся у природы: апосематизм</a></li>
+      <li><a href="#s3">Словарь терминов</a></li>
+      <li><a href="#s4">Аксиомы дизайна</a></li>
+      <li><a href="#s5">Три теста для каждого персонажа</a></li>
+      <li><a href="#s6">Матрица ростер-архетипов</a></li>
+      <li><a href="#s7">Вайб каждого архетипа</a></li>
+      <li><a href="#s8">«Мнимая доступность» в бою</a></li>
+      <li><a href="#s9">Палитра и визуальные приёмы</a></li>
+      <li><a href="#s10">Редкость и психология баннера</a></li>
+      <li><a href="#s11">Рынок: рейтинги и стора-безопасность</a></li>
+      <li><a href="#s12">Чек-лист дизайнера</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="s1">
+    <h2 class="sec"><span class="num">01</span> Формула одной фразой</h2>
+    <p class="secsub">Ось дизайна — не «закрыто ↔ откровенно», а «приглашение ↔ угроза».</p>
+    <p>Открытый костюм в этом сеттинге работает только как <strong>ловушка хищника</strong>: персонаж выглядит доступным — но каждая деталь наряда, каждая открытая зона и поза говорят «подойди и умри». Мозг игрока по умолчанию читает открытость как приглашение; задача дизайна — <em>инвертировать</em> эту реакцию за счёт опасности, которая доминирует визуально.</p>
+    <div class="quote">«Ты видишь уязвимость. Это и есть приманка. Горло открыто — клинок уже в твоей спине»<b>— реплика-принцип для веном-персонажа</b></div>
+    <div class="statband">
+      <div class="stat"><b>2–3</b><span>веном-персонажа на ростер — редкость создаёт смысл</span></div>
+      <div class="stat"><b>100%</b><span>детали одежды — язык угрозы, а не украшение</span></div>
+      <div class="stat"><b>0</b><span>сексуального контента. Открытость ≠ пошлость</span></div>
+    </div>
+    <div class="rule bad">Открытая броня + украшательства и «привлекательная поза». Читается как обычный фансервис, ценность персонажа падает.</div>
+    <div class="rule good">Открытая броня + заряженное оружие, предупреждающая окраска, угрожающая поза и боевая агрия. Читается: «приманка, внутри — яд».</div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <h2 class="sec"><span class="num">02</span> Учимся у природы: апосематизм</h2>
+    <p class="secsub">«Ядовитость» — прямой перевод биологического принципа: яркое = опасное.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Объект</th><th>Как работает в природе</th><th>Что переносим в дизайн</th></tr></thead>
+        <tbody>
+          <tr><td><b>Лягушка-древолаз</b></td><td>Кричащая окраска предупреждает хищников: «не трогай, я токсична».</td><td>Контрастная «сигнальная» палитра персонажа + свечение mark-зон.</td></tr>
+          <tr><td><b>Орхидейный богомол</b></td><td>Выглядит как цветок (приманка), жертва подходит сама.</td><td>«Мнимая доступность»: открытые зоны притягивают взгляд — это капкан.</td></tr>
+          <tr><td><b>Морской ёрш</b></td><td>Маскируется под камень; яд в шипах.</td><td>Тихое начало, «почти безобидный» силуэт — внезапная летальная вспышка.</td></tr>
+          <tr><td><b>Коралловая змейка</b></td><td>Полосатая «униформа» ядовитых — узор, который все узнают.</td><td>Узнаваемый фирменный узор/аксессуар каждого веном-персонажа «униформа яда».</td></tr>
+          <tr><td><b>Бабочка-монарх</b></td><td>Вкусная отвратительность; труп на животе.</td><td>Тоже красива, тоже смертельноопасна — «Яд. Красиво. Не тронем».</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Отсюда главный принцип: визуальные приёмы угрозы используем <strong>честно и буквально</strong> — как химия тела, а не как декор. Зритель должен «считать» опасность ещё до боя: по цвету, по узору, по позе.</p>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <h2 class="sec"><span class="num">03</span> Словарь терминов</h2>
+    <p class="secsub">Общий язык для команды дизайна и райтинга.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Термин</th><th>Значение</th></tr></thead>
+        <tbody>
+          <tr><td><b>Апосематизм</b></td><td>Яркая предупреждающая окраска «не тронь меня». Визуальный кодетектор смертельной опасности.</td></tr>
+          <tr><td><b>Мнимая доступность</b></td><td>Приглашающий внешний вид, который является ловушкой. Наряд/поза «подойди» + геймплей «жадность наказывается».</td></tr>
+          <tr><td><b>Открытость как мишень</b></td><td>Открытые участки тела — это не «красота», а зоны риска: горло, ключицы, mark-линии. Куда бьют — туда и открыто.</td></tr>
+          <tr><td><b>Веном-персонаж</b></td><td>Редкий архетип ростра, где все приёмы апосематизма собраны в одного: красив, открыт, смертоносен.</td></tr>
+          <tr><td><b>Униформа яда</b></td><td>Фирменный повторяющийся узор/аксессуар, который игрок узнаёт с одного взгляда (как полоски змеи).</td></tr>
+          <tr><td><b>Ловушка-парирование</b></td><td>Боевая механика: противник приглашающе открывается — игрок подходит — наказывается. Тема «мнимой доступности» в геймплее.</td></tr>
+          <tr><td><b>Правило 50/50</b></td><td>Тест: взгляд на персонажа у случайного зрителя должен поровну склоняться между «подойти» и «опасаться». Если 90% — «подойти», дизайн провален.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <h2 class="sec"><span class="num">04</span> Аксиомы дизайна</h2>
+    <p class="secsub">Правила, которые нельзя нарушать, иначе концепт вырождается в обычный фансервис.</p>
+    <ol>
+      <li><strong>Опасность доминирует визуально.</strong> Открытость всегда перебивается оружием, стойкой, свечением или узором. Наряд не может «выигрывать» у позы.</li>
+      <li><strong>Открытость направленная.</strong> Не «много кожи», а «конкретные зоны риска»: то, куда противник целится, — то и открыто. Это читается как угроза, а не украшение.</li>
+      <li><strong>Редкость обязательна.</strong> Если все персонажи «ядовито-открытые», приём обесценивается. Ростер в основном собранный; веномы — исключение, ради которого их и тянут в банер.</li>
+      <li><strong>Персонаж = силаэт + приём.</strong> Без цвета и деталей силуэт должен читаться: «опасна ли она?» Да — только по позе.</li>
+      <li><strong>Тема яда у каждого своя.</strong> Змея, шипы, тлен, насекомые — чтоб «смертельность» отличалась и не сливалась в один «зелёный ядовитый клон».</li>
+      <li><strong>Секс — нет.</strong> Задача — напряжение и страх, а не возбуждение. Граница: M/PEGI 18, но без секс-сцен и без детально обнажённых тел в постоянном контенте.</li>
+      <li><strong>«Мнимая доступность» живёт и в бою.</strong> Картинка без геймплея-ловушки — пустой театр. Тема должна повторяться в паттернах врагов.</li>
+    </ol>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <h2 class="sec"><span class="num">05</span> Три теста для каждого персонажа</h2>
+    <p class="secsub">Прогони персонажа до того, как он попадёт в банер.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Тест</th><th>Как провести</th><th>Критерий прохождения</th></tr></thead>
+        <tbody>
+          <tr><td><b>Силуэт</b></td><td>Закрась персонажа одним цветом. Оцени позу, размашистый жест, направление оружия.</td><td>Силуэт говорит «бой» или «ловушка», а не «приглашение». Оружие и тело формируют одну агрессивную массу.</td></tr>
+          <tr><td><b>50/50</b></td><td>Покажи персонажа 40 случайным людям разом, без пояснений.</td><td>~половина скажет «подойти и проверить», половина — «лучше не трогать». Если почти все «подойти» — это провал.</td></tr>
+          <tr><td><b>«Убери атрибутику»</b></td><td>Убери ядовитые маркировки, свечение, оружие из рук.</td><td>Без атрибутики персонаж всё ещё выглядит «спокойно-опасным», а не игривым. Если «мило/кокетливо» — переделывай позу.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <h2 class="sec"><span class="num">06</span> Матрица ростер-архетипов</h2>
+    <p class="secsub">Примеры «ядовитых» персонажей — каждый с уникальным типом угрозы и ролью в бою.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Архетип</th><th>Тема яда</th><th>Открытые зоны / приём</th><th>Оружие и поза</th><th>Боевая роль</th></tr></thead>
+        <tbody>
+          <tr><td><b>Гадюка</b></td><td>Змеиный токсин: мгновенный укус-выстрел.</td><td>Открыты горло и руки-клыки; узор-«чешуя» на коже.</td><td>Парные кинжалы, стойка низкая, змеиная «ползёт» к жертве.</td><td>Хит-энд-ран, ядовитые ДОТ, наказание за приближение.</td></tr>
+          <tr><td><b>Шипящая роза</b></td><td>Пыльца-паралич + шипы-стебли.</td><td>Открыты плечи/спина, откуда растут «стебли»; цветочный силуэт.</td><td>Трость-коса и «лепестковая» завеса.</td><td>Контроль площади, стан/паралич, отравление зон.</td></tr>
+          <tr><td><b>Мёртвая невеста</b></td><td>Тленное качество: гнилостный туман.</td><td>Открытые ключицы-«швы», бледная кожа с гнилостными провалами.</td><td>Медленный тяжёлый клинок, горизонтальная «похоронная» поза.</td><td>Танк-отравитель, хиты не уменьшают урон, а накапливают чуму.</td></tr>
+          <tr><td><b>Осенняя саранча</b></td><td>Нейротоксин-«рой».</td><td>Открыто лицо и глаза; крылья-плащ из «насекомых».</td><td>Метательное оружие, пируэт-стая вокруг головы.</td><td>Скоростной агро-сборщик: жалит всё, что движется.</td></tr>
+          <tr><td><b>Лунная бледность</b></td><td>Ледяной холод-«ожог» + гекс.</td><td>Открытые ладони и грудь-«источник»; frost-свечение.</td><td>Двуручный ходащий клинок-бритва.</td><td>Фрост-баф, «замороженный капкан», парирование с возмездием.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="srcnote">Это рабочие эскизы архетипов, а не финальные персонажи: главное — каждый по-своему «открыт и смертоносен», и у каждого узнаваемый «фирменный яд».</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="s7">
+    <h2 class="sec"><span class="num">07</span> Вайб каждого архетипа</h2>
+    <p class="secsub">Что игрок должен чувствовать, встретив персонажа впервые.</p>
+    <div class="grid2">
+      <div class="mini"><h4>Гадюка</h4><p>«Ближе — и ты труп». Мурлычет приглашающе, а глаза считывают дистанцию. Квест-превращение: от «невозмутимой заводной» до резкого укуса.</p></div>
+      <div class="mini"><h4>Шипящая роза</h4><p>«Прекрасен до оскала». Красивая завеса лепестков вместо кровавого шлейфа — но шипы видны с первого кадра.</p></div>
+      <div class="mini"><h4>Мёртвая невеста</h4><p>«Свадьба на кладбище». Тоска вместо агрессии: она подходит медленно, потому что ей нельзя спешить — чума должна успеть.</p></div>
+      <div class="mini"><h4>Осенняя саранча</h4><p>«Смерть как игра». Смеётся, танцует, окликает тебя по имени — а вокруг уже роится яд.</p></div>
+      <div class="mini"><h4>Лунная бледность</h4><p>«Тишина опаснее крика». Почти не двигается, лицо закрыто; опасность в спокойствии и в вакууме рядом.</p></div>
+      <div class="mini"><h4>Общий тон</h4><p>Все веномы говорят мало и емко. Спокойствие = самая страшная их поза.</p></div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="s8">
+    <h2 class="sec"><span class="num">08</span> «Мнимая доступность» в бою</h2>
+    <p class="secsub">Картинка без геймплея — пустой театр. Тема переносится в паттерны врагов и боссов.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Механика</th><th>Как работает</th><th>Почему это та самая «мнимая доступность»</th></tr></thead>
+        <tbody>
+          <tr><td><b>Приманка-открытие</b></td><td>Босс намеренно открывается, манит ударом — подставиться под парирование.</td><td>Игрок видит «шанс», жадничает — получает контр-петлю. Точно как с нарядом.</td></tr>
+          <tr><td><b>Ядовитая зона-ловушка</b></td><td>Приглашающе пустой участок арены, который на деле убивает при входе.</td><td>Пустота и чистота читаются как «безопасно» — и наказываются.</td></tr>
+          <tr><td><b>Кровавый «последний шанс»</b></td><td>На низком HP босс усиливается, но по пластике «устаёт», маня добить.</td><td>Иллюзия добычи — разжигает жадность и ставит алчным угрозу.</td></tr>
+          <tr><td><b>Парти-ловушка</b></td><td>Противник-«приглашение» вообще уменьшает урон, но ядовитый ДОТ дерётся всю битву.</td><td>«Доступно» в цифрах, смертельно по напору.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Важно: это <strong>не хард-гейт</strong>. Игрок всегда может перерасти бой цифрами (твоя «логика перекачанного героя»); ловушка — бонус и красота, а не обязательное проклятие.</p>
+  </section>
+
+  <!-- 9 -->
+  <section id="s9">
+    <h2 class="sec"><span class="num">09</span> Палитра и визуальные приёмы</h2>
+    <p class="secsub">Цвет — часть «униформы яда», а не просто стиль.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Приём</th><th>Применение</th><th>Риск</th></tr></thead>
+        <tbody>
+          <tr><td><b>Кислотный-неоновый акцент</b></td><td>Один «токсичный» цвет на персонажа (кислотный зелёный, отравленный синий, гнилостный пурпур) — как сигнальная окраска.</td><td>Перегруз — если цветов больше двух-трёх, попаданий нет, маскировка.</td></tr>
+          <tr><td><b>Свечение mark-зон</b></td><td>Места «откуда яд» (руки, глаза, открытые участки) слегка светятся — читается как угроза, а не как ювелирка.</td><td>Фансервис-свечение «на грудь» — превращается в буквальную пошлость. Только на функциональные зоны.</td></tr>
+          <tr><td><b>Узнаваемый повтор</b></td><td>У каждого венома-персонажа повторяемый узор/аксессуар («униформа яда»), который виден в силуэте и в боевом ИКУ.</td><td>Единообразие — если узор везде одинаковый, теряется индивидуальность.</td></tr>
+          <tr><td><b>Контраст «мир vs она»</b></td><td>Окружение серое/тёплое, веном — холодный яркий. Она сама — пятно яда на карте.</td><td>Если мир тоже неоновый, «ядовитость» не считывается.</td></tr>
+          <tr><td><b>Тень и вырез</b></td><td>Открытые зоны подчёркнуты тенью-градиентом: «здесь не должно быть света, здесь вход в ловушку».</td><td>Чрезмерные вырезы превращают в каталог белья. Мера — обязательна.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section id="s10">
+    <h2 class="sec"><span class="num">10</span> Редкость и психология баннера</h2>
+    <p class="secsub">Почему игроки будут крутить именно веном-персонажей даже без «милоты».</p>
+    <div class="grid2">
+      <div class="mini"><h4>Редкость = смысл</h4><p>Веномов 2–3 на ростер. Они — «праздничные» баннеры, их ждут сезонов. Редкость создаёт ажиотаж вместо привычного еженедельного спроса.</p></div>
+      <div class="mini"><h4>Плейстайл-пул</h4><p>Каждый веном = уникальный движок боя (укусы, контроль, чума). Игрок тянет не за красоту — за «я хочу так играть».</p></div>
+      <div class="mini"><h4>Театр банера</h4><p>Вступление веном-персонажа = мини-дуэль с ним (соулс-ритуал). Победил в демо — захотел в ростер. Это работает без каваи.</p></div>
+      <div class="mini"><h4>Флекс в ко-опе</h4><p>Веномы используются как «униформа яда» для демонстрации в ко-опе/рейдах. Статусная редкость стимулирует донат.</p></div>
+      <div class="mini"><h4>Мета-якорь</h4><p>Раз в цикл выпускаем босса, под которого важен конкретный токсин — точечный «рецепт победы» без pay-to-win духа.</p></div>
+      <div class="mini"><h4>Лор-клей</h4><p>У каждого венома — трагическая история «почему она открыта». Игрок тянет, чтобы доиграть её судьбу.</p></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section id="s11">
+    <h2 class="sec"><span class="num">11</span> Рынок: рейтинги и стора-безопасность</h2>
+    <p class="secsub">Идея «взрослее, но без секса» — это ещё и ключ к платформенным ограничениям.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Канал</th><th>Правило</th><th>Вывод</th></tr></thead>
+        <tbody>
+          <tr><td><b>Apple App Store</b></td><td>Нагота (даже «художественная») — под риском; кровь и мат терпят лучше.</td><td>«Ядовитая открытость» без детального нравится здесь спокойно. Никаких секс-сцен — гарантия.</td></tr>
+          <tr><td><b>Google Play</b></td><td>Аналогично: секс-контент режется, кровь/жестокость запрашивают рейтинг.</td><td>M/PEGI 18 по «кровь+мат» — стандарт; «силовое обнажение» без секса — ок.</td></tr>
+          <tr><td><b>Китай (CN-локальный)</b></td><td>Цензура сильнее в сторону крови и эстетики боли.</td><td>Стандартное решение: отдельная CN-версия с приглушённой палитрой и более «закрытой» графикой.</td></tr>
+          <tr><td><b>Платежки (Apple/Google/Visa)</b></td><td>Секс-транзакции и «взрослые» товары ужесточаются.</td><td>Твой «веном» = костюм, а не контент — транзакции проходят.</td></tr>
+          <tr><td><b>ESRB / PEGI</b></td><td>Разница между «M за кровь» и «Adults Only за секс» огромна.</td><td>Цель — M без Adults Only во всех локалях.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section id="s12">
+    <h2 class="sec"><span class="num">12</span> Чек-лист дизайнера</h2>
+    <p class="secsub">Готовность персонажа к банеру.</p>
+    <ul>
+      <li>Пройден <strong>силуэт-тест</strong> — поза говорит «бой/ловушка», а не «приглашение».</li>
+      <li>Пройден <strong>тест 50/50</strong> — аудитория поровну подходит и опасается.</li>
+      <li>Открытые зоны — <strong>зоны риска</strong>, а не украшение; тень подчёркивает «вход в ловушку».</li>
+      <li>Один фирменный «яд» + один узнаваемый узор — без смешения тем между персонажами.</li>
+      <li>Неоновая сигнатура на функциональных зонах (руки/глаза/оружие), не на груди.</li>
+      <li>Секс-контента нет; детальное обнажение отсутствует в постоянном контенте.</li>
+      <li>В бою есть <strong>минимум одна механика «выманивающей ловушки»</strong> (приманка-открытие, ядовитая зона).</li>
+      <li>Веномов на ростер — не больше 2–3; остальные — собраны в броню.</li>
+      <li>Прогонен по стора-правилам: M-рейтинг по крови и языку, не Adults Only.</li>
+      <li>История у персонажа — трагедия («почему она открыта»), а не «просто так привлекательная». Это усиливает и лор-клей, и банер.</li>
+    </ul>
+    <div class="card trap">
+      <h3>Итог одной строчкой</h3>
+      <p>Мир — агрессивный, ростер — «мрачно-красивый», веномы — редкие приманки-ловушки, секс — нет, рейтинг — M, крутка — за плейстайл и статус. Ось дизайна: <em>приглашение против угрозы</em>.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer style="text-align:center;color:var(--muted);padding:30px 16px;font-size:12.5px;border-top:1px solid var(--line)">
+  Дизайн-философия «Ядовитая красота» — рабочая концепция для мрачной гача-боёвки · самостоятельная страница, старые html не изменялись · <a href="index.html" style="color:var(--acid2)">назад к списку страниц</a>
+</footer>
+
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Реестр проваленных геймдев-проектов</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      padding: 1.2rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      flex-wrap: wrap;
+    }
+    header .brand { font-weight: 700; font-size: 1.15rem; }
+    header .brand small { color: var(--muted); font-weight: 400; font-size: 0.8rem; display:block; }
+    nav { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn {
+      display:inline-block; padding:.55em 1em; border:1px solid var(--border);
+      border-radius:8px; text-decoration:none; color:var(--text);
+      background:#21262d; cursor:pointer; font-size:.9rem; transition: border-color .15s, background .15s;
+    }
+    .btn:hover { border-color: var(--accent); background:#30363d; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color:#0d1117; font-weight:600; }
+    .btn.primary:hover { background:#79c0ff; }
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    h1 { margin: 0.5rem 0 0.2rem; font-size: 1.6rem; }
+    .desc { color: var(--muted); margin-top: 0; max-width: 70ch; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+      gap: 1rem; margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: var(--panel); border:1px solid var(--border); border-radius:10px; padding:1rem;
+    }
+    .stat-card .num { font-size: 1.9rem; font-weight: 700; }
+    .stat-card .lbl { color: var(--muted); font-size: 0.85rem; margin-top: .2rem; }
+
+    .filters { display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+    .filters input, .filters select {
+      background:#21262d; color:var(--text); border:1px solid var(--border);
+      border-radius:8px; padding:.5em .7em; font-size:.9rem;
+    }
+    .filters input { flex:1; min-width:200px; }
+
+    .section-title { font-size:1.1rem; font-weight:600; margin:1.5rem 0 .8rem; }
+
+    .card {
+      background: var(--panel); border:1px solid var(--border); border-radius:10px;
+      padding:1rem 1.1rem; margin-bottom:.8rem;
+    }
+    .card .row { display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; }
+    .card h3 { margin:0 0 .3rem; font-size:1.05rem; }
+    .card .date { color:var(--muted); font-size:.8rem; white-space:nowrap; }
+    .tags { display:flex; gap:.4rem; flex-wrap:wrap; margin:.5rem 0; }
+    .tag { background:#21262d; border:1px solid var(--border); border-radius:999px; padding:.15em .7em; font-size:.78rem; color:var(--muted); }
+    .card .why { color:var(--text); background:#0d1117; border:1px dashed var(--border); border-radius:8px; padding:.6em .8em; font-size:.9rem; margin-top:.5rem; }
+    .card .genrefail { color:#f85149; font-size:.85rem; margin-top:.5rem; }
+    .card .idea { color:var(--muted); font-size:.85rem; margin-top:.3rem; }
+    .empty { color:var(--muted); text-align:center; padding:2.5rem 1rem; border:1px dashed var(--border); border-radius:10px; }
+    footer { border-top:1px solid var(--border); margin-top:2.5rem; padding:1.2rem 1.5rem; color:var(--muted); font-size:.85rem; text-align:center; }
+    .note { font-size:.85rem; color:var(--muted); margin:1rem 0 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Реестр проваленных геймдев-проектов
+      <small>учимся на чужих ошибках, чтобы не повторять свои</small>
+    </div>
+    <nav>
+      <a class="btn" href="#stats">Статистика</a>
+      <a class="btn" href="#list">База</a>
+      <a class="btn primary" href="submit.html">Добавить провал</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Какие идеи уже провалились</h1>
+    <p class="desc">Открытый реестр геймдев-проектов, которые провалились или не достигли успеха. Любой может добавить свой опыт. Цель — не повторять чужие ошибки и не тратить время на идеи, которые уже не сработали.</p>
+
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="num" data-stat="total">0</div><div class="lbl">всего проектов</div></div>
+      <div class="stat-card"><div class="num" data-stat="genres">0</div><div class="lbl">жанров</div></div>
+      <div class="stat-card"><div class="num" data-stat="success">0</div><div class="lbl">успешных из них</div></div>
+      <div class="stat-card"><div class="num" data-stat="failed">0</div><div class="lbl">провалившихся</div></div>
+    </div>
+
+    <div class="section-title">Жанры по популярности (сколько раз провалились)</div>
+    <div class="stats" id="genreStats"></div>
+
+    <div class="section-title" id="list">База проектов</div>
+    <div class="filters">
+      <input id="search" type="text" placeholder="Поиск по названию, идее, причинам...">
+      <select id="genreFilter"><option value="">Все жанры</option></select>
+      <select id="statusFilter">
+        <option value="">Любой статус</option>
+        <option value="провал">Провал</option>
+        <option value="недостаточно успешен">Недостаточно успешен</option>
+        <option value="успех">Успех (для сравнения)</option>
+      </select>
+    </div>
+    <div id="listContainer"></div>
+    <div class="note" id="fetchNote"></div>
+  </main>
+
+  <footer>
+    Открытый реестр · данные хранятся в GitHub-репозитории · модерация мгновенная (заглушка)
+  </footer>
+
+  <script>
+    const DB_URL = 'data/failed-projects.json';
+
+    async function loadData() {
+      try {
+        const res = await fetch(DB_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const list = Array.isArray(data.projects) ? data.projects : [];
+        renderAll(list);
+      } catch (e) {
+        document.getElementById('listContainer').innerHTML = '<div class="empty">Не удалось загрузить базу (' + e.message + '). Запустите сайт через localhost или GitHub Pages (fetch к JSON не работает с файла:// из-за CORS).</div>';
+      }
+    }
+
+    function gc(arr, key) {
+      const m = {};
+      arr.forEach(p => { const k = (p[key] || 'неизвестно').trim(); m[k] = (m[k] || 0) + 1; });
+      return Object.entries(m).sort((a, b) => b[1] - a[1]);
+    }
+
+    let ALL = [];
+
+    function renderAll(list) {
+      ALL = list;
+      const total = list.length;
+      const statusCount = {};
+      list.forEach(p => { const s = (p.status || 'провал').toLowerCase(); statusCount[s] = (statusCount[s] || 0) + 1; });
+      document.querySelector('[data-stat="total"]').textContent = total;
+      document.querySelector('[data-stat="genres"]').textContent = new Set(list.map(p => (p.genre || '').trim().toLowerCase()).filter(Boolean)).size;
+      document.querySelector('[data-stat="failed"]').textContent = (statusCount['провал'] || 0) + (statusCount['недостаточно успешен'] || 0);
+      document.querySelector('[data-stat="success"]').textContent = statusCount['успех'] || 0;
+
+      const genres = gc(list, 'genre');
+      const genreStats = document.getElementById('genreStats');
+      genreStats.innerHTML = genres.length
+        ? genres.map(([g, n]) => '<div class="stat-card"><div class="num">' + n + '</div><div class="lbl">' + esc(g) + '</div></div>').join('')
+        : '<div class="empty" style="grid-column:1/-1">Пока нет данных</div>';
+
+      const gf = document.getElementById('genreFilter');
+      gf.innerHTML = '<option value="">Все жанры</option>' + genres.map(([g]) => '<option value="' + esc(g) + '">' + esc(g) + '</option>').join('');
+
+      applyFilter();
+    }
+
+    function esc(s) {
+      // Сначала убиваем любой HTML/скрипт (защита от XSS), затем нейтрализуем ссылки (защита от скам-кликов)
+      let out = String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+      out = out.replace(/(https?:\/\/|www\.|\b\S+\.(com|net|ru|org|xyz|click|top|info)\b)\S*/gi, '[ссылка скрыта]');
+      return out;
+    }
+
+    function applyFilter() {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const g = document.getElementById('genreFilter').value;
+      const s = document.getElementById('statusFilter').value;
+      const filtered = ALL.filter(p => {
+        const hay = ((p.name||'')+' '+ (p.idea||'')+' '+ (p.reasons||'')+' '+ (p.genre||'')).toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (g && (p.genre||'').trim() !== g) return false;
+        if (s && (p.status||'').toLowerCase() !== s.toLowerCase()) return false;
+        return true;
+      });
+
+      const box = document.getElementById('listContainer');
+      if (!filtered.length) {
+        box.innerHTML = '<div class="empty">Ничего не найдено. Добавьте первый проваленный проект!</div>';
+        return;
+      }
+      box.innerHTML = filtered.map(p => {
+        const statusClass = (p.status||'').toLowerCase() === 'успех' ? ' (успех)' : '';
+        return '<div class="card">' +
+          '<div class="row"><h3>' + esc(p.name || 'Без названия') + '</h3>' +
+          '<span class="date">' + (p.date ? esc(p.date).slice(0,10) : '') + ' · ' + esc(p.status || 'провал') + '</span></div>' +
+          '<div class="tags">' + (p.genre ? '<span class="tag">' + esc(p.genre) + '</span>' : '') +
+          (p.platform ? '<span class="tag">' + esc(p.platform) + '</span>' : '') +
+          (p.teamSize ? '<span class="tag">команда: ' + esc(p.teamSize) + '</span>' : '') +
+          (p.duration ? '<span class="tag">' + esc(p.duration) + '</span>' : '') + '</div>' +
+          (p.idea ? '<div class="idea">Идея: ' + esc(p.idea) + '</div>' : '') +
+          (p.reasons ? '<div class="why">Почему провалилось: ' + esc(p.reasons) + '</div>' : '') +
+          (p.whatLearned ? '<div class="idea">Урок: ' + esc(p.whatLearned) + '</div>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    document.getElementById('search').addEventListener('input', applyFilter);
+    document.getElementById('genreFilter').addEventListener('change', applyFilter);
+    document.getElementById('statusFilter').addEventListener('change', applyFilter);
+
+    document.getElementById('fetchNote').textContent = 'Источник: ' + DB_URL;
+    loadData();
+  </script>
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>
