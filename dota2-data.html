@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dota 2 — данные: герои, навыки, сущности</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --card: #1c2128; --card2: #21262d;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --red: #e0322c; --teal: #4fc3a1; --yellow: #f5c542; --blue: #6aa9ff; --purple: #c792ea;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Segoe UI", Roboto, sans-serif; padding: 20px; line-height: 1.4; }
+  a { color: var(--blue); }
+  header.hero { position: relative; overflow: hidden; background: linear-gradient(120deg, #161b22 0%, #1b1109 55%, #2a0f0d 100%); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 16px; }
+  header.hero h1 { font-size: 26px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header.hero h1 img { height: 30px; }
+  header.hero h1 .accent { color: var(--red); }
+  header.hero .sub { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 820px; }
+  .stats-strip { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; min-width: 130px; }
+  .kpi .num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kpi.red .num { color: var(--red); } .kpi.teal .num { color: var(--teal); }
+  .kpi.blue .num { color: var(--blue); } .kpi.yellow .num { color: var(--yellow); }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .controls { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end; }
+  @media (max-width: 820px) { .controls { grid-template-columns: 1fr 1fr; } }
+  .controls label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+  input[type=text], select { width: 100%; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+  input[type=text]:focus, select:focus { outline: none; border-color: var(--blue); }
+  .toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; padding-bottom: 8px; }
+  .count-line { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  .count-line b { color: var(--text); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab { background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 9px 18px; font-size: 14px; cursor: pointer; }
+  .tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+  .chip { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin: 0 3px 3px 0; background: var(--card2); color: var(--muted); border: 1px solid var(--border); }
+  .chip.red { color: #ff7b72; border-color: #7a2620; } .chip.blue { color: #79c0ff; border-color: #1f4d7a; }
+  .chip.green { color: #7ee787; border-color: #1f6f3a; } .chip.yellow { color: #f5c542; border-color: #7a6410; }
+  .chip.purple { color: #d2a8ff; border-color: #553098; } .chip.teal { color: #4fc3a1; border-color: #1f6f5a; }
+
+  .hgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .hcard { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s; }
+  .hcard:hover { border-color: var(--red); transform: translateY(-2px); }
+  .hcard img { width: 100%; height: 96px; object-fit: cover; object-position: center 20%; display: block; background: #000; }
+  .hcard .b { padding: 8px 10px; }
+  .hcard .nm { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .hcard .nm img { width: 16px; height: 16px; height: auto; border-radius: 0; }
+  .hcard .meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .attr-ic { width: 15px; height: 15px; vertical-align: -2px; }
+
+  .statgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; }
+  .stat .k { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .stat .v { font-size: 15px; font-weight: 600; }
+
+  .abgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+  .abcard { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .abcard .hd { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+  .abcard .hd img { width: 44px; height: 44px; border-radius: 6px; border: 1px solid var(--border); background: #000; }
+  .abcard .dn { font-size: 15px; font-weight: 600; }
+  .abcard .in { font-family: Consolas, monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+  .abcard .ds { font-size: 12.5px; color: var(--muted); margin: 6px 0; }
+  .avals { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; font-size: 12px; margin-top: 6px; }
+  .avals .k { color: var(--muted); }
+  .avals .v { color: var(--yellow); font-family: Consolas, monospace; text-align: right; }
+
+  table.list { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.list th { text-align: left; position: sticky; top: 0; z-index: 2; background: var(--card2); color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; padding: 8px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.list td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; white-space: nowrap; }
+  table.list tr:hover td { background: rgba(110,168,254,.06); }
+  .mono { font-family: Consolas, monospace; font-size: 11.5px; }
+  .wrap { white-space: normal; }
+  .more { display: block; width: 100%; margin-top: 12px; padding: 10px; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .more:hover { border-color: var(--blue); }
+  .note { color: var(--muted); font-size: 12px; line-height: 1.65; }
+  .note code { background: var(--card2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-family: Consolas, monospace; font-size: 12px; color: var(--yellow); }
+  .back { display: inline-block; margin-bottom: 12px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+  .back:hover { border-color: var(--blue); }
+  .foot { color: var(--muted); font-size: 11px; text-align: center; margin-top: 20px; line-height: 1.7; }
+  .top-link { position: fixed; top: 14px; right: 14px; z-index: 50; }
+  .top-link a { display: inline-block; padding: 8px 14px; background: #161b22; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px; text-decoration: none; font-size: 14px; }
+  .top-link a:hover { border-color: var(--red); }
+  .loading { color: var(--muted); padding: 30px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="top-link"><a href="https://blaksou1.github.io/musorka/">&larr; Menu</a></div>
+
+<header class="hero">
+  <h1>
+    <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/global/dota2_logo_horiz.png" alt="Dota 2">
+    <span>данные: <span class="accent">герои</span>, навыки, сущности</span>
+  </h1>
+  <div class="sub">
+    Характеристики героев, способностей (включая скрытые, врождённые и таланты) и юнитов/сущностей.
+    Источник: официальные файлы игры <code>scripts/npc/*</code> и разобранные данные сообщества (dotaconstants).
+  </div>
+</header>
+
+<div class="stats-strip">
+  <div class="kpi red"><div class="num" id="kHeroes">—</div><div class="lbl">Герои</div></div>
+  <div class="kpi yellow"><div class="num" id="kAbil">—</div><div class="lbl">Способности</div></div>
+  <div class="kpi purple"><div class="num" id="kHidden">—</div><div class="lbl">Скрытых</div></div>
+  <div class="kpi blue"><div class="num" id="kUnits">—</div><div class="lbl">Сущности</div></div>
+  <div class="kpi teal"><div class="num" id="kShown">—</div><div class="lbl">Показано</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="heroes" onclick="switchTab('heroes')">Герои</button>
+  <button class="tab" data-tab="abils" onclick="switchTab('abils')">Навыки</button>
+  <button class="tab" data-tab="units" onclick="switchTab('units')">Сущности</button>
+</div>
+
+<div class="panel" id="tb"></div>
+<div id="content"><div class="loading">Загрузка данных…</div></div>
+
+<div class="panel" style="margin-top:14px">
+  <h2>Как читать</h2>
+  <div class="note">
+    <b>Герои:</b> базовые характеристики и полный список способностей с числами по уровням.<br>
+    <b>Навыки:</b> все способности из файла игры, включая <span class="chip yellow">скрытые</span>, <span class="chip purple">врождённые</span> и <span class="chip green">таланты</span>. Числа даны по уровням способности.<br>
+    <b>Сущности:</b> статы юнитов — нейтралов, крипов, строений, боссов и саммонов. Значения с учётом наследования (<code>BaseClass</code>).<br>
+    Значения <b>урона/HP/брони</b> — базовые из файлов игры (без предметов и талантов).
+  </div>
+</div>
+
+<div class="foot">Dota 2 — данные игры · герои, способности, юниты, скрытые параметры</div>
+
+<script src="dota2data.js"></script>
+<script>
+const CDN = "https://cdn.cloudflare.steamstatic.com";
+let HEROES = {}, ABIL = {}, HAB = {}, UNITS = [];
+let HERO_LIST = [], ABIL_NAMES = [], HERO_OF = {}, HERO_BY_KEY = {};
+let tab = "heroes", limit = 300;
+let qHero = "", qAbil = "", showHidden = false, srcFilter = "all";
+let qUnit = "", unitCat = "all";
+let selectedHero = null;
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function $(id){ return document.getElementById(id); }
+
+const ATTR = { str:"hero_strength", agi:"hero_agility", int:"hero_intelligence", all:"hero_universal", uni:"hero_universal" };
+function attrIcon(a){ return ATTR[a] ? '<img class="attr-ic" src="' + CDN + '/apps/dota2/images/dota_react/icons/' + ATTR[a] + '.png" alt="">' : ""; }
+function heroImg(h){ return CDN + (h.img || ""); }
+function abImg(o){ return o && o.img ? CDN + o.img : ""; }
+
+function isHidden(name, o){
+  if (!o || !o.dname) return true;
+  if (/generic_hidden|special_bonus|filler_ability|^dota_base_ability|^dota_empty_ability|_hidden$/.test(name)) return true;
+  return false;
+}
+function srcOf(name){
+  if (/^special_bonus/.test(name)) return "talent";
+  if (HERO_OF[name]) return "hero";
+  return "unit";
+}
+function srcLabel(name){
+  const s = srcOf(name);
+  if (s === "talent") return "талант";
+  if (s === "hero") { const h = HERO_OF[name]; return "герой: " + (h && h.localized_name ? h.localized_name : "?"); }
+  return "юнит/прочее";
+}
+
+function boot(){
+  HEROES = window.DD_HEROES || {};
+  ABIL = window.DD_ABIL || {};
+  HAB = window.DD_HAB || {};
+  UNITS = window.DD_UNITS || [];
+  if (!Object.keys(HEROES).length) {
+    $("content").innerHTML = '<div class="loading">Данные не загрузились: рядом с этой страницей должен лежать файл <b>dota2data.js</b>.</div>';
+    return;
+  }
+  HERO_LIST = Object.values(HEROES).sort((x, y) => x.localized_name.localeCompare(y.localized_name));
+  ABIL_NAMES = Object.keys(ABIL).sort();
+  HERO_LIST.forEach(hero => { HERO_BY_KEY[hero.name] = hero; });
+  HERO_LIST.forEach(hero => {
+    const hb = HAB[hero.name];
+    if (hb && hb.abilities) hb.abilities.forEach(n => { if (n) HERO_OF[n] = hero; });
+  });
+  const hidden = ABIL_NAMES.filter(n => isHidden(n, ABIL[n])).length;
+  $("kHeroes").textContent = HERO_LIST.length;
+  $("kAbil").textContent = ABIL_NAMES.length;
+  $("kHidden").textContent = hidden;
+  $("kUnits").textContent = UNITS.length;
+  render();
+}
+
+function switchTab(t){
+  tab = t; limit = 300; selectedHero = null;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === t));
+  render();
+}
+
+function render(){
+  if (tab === "heroes") renderHeroes();
+  else if (tab === "abils") renderAbils();
+  else renderUnits();
+}
+
+function toolbar(html){ $("tb").innerHTML = html; }
+
+function renderHeroes(){
+  if (selectedHero) return renderHeroDetail(selectedHero);
+  toolbar('<div class="controls"><div><label for="qh">Поиск героя (имя / роль)</label>' +
+    '<input type="text" id="qh" value="' + esc(qHero) + '" placeholder="например: axe, support, carry" oninput="qHero=this.value;renderHeroes()"></div>' +
+    '<div><label>&nbsp;</label><div class="count-line">Найдено: <b id="cnt">0</b></div></div></div>');
+  const q = qHero.trim().toLowerCase();
+  const list = HERO_LIST.filter(h => !q || h.localized_name.toLowerCase().includes(q) || (h.roles || []).join(" ").toLowerCase().includes(q) || (h.attack_type || "").toLowerCase().includes(q));
+  $("cnt").textContent = list.length;
+  $("kShown").textContent = list.length;
+  const cards = list.map(h =>
+    '<div class="hcard" onclick="openHero(' + h.id + ')">' +
+      '<img src="' + heroImg(h) + '" alt="' + esc(h.localized_name) + '">' +
+      '<div class="b"><div class="nm">' + attrIcon(h.primary_attr) + esc(h.localized_name) + '</div>' +
+      '<div class="meta">' + esc(h.attack_type) + ' · ' + esc((h.roles || []).join(", ")) + '</div></div>' +
+    '</div>').join("");
+  $("content").innerHTML = '<div class="hgrid">' + cards + '</div>';
+}
+function openHero(id){ selectedHero = HEROES[String(id)]; render(); }
+function backHeroes(){ selectedHero = null; render(); }
+
+function stat(k, v){ return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + esc(v == null || v === "" ? "—" : v) + '</div></div>'; }
+
+function renderHeroDetail(h){
+  toolbar('<button class="back" onclick="backHeroes()">&larr; Все герои</button>');
+  const hb = HAB[h.name] || {};
+  const abils = (hb.abilities || []).filter(Boolean);
+  const talents = (hb.talents || []);
+  let s = "";
+  s += '<div class="statgrid">';
+  s += stat("Здоровье", h.base_health) + stat("Реген HP", h.base_health_regen) + stat("Мана", h.base_mana) + stat("Реген маны", h.base_mana_regen);
+  s += stat("Броня", h.base_armor) + stat("Сопр. магии", h.base_mr + "%") + stat("Урон", h.base_attack_min + "–" + h.base_attack_max) + stat("Дальность атаки", h.attack_range);
+  s += stat("Скорость", h.move_speed) + stat("Ск. атаки", h.attack_rate) + stat("Время атаки", h.base_attack_time) + stat("Замах", h.attack_point);
+  s += stat("Скорость снаряда", h.projectile_speed) + stat("Поворот", h.turn_rate) + stat("Обзор днём", h.day_vision) + stat("Обзор ночью", h.night_vision);
+  s += stat(attrIcon(h.primary_attr) + " Сила", h.base_str + " +" + h.str_gain) + stat(attrIcon("agi") + " Ловкость", h.base_agi + " +" + h.agi_gain) + stat(attrIcon("int") + " Интеллект", h.base_int + " +" + h.int_gain);
+  s += '</div>';
+  s += '<div class="panel"><h2>Способности (' + abils.filter(n => ABIL[n]).length + ')</h2><div class="abgrid">' +
+       abils.map(n => ABIL[n] ? abilityCard(n, false) : '').join("") + '</div></div>';
+  if (talents.length) {
+    s += '<div class="panel"><h2>Таланты</h2><div class="statgrid">' +
+      talents.map(t => {
+        const o = ABIL[t.name];
+        const dn = o && o.dname ? o.dname : t.name;
+        return '<div class="stat"><div class="k">' + esc(t.level) + ' ур.</div><div class="v" style="font-size:13px">' + esc(dn) + '</div></div>';
+      }).join("") + '</div></div>';
+  }
+  $("content").innerHTML =
+    '<div class="panel"><h2>' + esc(h.localized_name) + '</h2>' +
+    '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">' +
+    '<img src="' + heroImg(h) + '" style="width:180px;border-radius:10px;border:1px solid var(--border)">' +
+    '<div style="flex:1;min-width:260px">' + s + '</div></div></div>';
+  $("kShown").textContent = abils.length;
+}
+
+function abilityCard(name, showSrc){
+  const o = ABIL[name] || {};
+  const hidden = isHidden(name, o);
+  let vals = "";
+  if (o.attrib) {
+    const rows = o.attrib.filter(x => x.value !== undefined && x.value !== "" && !(Array.isArray(x.value) && !x.value.length)).map(x => {
+      const v = Array.isArray(x.value) ? x.value.join(" / ") : x.value;
+      return '<div class="k">' + esc(x.header || x.key) + '</div><div class="v">' + esc(v) + '</div>';
+    }).join("");
+    if (rows) vals = '<div class="avals">' + rows + '</div>';
+  }
+  const jn = v => Array.isArray(v) ? v.join(" / ") : v;
+  let meta = "";
+  if (o.mc) meta += '<span class="chip blue">мана ' + esc(jn(o.mc)) + '</span>';
+  if (o.cd) meta += '<span class="chip red">кд ' + esc(jn(o.cd)) + '</span>';
+  if (o.behavior) meta += '<span class="chip">' + esc(o.behavior) + '</span>';
+  if (o.dmg_type) meta += '<span class="chip">' + esc(o.dmg_type) + '</span>';
+  if (o.bkbpierce) meta += '<span class="chip purple">BKB ' + esc(o.bkbpierce) + '</span>';
+  if (o.dispellable) meta += '<span class="chip">диспел ' + esc(o.dispellable) + '</span>';
+  if (o.is_innate) meta += '<span class="chip purple">врождённая</span>';
+  if (hidden) meta += '<span class="chip yellow">скрытая</span>';
+  if (showSrc) meta += '<span class="chip teal">' + esc(srcLabel(name)) + '</span>';
+  const img = abImg(o);
+  return '<div class="abcard">' +
+    '<div class="hd">' + (img ? '<img src="' + img + '" alt="">' : '') +
+    '<div><div class="dn">' + esc(o.dname || "—") + '</div><div class="in">' + esc(name) + '</div></div></div>' +
+    (o.desc ? '<div class="ds">' + esc(o.desc) + '</div>' : '') +
+    '<div>' + meta + '</div>' + vals + '</div>';
+}
+
+function renderAbils(){
+  toolbar('<div class="controls">' +
+    '<div><label for="qa">Поиск по названию / описанию</label><input type="text" id="qa" value="' + esc(qAbil) + '" placeholder="например: blink, stun, damage" oninput="qAbil=this.value;renderAbils()"></div>' +
+    '<div><label for="srca">Источник</label><select id="srca" onchange="srcFilter=this.value;renderAbils()">' +
+      '<option value="all">все</option><option value="hero">герои</option><option value="unit">юниты</option><option value="talent">таланты</option></select></div>' +
+    '<div><label>&nbsp;</label><label class="toggle"><input type="checkbox" id="sh"' + (showHidden ? ' checked' : '') + ' onchange="showHidden=this.checked;renderAbils()"> показать скрытые</label></div>' +
+    '<div><label>&nbsp;</label><div class="count-line">Найдено: <b id="cnt">0</b></div></div></div>');
+  $("srca").value = srcFilter;
+  const q = qAbil.trim().toLowerCase();
+  const list = ABIL_NAMES.filter(n => {
+    const o = ABIL[n] || {};
+    if (!showHidden && isHidden(n, o)) return false;
+    if (srcFilter !== "all" && srcOf(n) !== srcFilter) return false;
+    if (q && !(n.toLowerCase().includes(q) || String(o.dname || "").toLowerCase().includes(q) || String(o.desc || "").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $("cnt").textContent = list.length;
+  const slice = list.slice(0, limit);
+  $("kShown").textContent = slice.length;
+  $("content").innerHTML = '<div class="abgrid">' + slice.map(n => abilityCard(n, true)).join("") + '</div>' +
+    (list.length > limit ? '<button class="more" onclick="limit+=300;renderAbils()">Показать ещё 300 (осталось ' + (list.length - limit) + ')</button>' : '');
+}
+
+const CATRU = { base:"Базовый шаблон", boss:"Босс", neutral:"Нейтрал", building:"Строение", creep:"Крип линии", side:"Юнит стороны/саммон", other:"Прочее" };
+function renderUnits(){
+  toolbar('<div class="controls">' +
+    '<div><label for="qu">Поиск сущности</label><input type="text" id="qu" value="' + esc(qUnit) + '" placeholder="например: roshan, centaur, tower" oninput="qUnit=this.value;renderUnits()"></div>' +
+    '<div><label for="ucat">Категория</label><select id="ucat" onchange="unitCat=this.value;renderUnits()">' +
+      '<option value="all">все</option>' + Object.keys(CATRU).map(k => '<option value="' + k + '">' + CATRU[k] + '</option>').join("") + '</select></div>' +
+    '<div><label>&nbsp;</label><div class="count-line">Найдено: <b id="cnt">0</b></div></div></div>');
+  $("ucat").value = unitCat;
+  const q = qUnit.trim().toLowerCase();
+  const list = UNITS.filter(u => {
+    if (unitCat !== "all" && u.cat !== unitCat) return false;
+    if (q && !(u.id.toLowerCase().includes(q) || u.name.toLowerCase().includes(q) || (u.abilities || []).join(" ").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $("cnt").textContent = list.length;
+  $("kShown").textContent = list.length;
+  const rows = list.map(u =>
+    '<tr>' +
+    '<td class="wrap"><b>' + esc(u.name) + '</b><div class="mono" style="color:var(--muted)">' + esc(u.id) + '</div></td>' +
+    '<td>' + esc(CATRU[u.cat] || u.cat) + (u.neutral ? ' <span class="chip green">нейтрал</span>' : '') + (u.ancient ? ' <span class="chip purple">древний</span>' : '') + '</td>' +
+    '<td>' + esc(u.level) + '</td>' +
+    '<td>' + esc(u.hp) + '</td>' +
+    '<td>' + esc(u.mana) + '</td>' +
+    '<td>' + esc(u.armor) + '</td>' +
+    '<td>' + esc(u.mr) + '</td>' +
+    '<td>' + esc((u.dmgMin != null ? u.dmgMin : "?") + "–" + (u.dmgMax != null ? u.dmgMax : "?")) + '</td>' +
+    '<td>' + esc(u.atkRange) + '</td>' +
+    '<td>' + esc(u.atkRate) + '</td>' +
+    '<td>' + esc(u.ms) + '</td>' +
+    '<td>' + esc(u.visionDay) + "/" + esc(u.visionNight) + '</td>' +
+    '<td>' + esc(u.bountyMin != null ? u.bountyMin + "–" + u.bountyMax : "—") + '</td>' +
+    '<td class="wrap">' + esc((u.abilities || []).join(", ")) + '</td>' +
+    '</tr>').join("");
+  $("content").innerHTML = '<div class="panel" style="padding:0;overflow:auto;max-height:75vh"><table class="list">' +
+    '<thead><tr><th>Сущность</th><th>Категория</th><th>Ур.</th><th>HP</th><th>Мана</th><th>Броня</th><th>МР</th><th>Урон</th><th>Дальн.</th><th>Ск.атк</th><th>Скорость</th><th>Обзор д/н</th><th>Баунти</th><th>Способности</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div>';
+}
+
+boot();
+</script>
+</body>
+</html>
