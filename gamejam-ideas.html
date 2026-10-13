@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Идеи Геймджем 24.09.2026 — все участники, разбор и развитие</title>
+<style>
+  :root{
+    --bg:#0d0f1a; --panel:#161a2b; --panel2:#1b2035; --accent:#7b5cff;
+    --gold:#ffcf56; --txt:#e8ebf5; --muted:#9aa3bd; --line:#2a2f4a;
+    --r5:#ff4d6d; --r4:#c77dff; --r3:#5cc8ff; --r2:#7dffa1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden;
+  }
+  header{
+    padding:52px 20px 40px;text-align:center;
+    background:linear-gradient(135deg,#161a2b 0%,#2a1b4a 45%,#3a1f3f 100%);
+    border-bottom:1px solid var(--line);position:relative;overflow:hidden;
+  }
+  header::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 78% 20%,rgba(199,125,255,.18),transparent 45%),
+               radial-gradient(circle at 20% 80%,rgba(255,207,86,.12),transparent 40%);
+  }
+  header .wrap{position:relative;max-width:900px;margin:0 auto}
+  .kicker{color:var(--gold);letter-spacing:3px;font-size:13px;text-transform:uppercase;font-weight:700}
+  header h1{font-size:clamp(22px,4.5vw,38px);font-weight:800;margin:12px 0 10px;line-height:1.2}
+  header p{color:var(--muted);max-width:780px;margin:0 auto;font-size:15px}
+  .meta{margin-top:16px;color:var(--muted);font-size:13px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .meta b{color:var(--txt)}
+
+  main{max-width:920px;margin:0 auto;padding:28px 18px 60px}
+
+  .toc{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:18px 20px;margin:30px 0;
+  }
+  .toc h2{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  .toc ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px 18px;counter-reset:t}
+  .toc a{color:var(--muted);text-decoration:none;font-size:14px;display:flex;gap:8px;padding:5px 8px;border-radius:8px;transition:.15s}
+  .toc a::before{content:counter(t);counter-increment:t;color:var(--accent);font-weight:700}
+  .toc a:hover{background:var(--panel2);color:var(--txt)}
+
+  .theme-note{
+    background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:14px;padding:16px 18px;margin:30px 0;
+  }
+  .theme-note b{color:var(--gold)}
+
+  section{margin:52px 0}
+  h2.sec{
+    font-size:25px;font-weight:800;margin-bottom:6px;line-height:1.25;
+    padding-left:16px;border-left:4px solid var(--accent);
+  }
+  h2.sec .num{color:var(--gold);margin-right:10px}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px;padding-left:16px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--panel)}
+  .tag.author{color:var(--r3);border-color:rgba(92,200,255,.35);background:rgba(92,200,255,.07)}
+  .tag.hot{color:var(--r2);border-color:rgba(125,255,161,.35);background:rgba(125,255,161,.07)}
+  .tag.win{color:var(--gold);border-color:rgba(255,207,86,.4);background:rgba(255,207,86,.09);font-weight:700}
+
+  h3{font-size:19px;margin:24px 0 8px;color:var(--txt)}
+  p{margin:10px 0;color:#c6ccdd}
+  .quote{
+    border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    padding:13px 16px;margin:16px 0;position:relative;
+  }
+  .quote::before{
+    content:"из чата";position:absolute;top:-10px;left:14px;
+    background:var(--accent);color:#fff;font-size:11px;font-weight:700;
+    padding:1px 10px;border-radius:999px;letter-spacing:1px;text-transform:uppercase;
+  }
+  .quote p{color:var(--muted);font-style:italic;font-size:14.5px}
+  .quote .who{display:block;margin-top:6px;color:var(--r3);font-style:normal;font-weight:700;font-size:12.5px}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:15px 18px;margin:12px 0;
+  }
+  .card h4{font-size:15.5px;color:var(--gold);margin-bottom:6px}
+  .card ul{margin:8px 0 0;padding-left:20px;color:#c6ccdd}
+  .card li{margin:5px 0}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .pros h4{color:var(--r2)}
+  .cons h4{color:var(--r5)}
+
+  .verdict{
+    background:linear-gradient(135deg,rgba(123,92,255,.14),rgba(255,207,86,.08));
+    border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:16px 0;
+  }
+  .verdict b{color:var(--gold)}
+
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+  th{background:var(--panel);color:var(--gold);letter-spacing:1px;text-transform:uppercase;font-size:12px}
+  td{color:#c6ccdd}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  .ok{color:var(--r2);font-weight:700}
+  .no{color:var(--r5);font-weight:700}
+
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:600px){header h1{font-size:24px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Геймджем 24.09.2026 • команда «Speedrun Games»</div>
+    <h1>Все идеи чата: разбор и развитие</h1>
+    <p>Полный экспорт переписки (Prime, NEON_ner, cRoxx, Андрей). Все идеи вычленены, расписаны и развиты. В конце — итоговое сравнение и решения команды.</p>
+    <div class="meta">
+      <span>Тема джема: <b>«Управляй правилами»</b></span>
+      <span>Участников: <b>4</b></span>
+      <span>Идей: <b>12</b></span>
+      <span>Тайминг: <b>65 ч, защита 27.09</b></span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <div class="theme-note">
+    <b>Контекст.</b> Тема выпала на колесе 24.09 — <b>«Управляй правилами»</b>. Обсуждение крутилось вокруг того, что «трушное управление правилами не сделать», поэтому лучшие идеи — то, где игрок <i>пересобирает условия игры</i> (конструктор правил), либо <i>выламывается из них</i> (мета-уровень). В команде решили: не раннеры, не выживалки, лучше инкременталки/игры одного экрана. Итогом голосования выбрана <b>идея про дерево</b> (см. №2). ИИ разрешён (п. 4.7 Положения), но не в визуале/звуке.
+  </div>
+
+  <nav class="toc">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#i1">Змейка-конструктор правил</a></li>
+      <li><a href="#i2">Дерево: инкременталка + мета-концовка (выбрано)</a></li>
+      <li><a href="#i3">Сессионная шахта-инкременталка</a></li>
+      <li><a href="#i4">Симилятор гача-босса</a></li>
+      <li><a href="#i5">Магазин хрома в киберпанке</a></li>
+      <li><a href="#i6">Куратор симуляции / декбилдер</a></li>
+      <li><a href="#i7">Непослушный рассказчик (мета)</a></li>
+      <li><a href="#i8">Baba Is You-клон</a></li>
+      <li><a href="#i9">Правила-оружие: Inscryption / Balatro</a></li>
+      <li><a href="#i10">Шахматы с нарушением правил</a></li>
+      <li><a href="#i11">Завод-очки влияния (отклонено)</a></li>
+      <li><a href="#i12">«Игра одного экрана»</a></li>
+      <li><a href="#team">Решения команды и роли</a></li>
+      <li><a href="#compare">Сравнение и рекомендация</a></li>
+    </ol>
+  </nav>
+
+  <section id="i1">
+    <h2 class="sec"><span class="num">01</span>Змейка-конструктор правил</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Аркада</span><span class="tag hot">Лёгкий скоуп</span><span class="tag">Roguelite</span></div>
+
+    <div class="quote">
+      <p>«змейка, вместо апгрейдов вылетают на выбор правила добавляемые, цель — дождаться когда выпадет правило приводящее к победе, выбрать его и победить… из противников выпадает валюта позволяющая обновить список правил, скип выбора, откат правил»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Классическая змейка, где «честного» лут-тейбла нет: каждый уровень кидает набор правил, а игрок сам собирает конфигурацию, в которой играет. Правила могут помогать и мешать — играть приходится «лицом к лицу» с собственным выбором. Это одно из самых прямых прочтений темы «управляй правилами».</p>
+
+    <div class="card">
+      <h4>Ядро цикла</h4>
+      <ul>
+        <li>После каждого фрагмента — выбор 2–3 правил из трёх случайных (как апгрейды в роуглитах, но вместо цифр — <b>перепись правил</b>).</li>
+        <li>Правила бывают усложняющие (скорость реже, больше стен) и расширяющие (новая локация, дроп улучшений с врагов, «всем врагам огнестрел»).</li>
+        <li>Валюта за врагов: <b>переброс</b> списка правил / <b>скип</b> выбора / <b>откат</b> неудобного правила.</li>
+        <li>Победу нужно «вырастить»: собрать комбо, с которым реально справиться, а не переупиться рандомом.</li>
+      </ul>
+    </div>
+
+    <div class="grid2">
+      <div class="card pros"><h4>Сильные стороны</h4><ul><li>Минимальный арт: одна локация, спрайты-примитивы.</li><li>Переигрываемость из 15–25 правил-модулей.</li><li>Тема читается буквально, сессии по 3–5 минут.</li></ul></div>
+      <div class="card cons"><h4>Риски</h4><ul><li>Баланс силы правил — иначе «рандом на рандоме».</li><li>Змейка на джемах — затёртый жанр, спасает только твист.</li></ul></div>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> быстрый прототип на вечер, отличный кандидат на «игру одного экрана». Хороший страхователь, если главная идея не окнется.</div>
+  </section>
+
+  <section id="i2">
+    <h2 class="sec"><span class="num">02</span>Дерево: инкременталка с мета-концовкой <span class="tag win" style="margin-left:10px">ВЫБРАНО</span></h2>
+    <div class="tags"><span class="tag author">cRoxx + Андрей</span><span class="tag">Инкременталка</span><span class="tag">Мета-нарратив</span><span class="tag hot">Голосованием - фокус джема</span></div>
+
+    <div class="quote">
+      <p>«инкременталка про рубку дерева: спавнимся в маленькой квадратной локации, перед нами один саженец и его настройки — длина, толщина и тд. выращиваем дерево, рубим его и продаем древесину через конвейер. рубка проходит через проверки: хватит ли силы топора на толщину, поместится ли упавшее дерево в локе, пролезет ли бревно в конвейер. топор, размер локации, конвейер апгрейдятся. после каждого апгрейда старая настройка перестает быть оптимальной и мы перенастраиваем дерево»</p>
+      <span class="who">— cRoxx</span>
+    </div>
+
+    <p>Игрок сам задаёт «правила партии» через настройки саженца (длина, толщина), а апгрейды инвентаря (топор, локация, конвейер) делают прежний билд неоптимальным — приходится постоянно пересобирать дерево. Красивая инкрементальная петля «настройка → проверка → апгрейд → перенастройка». Андрей докрутил до мета-уровня:</p>
+
+    <div class="quote">
+      <p>«Локация огорожена забором, через него можно перелезть и выйти за пределы игры — персонаж будет вне правил его же игры… в конце игрок станет деревом, которое будет рубить уже следующий»</p>
+      <span class="who">— Андрей</span>
+    </div>
+
+    <div class="card">
+      <h4>Собираемая структура</h4>
+      <ul>
+        <li><b>Петля:</b> настройки саженца (длина/толщина/тип) → рост → рубка → проверки (топор против толщины, бревно против забора, конвейер против размера) → продажа → апгрейд → перенастройка.</li>
+        <li><b>Мета-пласт:</b> в один момент появляется проход за забор (открывается только в конце, чтобы нельзя было свалить раньше). За пределами — «вне правил игры».</li>
+        <li><b>Финал-витвист:</b> игрок становится деревом, в его стволе дыра-тоннель, туда заходит следующий игрок — цикл замыкается.</li>
+        <li><b>Реф Берри Бури:</b> локация появляется по мере продвижения (сначала пусто, потом домики).</li>
+      </ul>
+    </div>
+
+    <div class="grid2">
+      <div class="card pros"><h4>Сильные стороны</h4><ul><li>Жанр идеально ложится на джем: два неполных дня = один «железный» геймплейный цикл.</li><li>Мета-концовка даёт то самое «управление правилами» на уровне выше геймплея.</li><li>3D-простыня реализуется примитивами (дерево, забор, конвейер).</li><li>Ядро логики — 2–3 проверки и баланс чисел, быстро кодится.</li></ul></div>
+      <div class="card cons"><h4>Риски</h4><ul><li>Инкременталка без «сочности» апгрейдов быстро надоедает — нужны вкусные ранки/визуальный рост.</li><li>Мета-концовка требует хорошей подачи (текст/что-то), чтобы её заметили.</li><li>«Последняя оптимизация» — риск потратить время на числа вместо фича-чувств.</li></ul></div>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> выбрана командой — «Решили, кайф» (Андрей). Победит, если успеть: один солидный цикл + 2–3 апгрейда + финальная мета-сцена. Всё остальное — полировка.</div>
+  </section>
+
+  <section id="i3">
+    <h2 class="sec"><span class="num">03</span>Сессионная шахта-инкременталка</h2>
+    <div class="tags"><span class="tag author">cRoxx</span><span class="tag">Nodebuster-like</span><span class="tag">Риск/менеджмент</span></div>
+
+    <div class="quote">
+      <p>«сессионная инкременталка где мы шахтёр и выбираем сколько каких руд будет в шахте. кирка — ограничитель, но чтоб чел не ставил только самую доступную руду… на ум приходит взрывная руда, которая ломает то что ты не можешь, но если их много — цепная реакция и вся шахта лопнет, конец сессии»</p>
+      <span class="who">— cRoxx</span>
+    </div>
+
+    <p>Игрок <b>проектирует</b> шахту сам: раскладка руд = «правила» сессии. Кирка определяет, что добывается, но чтобы пробираться дальше — нужна взрывная руда, цена которой — риск каскадного взрыва всей шахты. Баланс «максимальная нажива vs не подорваться» — это и есть управление правилами внутри.</p>
+
+    <div class="card">
+      <h4>Как усилить</h4>
+      <ul>
+        <li>Мини-старт: только 2–3 типа руды + 1 «запрещённая» комбинация → расширение по глубине.</li>
+        <li>Цепная реакция должна быть <b>предсказуемой</b> (показ угрозы), иначе смерть ощущается несправедливой.</li>
+        <li>Три референса на выбор: 10 Million Pixels, Berry Bury Berry, классические clicker-шахты.</li>
+      </ul>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> сильный концепт, но сложнее в балансе, чем дерево. Хороший запасной вариант на случай «дерево не зайдёт».</div>
+  </section>
+
+  <section id="i4">
+    <h2 class="sec"><span class="num">04</span>Симилятор гача-босса</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Панель-менеджмент</span><span class="tag">Meta</span></div>
+
+    <div class="quote">
+      <p>«игрок-биг босс типа корпорации и должен регулировать шансы выпадения в их гача-игре так, чтобы не оттолкнуть, а в идеале привлечь игроков и манипулировать психологически, разводя на деньги»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Игрок не крутит гачу, а <b>крутит гачу изнутри</b>: панель настроек дропа, цен, FOMO-ивентов. На другом конце экрана — симуляция аудитории с настроением и кошельком. Каждый рычаг = реальный паттерн монетизации, от чего игра работает и как сатира.</p>
+
+    <div class="card">
+      <h4>Ключевые рычаги</h4>
+      <ul>
+        <li><b>Шансы:</b> low roll = донат, но слив аудитории; повышение = лояльность, но потеря P2W.</li>
+        <li><b>Цены/паки:</b> психология чисел (99 vs 100), «выгодные» пакеты.</li>
+        <li><b>Ивенты/лимитки:</b> FOMO-таймеры, гарант «SSR за 90 круток».</li>
+        <li><b>Метрики:</b> довольство игроков, рейтинг в сторе, отзывы +/−.</li>
+      </ul>
+    </div>
+
+    <div class="grid2">
+      <div class="card pros"><h4>Сильные стороны</h4><ul><li>Тема раскрыта через правила экономики — свежо.</li><li>UI-first, один экран таблиц.</li></ul></div>
+      <div class="card cons"><h4>Риски</h4><ul><li>Скучно без «живой» симуляции игроков (нужны тренды, мемы, велосити-чарты).</li><li>Риск скатиться в нравоучение.</li></ul></div>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> самый «умный» на конференции концепт, но требует аккуратного фидбека аудитории. Tuple для второго дня после MVP.</div>
+  </section>
+
+  <section id="i5">
+    <h2 class="sec"><span class="num">05</span>Магазин хрома в киберпанке</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Симулятор</span><span class="tag">Нарратив</span></div>
+
+    <div class="quote">
+      <p>«игрок — владелец магазинчика в киберпанке, продает хром; приходят власти, банды — и так он влияет на весь город (грабят банк, рождаемость, смертельный вирус). приходит барыга: "дай пушку" — даешь ему ядерку, на утро видишь как менты гоняют тс пуками-фалометраторами»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Тихий магазинчик как точка силы: каждое «кому и что продал» пускает волны в город, видимые через окно, телек и новости. Игрок не делает квесты — просто торгует, а мир реагирует. В чате cRoxx резонно заметил: сценариев много, «социалку на джем не успеем» — поэтому систему последствий стоит сделать процедурной (генерация «волн» из пар продажа→событие), а не сценарной.</p>
+
+    <div class="card">
+      <h4>Как срезать скоуп</h4>
+      <ul>
+        <li>Генератор событий: каждое решение = карточка-последствие из таблицы (не писать 100 сценариев руками).</li>
+        <li>Телек-новости как единственный экран обратной связи — дёшево и выразительно.</li>
+        <li>Гейм овер — это каскад упавшей репутации / разжалование, а не «смерть».</li>
+      </ul>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> самый киношный концепт, козырь при наличии сценариста. В чистом виде на 65 часов — рискованно; процедурные последствия спасают.</div>
+  </section>
+
+  <section id="i6">
+    <h2 class="sec"><span class="num">06</span>Куратор симуляции / декбилдер</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">God-game</span><span class="tag">Головоломка</span></div>
+
+    <div class="quote">
+      <p>«декибилдер: собираешь что-то — это превращается в условия на уровне… игра где ты управляешь симуляцией: задаешь цель симуляции, условия, а потом обеспечиваешь её как-то, чтобы она достигла этой цели»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Игрок настраивает «песочницу» через конструктор правил (колода карт-условий, схема, параметры) и запускает автономную симуляцию. Пере-конфигурируй, пока агент не достигнет цели. Буквальный ответ на тему: игрок — автор законов, мир — исполнитель.</p>
+
+    <div class="card">
+      <h4>Идеи для реализации</h4>
+      <ul>
+        <li>Правила-карты: «если у агента вода → хлеб», «при стрессе → красть». Колода = поведение.</li>
+        <li>Цель уровня: «агент должен дойти до выхода, не касаясь света и не поджигаясь».</li>
+        <li>Визуал — стрелки и кружки: ноль ассетов, вся игра в системе.</li>
+      </ul>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> самый оригинальный и рискованный. Требует системного геймдизайна в сроки джема — брать только если команда хочет именно «геймдизайнерский» вызов.</div>
+  </section>
+
+  <section id="i7">
+    <h2 class="sec"><span class="num">07</span>Непослушный рассказчик (мета)</h2>
+    <div class="tags"><span class="tag author">Андрей</span><span class="tag">Нарратив</span><span class="tag">Stanley Parable</span></div>
+
+    <div class="quote">
+      <p>«некий рассказчик или персонаж для обучения говорит, что нужно делать (базовый набор действий и их правильный порядок), но мы можем делать по-другому… и сам игрок смогут в какой-то момент быть вне правил игры»</p>
+      <span class="who">— Андрей</span>
+    </div>
+
+    <p>Обучение подаётся как «закон»: рассказчик диктует порядок действий, а игрок может нарушать — и это уже отмечается миром. Классика — Stanley Parable. На джоме реализуется как короткий ходьба-сим с 2–3 развилками и «судьёй» в кадре.</p>
+
+    <div class="card">
+      <h4>Почему не в топе</h4>
+      <ul>
+        <li>Ядро геймплея тонкое — большую часть времени игрок просто идёт по коридору.</li>
+        <li>Короткая история = мало «правил» для демонстрации темы.</li>
+        <li>Работает как украшение (мета-пласт) для другой механики, а не как самостоятельная игра джема.</li>
+      </ul>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> берём как <i>мета-пласт</i> (помни: «дерево» уже получило такую концовку). Самостоятельно — слабовато для топ-места.</div>
+  </section>
+
+  <section id="i8">
+    <h2 class="sec"><span class="num">08</span>Baba Is You-клон</h2>
+    <div class="tags"><span class="tag author">cRoxx</span><span class="tag">Пазл</span><span class="tag">Проверенный реф</span></div>
+
+    <div class="quote">
+      <p>«либо как вариант baba is you скопировать, оч крутая игра, идеально под джем ложится, и быстро можно сделать… если потанцевала нет и надо чисто топ занять»</p>
+      <span class="who">— cRoxx</span>
+    </div>
+
+    <p>Правила как объекты уровня, которые игрок передвигает: буквальное «управляй правилами». Проверенный реф, дожимная механика. Но на джемах такие пазлы массово дублируются — нужна оригинальная подача, иначе «мимо».</p>
+
+    <div class="card pros"><h4>Когда брать</h4><ul><li>Если хочется гарантированный играбельный результат без нарратива.</li><li>Если в команде сильный левел-дизайнер на 30–50 уровней.</li></ul></div>
+
+    <div class="verdict"><b>Вердикт:</b> план Б «чисто занять топ-место». Не первый выбор, потому что слишком известный реф.</div>
+  </section>
+
+  <section id="i9">
+    <h2 class="sec"><span class="num">09</span>Правила-оружие: Inscryption / Balatro</h2>
+    <div class="tags"><span class="tag author">Prime + cRoxx</span><span class="tag">Meta-механика</span><span class="tag">Роглайт</span></div>
+
+    <div class="quote">
+      <p>«инскрипшен, где противник мог менять правила игры в зависимости от своей маски» <span class="who">— Prime</span></p>
+      <p>«мулинс лысая легенда… балатро тоже кста подходит» <span class="who">— cRoxx</span></p>
+    </div>
+
+    <p>Мета-слой: правила боя как ресурс/оружие. Маски-переключатели Inscryption или «джокеры» Balatro меняют саму расчётку очков. Рефы подтверждают: тема «управляй правилами» — это уже состоявшийся жанровый паттерн, а не абстракция.</p>
+
+    <div class="card">
+      <h4>Что взять отсюда</h4>
+      <ul>
+        <li>Механика «противник переписывает правила боя» — отличный слой в любую боевую систему.</li>
+        <li>«Джокеры-модификаторы» как дек-билдер для счёта — готовая инкрементальная начинка.</li>
+      </ul>
+    </div>
+
+    <div class="verdict"><b>Вердикт:</b> не самостоятельная игра для джома (Inscryption делали годами, Balatro — годами +). Использовать как чистый источник приемов.</div>
+  </section>
+
+  <section id="i10">
+    <h2 class="sec"><span class="num">10</span>Шахматы с нарушением правил</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Настолка</span><span class="tag">Саботаж</span></div>
+
+    <div class="quote">
+      <p>«это шахматы (или любая настолка) где ты можешь нарушать правила — такое было на итче и полностью соответствует теме»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Правила — набор «дожин», которые можно нарушать ограниченно: пара «нелегальных» ходов в обмен на другие ресурсы. Быстрый прототип, но тема «уже было». В чате осталось референсом, в топ не пошёл.</p>
+
+    <div class="verdict"><b>Вердикт:</b> прототипируется быстро, конкурсный риск «уже было». Запасной вариант, если всё остальное отвалится.</div>
+  </section>
+
+  <section id="i11">
+    <h2 class="sec"><span class="num">11</span>Завод-очки влияния <span class="tag no" style="margin-left:10px;color:var(--r5)">ОТКЛОНЕНО</span></h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Инкременталка</span></div>
+
+    <div class="quote">
+      <p>«покупаем очки влияния, ими магическим образом оптимизируем станок на заводе и он начинает работать быстрее»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Идея умерла от критики Андрея: «тут ты не управляешь правилами, а идёшь как раз по ним». Классическая инкременталка — апгрейды это <i>следование</i> правилам, а не управление. Записана как анти-пример для остальных идей.</p>
+  </section>
+
+  <section id="i12">
+    <h2 class="sec"><span class="num">12</span>«Игра одного экрана»</h2>
+    <div class="tags"><span class="tag author">Prime</span><span class="tag">Ограничение</span></div>
+
+    <div class="quote">
+      <p>«"игра 1го экрана"»</p>
+      <span class="who">— Prime</span>
+    </div>
+
+    <p>Не идея, а скоуп-фильтр: всё умещается в один экран — таблицы, панели, полоса змейки, «стенд» дерева. Это сильно упрощает арт/анимации/UI и убирает необходимость левел-дизайна в классическом смысле. Хороший критерий отбора для остальных идей.</p>
+  </section>
+
+  <section id="team">
+    <h2 class="sec"><span class="num">13</span>Решения команды и роли</h2>
+    <div class="card">
+      <h4>Команда «Speedrun Games»</h4>
+      <table>
+        <tr><th>Кто</th><th>Роль/скиллы</th><th>В диалоге</th></tr>
+        <tr><td><b>cRoxx</b></td><td>Кор кода + полишинг (Unity + C#)</td><td>Автор идеи «дерево» и «шахта»; «я корлуп + полишинг, какая бы игра не была»</td></tr>
+        <tr><td><b>NEON_ner</b></td><td>3D-моделирование, уровень, код при необходимости, меню</td><td>Искал звукаря, координировал версию Unity, ведёт ТЗ</td></tr>
+        <tr><td><b>Андрей</b></td><td>Левел-дизайн, диалоги, лор/сюжет; 3D — на простом</td><td>Автор мета-нарратива и концовки «стать деревом»</td></tr>
+        <tr><td><b>Prime</b></td><td>Геймдизайнер, git</td><td>Автор «змейки», «гача-босса», «хром-магазина», «куратора»</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h4>Зафиксировано в чате</h4>
+      <ul>
+        <li>Тема: <b>«Управляй правилами»</b>. Деадлайн 65 ч, защита 27.09.</li>
+        <li>Звук и анимации не делаем (можно кинуть эмбиент). ИИ разрешён по Положению п. 4.7, но не в визуале/звуке.</li>
+        <li>Движок Unity (одна версия), графика 3D (не воксельная — «не хотелось бы»).</li>
+        <li>Итог голосования: <b>дерево</b> («Решили, кайф»). ТЗ формирует NEON_ner.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="compare">
+    <h2 class="sec"><span class="num">14</span>Сравнение и рекомендация</h2>
+    <table>
+      <tr><th>Идея</th><th>Автор</th><th>Соответствие теме</th><th>Скоуп на 65ч</th><th>Потенциал</th></tr>
+      <tr><td>Дерево + мета</td><td>cRoxx/Андрей</td><td class="ok">Отлично (правила + мета)</td><td class="ok">Средний</td><td class="ok">Высокий</td></tr>
+      <tr><td>Змейка-правила</td><td>Prime</td><td class="ok">Отлично</td><td class="ok">Низкий</td><td>Средний</td></tr>
+      <tr><td>Шахта-инкременталка</td><td>cRoxx</td><td class="ok">Хорошо</td><td>Средний</td><td>Средний</td></tr>
+      <tr><td>Гача-босс</td><td>Prime</td><td class="ok">Хорошо</td><td>Средний</td><td class="ok">Высокий</td></tr>
+      <tr><td>Хром-магазин</td><td>Prime</td><td class="ok">Хорошо</td><td class="no">Высокий</td><td class="ok">Высокий</td></tr>
+      <tr><td>Куратор симуляции</td><td>Prime</td><td class="ok">Отлично</td><td class="no">Высокий</td><td class="ok">Высокий</td></tr>
+      <tr><td>Рассказчик (мета)</td><td>Андрей</td><td>Средне</td><td class="ok">Низкий</td><td>Средний</td></tr>
+      <tr><td>Baba Is You-клон</td><td>cRoxx</td><td class="ok">Отлично</td><td class="ok">Низкий</td><td>Средний</td></tr>
+      <tr><td>Завод-очки</td><td>Prime</td><td class="no">Слабо</td><td class="ok">Низкий</td><td class="no">Низкий</td></tr>
+    </table>
+
+    <div class="verdict">
+      <b>Рекомендация:</b> идём в <b>дерево</b> — это выбор команды и самый сбалансированный по «тема × скоуп × мета». Если захочется подстраховаться, модульный «банк правил» (перепись условий как данные) пригодится и для змейки, и для куратора — система делается один раз и переиспользуется. Мета-нарратив Андрея — уже зашит в концовку.
+    </div>
+  </section>
+
+  <footer>Сгенерировано на основе полного экспорта чата «Геймджем 24.09.2026» (4 участника) • 12 идей + решения команды</footer>
+
+</main>
+<a href="https://blaksou1.github.io/musorka/" style="position:fixed;top:14px;left:14px;z-index:9999;display:inline-block;padding:8px 14px;background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:8px;text-decoration:none;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;">&#8592; Menu</a>
+</body>
+</html>
